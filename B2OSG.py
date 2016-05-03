@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Blender2osg",
     "author": "E. Demetrescu",
-    "version": (0,9),
+    "version": (1,0),
     "blender": (2, 7, 7),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -90,6 +90,8 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
+        row = layout.row()
+        self.layout.operator("correct.material", icon="NODE", text='Correct photogr. mats')
 
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -255,6 +257,21 @@ class OBJECT_OT_LocalTexture(bpy.types.Operator):
         bpy.ops.file.autopack_toggle()
         bpy.ops.file.unpack_all(method='WRITE_LOCAL')
         bpy.ops.file.make_paths_relative()
+        return {'FINISHED'}
+
+class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
+    bl_idname = "correct.material"
+    bl_label = "Correct photogr. mats"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        for ma in bpy.data.materials:
+            ma.alpha = 1.0
+            ma.use_transparency = False
+            ma.transparency_method = 'Z_TRANSPARENCY'
+            ma.use_transparent_shadows = True
+            ma.specular_intensity = 0.0
+            ma.ambient = 0.0
         return {'FINISHED'}
 
 class OBJECT_OT_Automator(bpy.types.Operator):
