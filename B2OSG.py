@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Blender2osg",
     "author": "E. Demetrescu",
-    "version": (1,0),
+    "version": (1,1),
     "blender": (2, 7, 7),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -38,7 +38,7 @@ class ToolsPanel4(bpy.types.Panel):
         obj = context.object
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
-
+        
 class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -82,16 +82,22 @@ class ToolsPanel3(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         obj = context.object
-        row = layout.row()
-        self.layout.operator("translate.scs", icon="AUTO", text='Grab Selected to SCS')
-        row = layout.row()
-        self.layout.operator("translate.dp", icon="AUTO", text='Grab Selected to D. Piscului')
+#        row = layout.row()
+#        self.layout.operator("translate.scs", icon="AUTO", text='Grab Selected to SCS')
+#        row = layout.row()
+#        self.layout.operator("translate.dp", icon="AUTO", text='Grab Selected to D. Piscului')
         row = layout.row()
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
-        self.layout.operator("correct.material", icon="NODE", text='Correct photogr. mats')
+        self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
+        row = layout.row()
+        self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
+        row = layout.row()
+        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')
+        row = layout.row()
+        self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
 
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -199,37 +205,37 @@ class OBJECT_OT_ExportCamButton(bpy.types.Operator):
         file.close()
         return {'FINISHED'}
 
-class OBJECT_OT_TranslatetoSCSButton(bpy.types.Operator):
-    bl_idname = "translate.scs"
-    bl_label = "Translate to SCS"
-    bl_options = {"REGISTER", "UNDO"}
-    
-    def execute(self, context):
+#class OBJECT_OT_TranslatetoSCSButton(bpy.types.Operator):
+#    bl_idname = "translate.scs"
+#    bl_label = "Translate to SCS"
+#    bl_options = {"REGISTER", "UNDO"}
+#    
+#    def execute(self, context):
 
-        selection = bpy.context.selected_objects
-#        bpy.ops.object.select_all(action='DESELECT')
-        
-        # translate objects in SCS coordinate
-        for obj in selection:    
-            obj.select = True  
-            bpy.ops.transform.translate(value=(-327300, -448370, -500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-        return {'FINISHED'}
+#        selection = bpy.context.selected_objects
+##        bpy.ops.object.select_all(action='DESELECT')
+#        
+#        # translate objects in SCS coordinate
+#        for obj in selection:    
+#            obj.select = True  
+#            bpy.ops.transform.translate(value=(-327300, -448370, -500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+#        return {'FINISHED'}
 
-class OBJECT_OT_TranslatetoDPButton(bpy.types.Operator):
-    bl_idname = "translate.dp"
-    bl_label = "Translate to DP"
-    bl_options = {"REGISTER", "UNDO"}
-    
-    def execute(self, context):
+#class OBJECT_OT_TranslatetoDPButton(bpy.types.Operator):
+#    bl_idname = "translate.dp"
+#    bl_label = "Translate to DP"
+#    bl_options = {"REGISTER", "UNDO"}
+#    
+#    def execute(self, context):
 
-        selection = bpy.context.selected_objects
-#        bpy.ops.object.select_all(action='DESELECT')
-        
-        # translate objects in SCS coordinate
-        for obj in selection:    
-            obj.select = True  
-            bpy.ops.transform.translate(value=(327300, 448370, 500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-        return {'FINISHED'}
+#        selection = bpy.context.selected_objects
+##        bpy.ops.object.select_all(action='DESELECT')
+#        
+#        # translate objects in SCS coordinate
+#        for obj in selection:    
+#            obj.select = True  
+#            bpy.ops.transform.translate(value=(327300, 448370, 500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+#        return {'FINISHED'}
 
 class OBJECT_OT_CenterMass(bpy.types.Operator):
     bl_idname = "center.mass"
@@ -273,6 +279,183 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
             ma.specular_intensity = 0.0
             ma.ambient = 0.0
         return {'FINISHED'}
+
+class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
+    bl_idname = "canon6d.scene"
+    bl_label = "Canon 6D scene"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        bpy.context.scene.render.resolution_x = 5472
+        bpy.context.scene.render.resolution_y = 3648
+        bpy.context.scene.render.resolution_percentage = 100
+        bpy.context.scene.tool_settings.image_paint.screen_grab_size[0] = 5472
+        bpy.context.scene.tool_settings.image_paint.screen_grab_size[1] = 3648
+        bpy.context.scene.game_settings.material_mode = 'GLSL'
+        bpy.context.scene.game_settings.use_glsl_lights = False
+        return {'FINISHED'}
+
+class OBJECT_OT_Canon6D35(bpy.types.Operator):
+    bl_idname = "canon6d35mm.camera"
+    bl_label = "Set as Canon 6D 35mm"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select = True
+            obj.data.lens = 34.34
+            obj.data.sensor_fit = 'HORIZONTAL'
+            obj.data.sensor_width = 35.8
+            obj.data.sensor_height = 23.9
+        return {'FINISHED'}
+
+
+#        for obj in selection:    
+#            obj.select = True  
+#            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
+#            basedir = os.path.dirname(bpy.data.filepath)
+#            if not basedir:
+#                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+#            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+#            fn = os.path.join(basedir, activename)
+#            file = open(fn + "-inst.txt", 'w')
+#            file.write("%s %s %s %s %s %s %s %s %s\n" % (obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.scale[0], obj.scale[1], obj.scale[2]))
+#            file.close()
+#            bpy.context.object.location[0] = 0
+#            bpy.context.object.location[1] = 0
+#            bpy.context.object.location[2] = 0
+#            bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
+
+
+class CreateCameraImagePlane(bpy.types.Operator):
+    """Create image plane for camera"""
+    bl_idname= "object.createcameraimageplane"
+    bl_label="Camera Image Plane"
+    bl_options={'REGISTER', 'UNDO'}
+    def SetupDriverVariables(self, driver, imageplane):
+        camAngle = driver.variables.new()
+        camAngle.name = 'camAngle'
+        camAngle.type = 'SINGLE_PROP'
+        camAngle.targets[0].id = imageplane.parent
+        camAngle.targets[0].data_path="data.angle"
+        
+        depth = driver.variables.new()
+        depth.name = 'depth'
+        depth.type = 'TRANSFORMS'
+        depth.targets[0].id = imageplane    
+        depth.targets[0].data_path = 'location'
+        depth.targets[0].transform_type = 'LOC_Z'
+        depth.targets[0].transform_space = 'LOCAL_SPACE'
+    
+    #unfortunately not possible to add driver on scene object    
+    #    resolution_x = driver.variables.new()
+    #    resolution_x.name = 'resolution_x'
+    #    resolution_x.type = 'SINGLE_PROP'
+    #    resolution_x.targets[0].id =bpy.context.scene
+    #    resolution_x.targets[0].data_path = 'render.resolution_x'
+    #    resolution_y = driver.variables.new()
+    #    resolution_y.name = 'resolution_y'
+    #    resolution_y.type = 'SINGLE_PROP'
+    #    resolution_y.targets[0].id =bpy.context.scene
+    #    resolution_y.targets[0].data_path = 'render.resolution_y'
+    #    pixel_x = driver.variables.new()
+    #    pixel_x.name = 'pixel_x'
+    #    pixel_x.type = 'SINGLE_PROP'
+    #    pixel_x.targets[0].id =bpy.context.scene
+    #    pixel_x.targets[0].data_path = 'render.pixel_aspect_x'
+    #    pixel_y = driver.variables.new()
+    #    pixel_y.name = 'pixel_y'
+    #    pixel_y.type = 'SINGLE_PROP'
+    #    pixel_y.targets[0].id =bpy.context.scene
+    #    pixel_y.targets[0].data_path = 'render.pixel_aspect_y'
+                
+    
+    def SetupDriversForImagePlane(self, imageplane):
+        driver = imageplane.driver_add('scale',1).driver
+        driver.type = 'SCRIPTED'
+        self.SetupDriverVariables( driver, imageplane) 
+        #driver.expression ="-depth*math.tan(camAngle/2)*resolution_y*pixel_y/(resolution_x*pixel_x)"
+        driver.expression ="-depth*tan(camAngle/2)*bpy.context.scene.render.resolution_y * bpy.context.scene.render.pixel_aspect_y/(bpy.context.scene.render.resolution_x * bpy.context.scene.render.pixel_aspect_x)"
+        driver = imageplane.driver_add('scale',0).driver
+        driver.type= 'SCRIPTED'
+        self.SetupDriverVariables( driver, imageplane)
+        driver.expression ="-depth*tan(camAngle/2)"
+    
+    # get selected camera (might traverse children of selected object until a camera is found?)
+    # for now just pick the active object
+    def createImagePlaneForCamera(self, camera):
+        imageplane = None
+        try:
+            depth = 10
+            
+            
+            #create imageplane
+            bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
+            imageplane = bpy.context.active_object
+            imageplane.name = "imageplane"
+            bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='TOGGLE')
+            bpy.ops.transform.resize( value=(0.5,0.5,0.5))
+            bpy.ops.uv.smart_project(angle_limit=66,island_margin=0, user_area_weight=0)
+            bpy.ops.uv.select_all(action='TOGGLE')
+            bpy.ops.transform.rotate(value=1.5708, axis=(0,0,1) )
+            bpy.ops.object.editmode_toggle()
+        
+            
+            imageplane.location = (0,0,-depth)
+            imageplane.parent = camera
+            
+            
+            #calculate scale
+            #REPLACED WITH CREATING EXPRESSIONS
+            self.SetupDriversForImagePlane(imageplane)
+    
+            #setup material
+            if( len( imageplane.material_slots) == 0 ):
+                bpy.ops.object.material_slot_add()
+                #imageplane.material_slots.
+            bpy.ops.material.new()
+            mat_index = len(bpy.data.materials)-1
+            imageplane.material_slots[0].material = bpy.data.materials[mat_index]
+            material =  imageplane.material_slots[0].material
+            # if not returned by new use imgeplane.material_slots[0].material
+            material.name = 'mat_imageplane_'+camera.name
+            material.use_nodes = True
+            nodes = material.node_tree.nodes
+            links = material.node_tree.links
+            
+            nodes.clear()
+            emissive = nodes.new('ShaderNodeEmission')
+            emissive.location = 0, 0
+            transparent = nodes.new('ShaderNodeBsdfTransparent')
+            transparent.location = 0,100
+            mix = nodes.new('ShaderNodeMixShader')
+            mix.location = 400,0
+            links.new( emissive.outputs[0], mix.inputs[2] ) 
+            links.new( transparent.outputs[0], mix.inputs[1] )
+            outnode = nodes.new('ShaderNodeOutputMaterial')
+            outnode.location = 800,0
+            links.new( mix.outputs[0], outnode.inputs[0] )
+            texture = nodes.new('ShaderNodeTexImage')
+            texture.location = -400,0
+            links.new( texture.outputs[0], emissive.inputs[0] )    
+            links.new( texture.outputs[1], mix.inputs[0] )
+            #texture.image = bpy.ops.image.open(filepath="c:\\nova\\keyed\\1\\1_5_1\\1_5_1.00000.png")
+    
+        
+        except Exception as e: 
+            imageplane.select=False
+            camera.select = True
+            raise e    
+        return {'FINISHED'}
+    
+    def execute(self, context):
+        camera = bpy.context.active_object #bpy.data.objects['Camera']
+        return self.createImagePlaneForCamera(camera)
+
 
 class OBJECT_OT_Automator(bpy.types.Operator):
     bl_idname = "automator.b2osg"
@@ -573,6 +756,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
+    bpy.utils.register_class(OBJECT_OT_Canon6D35)
     bpy.utils.register_class(ImportMultipleObjs)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
