@@ -95,10 +95,18 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
         row = layout.row()
-        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')
-        row = layout.row()
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
-
+        row = layout.row()
+        self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Set as Canon6D 14mm')
+        row = layout.row()
+        self.layout.operator("better.cameras", icon="RENDER_REGION", text='Better Cams')
+        row = layout.row()
+        self.layout.operator("nobetter.cameras", icon="RENDER_REGION", text='Disable Better Cams')
+        row = layout.row()
+        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
+#        row = layout.row()
+#        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera Tex')
+                
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -311,22 +319,53 @@ class OBJECT_OT_Canon6D35(bpy.types.Operator):
             obj.data.sensor_height = 23.9
         return {'FINISHED'}
 
+class OBJECT_OT_Canon6D14(bpy.types.Operator):
+    bl_idname = "canon6d14mm.camera"
+    bl_label = "Set as Canon 6D 14mm"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select = True
+            obj.data.lens = 14.46
+            obj.data.sensor_fit = 'HORIZONTAL'
+            obj.data.sensor_width = 35.8
+            obj.data.sensor_height = 23.9
+        return {'FINISHED'}
 
-#        for obj in selection:    
-#            obj.select = True  
-#            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-#            basedir = os.path.dirname(bpy.data.filepath)
-#            if not basedir:
-#                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
-#            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-#            fn = os.path.join(basedir, activename)
-#            file = open(fn + "-inst.txt", 'w')
-#            file.write("%s %s %s %s %s %s %s %s %s\n" % (obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.scale[0], obj.scale[1], obj.scale[2]))
-#            file.close()
-#            bpy.context.object.location[0] = 0
-#            bpy.context.object.location[1] = 0
-#            bpy.context.object.location[2] = 0
-#            bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
+class OBJECT_OT_BetterCameras(bpy.types.Operator):
+    bl_idname = "better.cameras"
+    bl_label = "Better Cameras"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for cam in selection:
+            cam.select = True
+            cam.data.show_limits = True
+            cam.data.clip_start = 0.5
+            cam.data.clip_end = 4
+        return {'FINISHED'}
+
+class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
+    bl_idname = "nobetter.cameras"
+    bl_label = "Disable Better Cameras"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for cam in selection:
+            cam.select = True
+            cam.data.show_limits = False
+        return {'FINISHED'}
+    
+
+#_______________________________________________________________________________________________________________
+
 
 
 class CreateCameraImagePlane(bpy.types.Operator):
@@ -349,29 +388,6 @@ class CreateCameraImagePlane(bpy.types.Operator):
         depth.targets[0].transform_type = 'LOC_Z'
         depth.targets[0].transform_space = 'LOCAL_SPACE'
     
-    #unfortunately not possible to add driver on scene object    
-    #    resolution_x = driver.variables.new()
-    #    resolution_x.name = 'resolution_x'
-    #    resolution_x.type = 'SINGLE_PROP'
-    #    resolution_x.targets[0].id =bpy.context.scene
-    #    resolution_x.targets[0].data_path = 'render.resolution_x'
-    #    resolution_y = driver.variables.new()
-    #    resolution_y.name = 'resolution_y'
-    #    resolution_y.type = 'SINGLE_PROP'
-    #    resolution_y.targets[0].id =bpy.context.scene
-    #    resolution_y.targets[0].data_path = 'render.resolution_y'
-    #    pixel_x = driver.variables.new()
-    #    pixel_x.name = 'pixel_x'
-    #    pixel_x.type = 'SINGLE_PROP'
-    #    pixel_x.targets[0].id =bpy.context.scene
-    #    pixel_x.targets[0].data_path = 'render.pixel_aspect_x'
-    #    pixel_y = driver.variables.new()
-    #    pixel_y.name = 'pixel_y'
-    #    pixel_y.type = 'SINGLE_PROP'
-    #    pixel_y.targets[0].id =bpy.context.scene
-    #    pixel_y.targets[0].data_path = 'render.pixel_aspect_y'
-                
-    
     def SetupDriversForImagePlane(self, imageplane):
         driver = imageplane.driver_add('scale',1).driver
         driver.type = 'SCRIPTED'
@@ -385,16 +401,16 @@ class CreateCameraImagePlane(bpy.types.Operator):
     
     # get selected camera (might traverse children of selected object until a camera is found?)
     # for now just pick the active object
+
     def createImagePlaneForCamera(self, camera):
         imageplane = None
         try:
             depth = 10
             
-            
             #create imageplane
             bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
             imageplane = bpy.context.active_object
-            imageplane.name = "imageplane"
+            imageplane.name = ("objplane_"+camera.name)
             bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
             bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.select_all(action='TOGGLE')
@@ -402,13 +418,11 @@ class CreateCameraImagePlane(bpy.types.Operator):
             bpy.ops.uv.smart_project(angle_limit=66,island_margin=0, user_area_weight=0)
             bpy.ops.uv.select_all(action='TOGGLE')
             bpy.ops.transform.rotate(value=1.5708, axis=(0,0,1) )
-            bpy.ops.object.editmode_toggle()
-        
+            bpy.ops.object.editmode_toggle()        
             
             imageplane.location = (0,0,-depth)
             imageplane.parent = camera
-            
-            
+                        
             #calculate scale
             #REPLACED WITH CREATING EXPRESSIONS
             self.SetupDriversForImagePlane(imageplane)
@@ -423,29 +437,18 @@ class CreateCameraImagePlane(bpy.types.Operator):
             material =  imageplane.material_slots[0].material
             # if not returned by new use imgeplane.material_slots[0].material
             material.name = 'mat_imageplane_'+camera.name
-            material.use_nodes = True
-            nodes = material.node_tree.nodes
-            links = material.node_tree.links
-            
-            nodes.clear()
-            emissive = nodes.new('ShaderNodeEmission')
-            emissive.location = 0, 0
-            transparent = nodes.new('ShaderNodeBsdfTransparent')
-            transparent.location = 0,100
-            mix = nodes.new('ShaderNodeMixShader')
-            mix.location = 400,0
-            links.new( emissive.outputs[0], mix.inputs[2] ) 
-            links.new( transparent.outputs[0], mix.inputs[1] )
-            outnode = nodes.new('ShaderNodeOutputMaterial')
-            outnode.location = 800,0
-            links.new( mix.outputs[0], outnode.inputs[0] )
-            texture = nodes.new('ShaderNodeTexImage')
-            texture.location = -400,0
-            links.new( texture.outputs[0], emissive.inputs[0] )    
-            links.new( texture.outputs[1], mix.inputs[0] )
-            #texture.image = bpy.ops.image.open(filepath="c:\\nova\\keyed\\1\\1_5_1\\1_5_1.00000.png")
-    
-        
+
+            material.use_nodes = False
+                        
+            basedir = os.path.dirname(bpy.data.filepath)
+            if not basedir:
+                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+
+            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(basedir+'/undistorted/'+camera.name)
+
+            bpy.ops.view3d.tex_to_material()
+
         except Exception as e: 
             imageplane.select=False
             camera.select = True
@@ -455,6 +458,8 @@ class CreateCameraImagePlane(bpy.types.Operator):
     def execute(self, context):
         camera = bpy.context.active_object #bpy.data.objects['Camera']
         return self.createImagePlaneForCamera(camera)
+
+#_______________________________________________________________________________________________________________
 
 
 class OBJECT_OT_Automator(bpy.types.Operator):
@@ -579,6 +584,136 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
             obj.select = False
         return {'FINISHED'}
     
+
+#_______________________________________________________________________________________________________________
+
+
+def assignmatslots(ob, matlist):
+    #given an object and a list of material names
+    #removes all material slots form the object
+    #adds new ones for each material in matlist
+    #adds the materials to the slots as well.
+
+    scn = bpy.context.scene
+    ob_active = bpy.context.active_object
+    scn.objects.active = ob
+
+    for s in ob.material_slots:
+        bpy.ops.object.material_slot_remove()
+
+    # re-add them and assign material
+    i = 0
+    for m in matlist:
+        mat = bpy.data.materials[m]
+        ob.data.materials.append(mat)
+        i += 1
+
+    # restore active object:
+    scn.objects.active = ob_active
+
+
+def check_texture(img, mat):
+    #finds a texture from an image
+    #makes a texture if needed
+    #adds it to the material if it isn't there already
+
+    tex = bpy.data.textures.get(img.name)
+
+    if tex is None:
+        tex = bpy.data.textures.new(name=img.name, type='IMAGE')
+
+    tex.image = img
+
+    #see if the material already uses this tex
+    #add it if needed
+    found = False
+    for m in mat.texture_slots:
+        if m and m.texture == tex:
+            found = True
+            break
+    if not found and mat:
+        mtex = mat.texture_slots.add()
+        mtex.texture = tex
+        mtex.texture_coords = 'UV'
+        mtex.use_map_color_diffuse = True
+
+def tex_to_mat():
+    # editmode check here!
+    editmode = False
+    ob = bpy.context.object
+    if ob.mode == 'EDIT':
+        editmode = True
+        bpy.ops.object.mode_set()
+
+    for ob in bpy.context.selected_editable_objects:
+
+        faceindex = []
+        unique_images = []
+
+        # get the texface images and store indices
+        if (ob.data.uv_textures):
+            for f in ob.data.uv_textures.active.data:
+                if f.image:
+                    img = f.image
+                    #build list of unique images
+                    if img not in unique_images:
+                        unique_images.append(img)
+                    faceindex.append(unique_images.index(img))
+
+                else:
+                    img = None
+                    faceindex.append(None)
+
+        # check materials for images exist; create if needed
+        matlist = []
+        for i in unique_images:
+            if i:
+                try:
+                    m = bpy.data.materials[i.name]
+                except:
+                    m = bpy.data.materials.new(name=i.name)
+                    continue
+
+                finally:
+                    matlist.append(m.name)
+                    # add textures if needed
+                    check_texture(i, m)
+
+        # set up the object material slots
+        assignmatslots(ob, matlist)
+
+        #set texface indices to material slot indices..
+        me = ob.data
+
+        i = 0
+        for f in faceindex:
+            if f is not None:
+                me.polygons[i].material_index = f
+            i += 1
+    if editmode:
+        bpy.ops.object.mode_set(mode='EDIT')
+
+class VIEW3D_OT_tex_to_material(bpy.types.Operator):
+    """Create texture materials for images assigned in UV editor"""
+    bl_idname = "view3d.tex_to_material"
+    bl_label = "Texface Images to Material/Texture (Material Utils)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        if context.selected_editable_objects:
+            tex_to_mat()
+            return {'FINISHED'}
+        else:
+            self.report({'WARNING'},
+                        "No editable selected objects, could not finish")
+            return {'CANCELLED'}
+
+
+
 
 #_______________________________________________________________________________________________________________
 
