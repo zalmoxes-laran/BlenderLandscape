@@ -5,11 +5,11 @@ bl_info = {
     "blender": (2, 7, 7),
     "api": 48000,
     "location": "Tool Shelf panel",
-    "description": "Blender exporter to osg4web",
+    "description": "Blender tools for Landscape reconstruction",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "Exporter"}
+    "category": "Tools"}
 
 
 import bpy
@@ -38,7 +38,9 @@ class ToolsPanel4(bpy.types.Panel):
         obj = context.object
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
-        
+#        row = layout.row()
+
+                
 class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -90,22 +92,36 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
-        row = layout.row()
+
+
+class ToolsPanel5(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "TOOLS"
+    bl_context = "objectmode"
+    bl_category = "B2OSG"
+    bl_label = "Photogrammetry"
+     
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
         self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
         row = layout.row()
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
-        row = layout.row()
+#        row = layout.row()
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
-        row = layout.row()
+#        row = layout.row()
         self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Set as Canon6D 14mm')
         row = layout.row()
         self.layout.operator("better.cameras", icon="RENDER_REGION", text='Better Cams')
-        row = layout.row()
+#        row = layout.row()
         self.layout.operator("nobetter.cameras", icon="RENDER_REGION", text='Disable Better Cams')
         row = layout.row()
         self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
-#        row = layout.row()
-#        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera Tex')
+        row = layout.row()
+        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
+        self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
+        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
+
                 
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -115,8 +131,7 @@ class ToolsPanel2(bpy.types.Panel):
     bl_label = "Automator"
      
     def draw(self, context):
-        layout = self.layout
-        
+        layout = self.layout        
         obj = context.object
         row = layout.row()
         row.prop(obj, "name")
@@ -129,11 +144,11 @@ class ToolsPanel2(bpy.types.Panel):
         row = layout.row()
         row.label(text= obj.name + "-inst.txt and " + obj.name + ".obj" )
         row = layout.row()
-        self.layout.operator("automator.export", icon="COLOR", text='D. Piscului to exported SCS')
-        row = layout.row()
-        row.label(text="Resulting files: ")
-        row = layout.row()
-        row.label(text= obj.name + ".obj" )
+#        self.layout.operator("automator.export", icon="COLOR", text='D. Piscului to exported SCS')
+#        row = layout.row()
+#        row.label(text="Resulting files: ")
+#        row = layout.row()
+#        row.label(text= obj.name + ".obj" )
         
 
 class OBJECT_OT_ExportButtonName(bpy.types.Operator):
@@ -348,6 +363,9 @@ class OBJECT_OT_BetterCameras(bpy.types.Operator):
             cam.data.show_limits = True
             cam.data.clip_start = 0.5
             cam.data.clip_end = 4
+            cam.scale[0] = 0.1
+            cam.scale[1] = 0.1
+            cam.scale[2] = 0.1
         return {'FINISHED'}
 
 class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
@@ -363,7 +381,6 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
             cam.data.show_limits = False
         return {'FINISHED'}
     
-
 #_______________________________________________________________________________________________________________
 
 
@@ -469,47 +486,30 @@ class OBJECT_OT_Automator(bpy.types.Operator):
     
     def execute(self, context):
 
+        basedir = os.path.dirname(bpy.data.filepath)
+        
+        if not basedir:
+            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
+        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+        fn = os.path.join(basedir, activename)
+        file = open(fn + "-inst.txt", 'w')
         
+        # write selected objects coordinate
         for obj in selection:    
             obj.select = True  
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-            basedir = os.path.dirname(bpy.data.filepath)
-            if not basedir:
-                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
-            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-            fn = os.path.join(basedir, activename)
-            file = open(fn + "-inst.txt", 'w')
             file.write("%s %s %s %s %s %s %s %s %s\n" % (obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.scale[0], obj.scale[1], obj.scale[2]))
-            file.close()
-            bpy.context.object.location[0] = 0
-            bpy.context.object.location[1] = 0
-            bpy.context.object.location[2] = 0
-            bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
-        return {'FINISHED'}
-
-class OBJECT_OT_AutomatorDP2(bpy.types.Operator):
-    bl_idname = "automator.export"
-    bl_label = "Automator DP2"
-    bl_options = {"REGISTER", "UNDO"}
-    
-    def execute(self, context):
-
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
+        file.close()
         
-        for obj in selection:    
-            obj.select = True
-            bpy.ops.transform.translate(value=(-233000, -394000, -150), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-            bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
-            basedir = os.path.dirname(bpy.data.filepath)
-            if not basedir:
-                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
-            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-            fn = os.path.join(basedir, activename)
-            bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
+        active = bpy.context.scene.objects.active
+        bpy.ops.object.select_all(action='DESELECT')
+        active.select = True
+        bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
         return {'FINISHED'}
+
+
 
 class OBJECT_OT_ExportObjButton(bpy.types.Operator):
     bl_idname = "export.object"
@@ -530,6 +530,39 @@ class OBJECT_OT_ExportObjButton(bpy.types.Operator):
         
         # write active object in obj format
         bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')        
+        return {'FINISHED'}
+
+
+class OBJECT_OT_paintcam(bpy.types.Operator):
+    bl_idname = "paint.cam"
+    bl_label = "Paint selected from current cam"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+#        bpy.ops.paint.texture_paint_toggle()
+        bpy.context.space_data.show_only_render = True
+        bpy.ops.image.project_edit()  
+        return {'FINISHED'}
+
+class OBJECT_OT_applypaintcam(bpy.types.Operator):
+    bl_idname = "applypaint.cam"
+    bl_label = "Apply paint"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+#        bpy.ops.paint.texture_paint_toggle()
+        bpy.ops.image.project_apply()  
+        bpy.context.space_data.show_only_render = False
+        return {'FINISHED'}
+
+class OBJECT_OT_savepaintcam(bpy.types.Operator):
+    bl_idname = "savepaint.cam"
+    bl_label = "Save paint"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+#        bpy.ops.paint.texture_paint_toggle()
+        bpy.ops.image.save_dirty()  
         return {'FINISHED'}
     
 #    print("written:", fn)
