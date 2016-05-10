@@ -39,7 +39,6 @@ class ToolsPanel4(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
 #        row = layout.row()
-
                 
 class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -94,6 +93,7 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
 
 
+
 class ToolsPanel5(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -106,6 +106,7 @@ class ToolsPanel5(bpy.types.Panel):
         obj = context.object
         self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
         row = layout.row()
+        self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
 #        row = layout.row()
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
@@ -303,6 +304,22 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
             ma.ambient = 0.0
         return {'FINISHED'}
 
+
+class OBJECT_OT_IsometricScene(bpy.types.Operator):
+    bl_idname = "isometric.scene"
+    bl_label = "Isometric scene"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+#        bpy.context.scene.compression = 90
+        bpy.context.scene.render.resolution_x = 3000
+        bpy.context.scene.render.resolution_y = 3000
+        bpy.context.scene.render.resolution_percentage = 100
+        bpy.context.scene.game_settings.material_mode = 'GLSL'
+        bpy.context.scene.game_settings.use_glsl_lights = False
+        return {'FINISHED'}
+
+
 class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
     bl_idname = "canon6d.scene"
     bl_label = "Canon 6D scene"
@@ -328,7 +345,7 @@ class OBJECT_OT_Canon6D35(bpy.types.Operator):
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
             obj.select = True
-            obj.data.lens = 34.34
+            obj.data.lens = 35
             obj.data.sensor_fit = 'HORIZONTAL'
             obj.data.sensor_width = 35.8
             obj.data.sensor_height = 23.9
@@ -639,6 +656,8 @@ def assignmatslots(ob, matlist):
     for m in matlist:
         mat = bpy.data.materials[m]
         ob.data.materials.append(mat)
+        bpy.context.object.active_material.use_transparency = True
+        bpy.context.object.active_material.alpha = 0.5
         i += 1
 
     # restore active object:
