@@ -560,7 +560,16 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
     def execute(self, context):
         bpy.ops.paint.texture_paint_toggle()
         bpy.context.space_data.show_only_render = True
-        bpy.ops.image.project_edit()  
+        bpy.ops.image.project_edit()
+        obj_camera = bpy.context.scene.camera
+
+
+        basedir = os.path.dirname(bpy.data.filepath)
+        if not basedir:
+            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+
+        bpy.ops.image.external_edit(filepath=basedir+'/undistorted/'+obj_camera.name)
         return {'FINISHED'}
 
 class OBJECT_OT_applypaintcam(bpy.types.Operator):
