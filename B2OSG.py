@@ -317,6 +317,8 @@ class OBJECT_OT_IsometricScene(bpy.types.Operator):
         bpy.context.scene.render.resolution_percentage = 100
         bpy.context.scene.game_settings.material_mode = 'GLSL'
         bpy.context.scene.game_settings.use_glsl_lights = False
+        bpy.context.scene.world.light_settings.use_ambient_occlusion = True
+        bpy.context.scene.render.alpha_mode = 'TRANSPARENT'
         return {'FINISHED'}
 
 
