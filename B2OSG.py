@@ -97,7 +97,7 @@ class ToolsPanel3(bpy.types.Panel):
 class ToolsPanel5(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_context = "objectmode"
+#    bl_context = "objectmode"
     bl_category = "B2OSG"
     bl_label = "Photogrammetry"
      
@@ -558,7 +558,7 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
-#        bpy.ops.paint.texture_paint_toggle()
+        bpy.ops.paint.texture_paint_toggle()
         bpy.context.space_data.show_only_render = True
         bpy.ops.image.project_edit()  
         return {'FINISHED'}
@@ -569,7 +569,7 @@ class OBJECT_OT_applypaintcam(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
-#        bpy.ops.paint.texture_paint_toggle()
+        bpy.ops.paint.texture_paint_toggle()
         bpy.ops.image.project_apply()  
         bpy.context.space_data.show_only_render = False
         return {'FINISHED'}
