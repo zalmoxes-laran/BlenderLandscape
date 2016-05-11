@@ -1,7 +1,7 @@
 bl_info = {
-    "name": "Blender2osg",
+    "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,1),
+    "version": (1,2),
     "blender": (2, 7, 7),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -30,7 +30,7 @@ class ToolsPanel4(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
-    bl_category = "B2OSG"
+    bl_category = "BL"
     bl_label = "Importer"
      
     def draw(self, context):
@@ -44,7 +44,7 @@ class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
-    bl_category = "B2OSG"
+    bl_category = "BL"
     bl_label = "Exporters"
      
     def draw(self, context):
@@ -77,58 +77,60 @@ class ToolsPanel3(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
-    bl_category = "B2OSG"
+    bl_category = "BL"
     bl_label = "Converters"
      
     def draw(self, context):
         layout = self.layout
         obj = context.object
-#        row = layout.row()
-#        self.layout.operator("translate.scs", icon="AUTO", text='Grab Selected to SCS')
-#        row = layout.row()
-#        self.layout.operator("translate.dp", icon="AUTO", text='Grab Selected to D. Piscului')
         row = layout.row()
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
 
-
-
 class ToolsPanel5(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
 #    bl_context = "objectmode"
-    bl_category = "B2OSG"
+    bl_category = "BL"
     bl_label = "Photogrammetry"
+#    bpy.types.Scene.scn_property = bpy.props.StringProperty(name = "UndistortedPath")
      
     def draw(self, context):
         layout = self.layout
         obj = context.object
+        row = layout.row()
+        row.label(text="Set up cams and scene", icon='RADIO')
+        row = layout.row()
         self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
         row = layout.row()
         self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
-#        row = layout.row()
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
-#        row = layout.row()
         self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Set as Canon6D 14mm')
         row = layout.row()
         self.layout.operator("better.cameras", icon="RENDER_REGION", text='Better Cams')
-#        row = layout.row()
         self.layout.operator("nobetter.cameras", icon="RENDER_REGION", text='Disable Better Cams')
         row = layout.row()
+        row.label(text="Folder with undistorted images:")
+        row = layout.row()
+        row.prop(context.scene, 'path', toggle = True)
+        row = layout.row()
+        row = layout.row()
+        row.label(text="Painting Toolbox", icon='TPAINT_HLT')
+#        row = layout.row()
         self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
         row = layout.row()
+
         self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
         self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
-
-                
+ 
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
-    bl_category = "B2OSG"
+    bl_category = "BL"
     bl_label = "Automator"
      
     def draw(self, context):
@@ -145,12 +147,6 @@ class ToolsPanel2(bpy.types.Panel):
         row = layout.row()
         row.label(text= obj.name + "-inst.txt and " + obj.name + ".obj" )
         row = layout.row()
-#        self.layout.operator("automator.export", icon="COLOR", text='D. Piscului to exported SCS')
-#        row = layout.row()
-#        row.label(text="Resulting files: ")
-#        row = layout.row()
-#        row.label(text= obj.name + ".obj" )
-        
 
 class OBJECT_OT_ExportButtonName(bpy.types.Operator):
     bl_idname = "export.coordname"
@@ -203,7 +199,6 @@ class OBJECT_OT_ExportButton(bpy.types.Operator):
         file.close()
         return {'FINISHED'}
     
-
 class OBJECT_OT_ExportCamButton(bpy.types.Operator):
     bl_idname = "export.camdata"
     bl_label = "Export cam data"
@@ -215,7 +210,6 @@ class OBJECT_OT_ExportCamButton(bpy.types.Operator):
         
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
-
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
@@ -228,38 +222,6 @@ class OBJECT_OT_ExportCamButton(bpy.types.Operator):
             file.write("%s %s %s %s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.data.lens))
         file.close()
         return {'FINISHED'}
-
-#class OBJECT_OT_TranslatetoSCSButton(bpy.types.Operator):
-#    bl_idname = "translate.scs"
-#    bl_label = "Translate to SCS"
-#    bl_options = {"REGISTER", "UNDO"}
-#    
-#    def execute(self, context):
-
-#        selection = bpy.context.selected_objects
-##        bpy.ops.object.select_all(action='DESELECT')
-#        
-#        # translate objects in SCS coordinate
-#        for obj in selection:    
-#            obj.select = True  
-#            bpy.ops.transform.translate(value=(-327300, -448370, -500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-#        return {'FINISHED'}
-
-#class OBJECT_OT_TranslatetoDPButton(bpy.types.Operator):
-#    bl_idname = "translate.dp"
-#    bl_label = "Translate to DP"
-#    bl_options = {"REGISTER", "UNDO"}
-#    
-#    def execute(self, context):
-
-#        selection = bpy.context.selected_objects
-##        bpy.ops.object.select_all(action='DESELECT')
-#        
-#        # translate objects in SCS coordinate
-#        for obj in selection:    
-#            obj.select = True  
-#            bpy.ops.transform.translate(value=(327300, 448370, 500), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-#        return {'FINISHED'}
 
 class OBJECT_OT_CenterMass(bpy.types.Operator):
     bl_idname = "center.mass"
@@ -476,12 +438,15 @@ class CreateCameraImagePlane(bpy.types.Operator):
 
             material.use_nodes = False
                         
-            basedir = os.path.dirname(bpy.data.filepath)
-            if not basedir:
-                raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+            
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
 
-            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(basedir+'/undistorted/'+camera.name)
+            undistortedpath = bpy.context.scene.path
+            
+            if not undistortedpath:
+                raise Exception("Hey Buddy, you have to set the undistorted images path !")
+
+            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(undistortedpath+camera.name)
 
             bpy.ops.view3d.tex_to_material()
 
@@ -563,13 +528,14 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
         bpy.ops.image.project_edit()
         obj_camera = bpy.context.scene.camera
 
+        undistortedpath = bpy.context.scene.path
+        if not undistortedpath:
+            raise Exception("Hey Buddy, you have to set the undistorted images path !")
+        
+        undistortedphoto = undistortedpath+obj_camera.name
+        cleanpath = bpy.path.abspath(undistortedphoto)
+        bpy.ops.image.external_edit(filepath=cleanpath)
 
-        basedir = os.path.dirname(bpy.data.filepath)
-        if not basedir:
-            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-
-        bpy.ops.image.external_edit(filepath=basedir+'/undistorted/'+obj_camera.name)
         return {'FINISHED'}
 
 class OBJECT_OT_applypaintcam(bpy.types.Operator):
