@@ -114,11 +114,10 @@ class ToolsPanel5(bpy.types.Panel):
         row = layout.row()
         row.label(text="Folder with undistorted images:")
         row = layout.row()
-        row.prop(context.scene, 'path', toggle = True)
+        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
         row = layout.row()
         row = layout.row()
         row.label(text="Painting Toolbox", icon='TPAINT_HLT')
-#        row = layout.row()
         self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
         row = layout.row()
 
@@ -900,6 +899,7 @@ class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
 
 #_______________________________________________________________________________________________________________
 
+
 def menu_func_import(self, context):
     self.layout.operator(ImportMultipleObjs.bl_idname, text="Wavefont Batch (.obj)")
 
@@ -930,12 +930,22 @@ def register():
 #
 def register():
     bpy.utils.register_module(__name__)
+
+# define path to undistorted image 
+    bpy.types.Scene.BL_undistorted_path = StringProperty(
+      name = "Undistorted Path",
+      default = "",
+      description = "Define the root path of the undistorted images",
+      subtype = 'DIR_PATH'
+      )
 #
 #
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
+    bpy.utils.unregister_module(__name__)
+    del bpy.types.Scene.BL_undistorted_path
 #
 
 if __name__ == "__main__":
