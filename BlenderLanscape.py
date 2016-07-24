@@ -462,9 +462,9 @@ class CreateCameraImagePlane(bpy.types.Operator):
 #_______________________________________________________________________________________________________________
 
 
-class OBJECT_OT_Automator(bpy.types.Operator):
+class OBJECT_OT_LOD2(bpy.types.Operator):
     bl_idname = "lod2.b2osg"
-    bl_label = "Automator"
+    bl_label = "LOD2"
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
@@ -536,8 +536,8 @@ class OBJECT_OT_Automator(bpy.types.Operator):
         fn = os.path.join(basedir, activename)
         bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
-        bpy.ops.object.move_to_layer(layers=(False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
-        bpy.context.scene.layers[1] = True
+        bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False))
+        bpy.context.scene.layers[10] = True
         bpy.context.scene.layers[0] = False
         return {'FINISHED'}
 
@@ -789,9 +789,6 @@ class VIEW3D_OT_tex_to_material(bpy.types.Operator):
                         "No editable selected objects, could not finish")
             return {'CANCELLED'}
 
-
-
-
 #_______________________________________________________________________________________________________________
 
 
@@ -964,7 +961,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_TranslatetoDPButton)
     bpy.utils.register_class(OBJECT_OT_CenterMass)
     bpy.utils.register_class(OBJECT_OT_LocalTexture)
-    bpy.utils.register_class(OBJECT_OT_Automator)
+    bpy.utils.register_class(OBJECT_OT_LOD2)
     bpy.utils.register_class(OBJECT_OT_AutomatorDP2)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
