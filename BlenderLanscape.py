@@ -487,6 +487,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.ops.object.material_slot_remove()
         bpy.ops.object.editmode_toggle()
         bpy.ops.uv.select_all(action='SELECT')
+        bpy.ops.mesh.remove_doubles()
         bpy.ops.uv.pack_islands(margin=0.001)
 
         # procedura di semplificazione mesh
