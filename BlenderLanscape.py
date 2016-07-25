@@ -440,7 +440,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
             
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
 
-            undistortedpath = bpy.context.scene.path
+            undistortedpath = bpy.context.scene.BL_undistorted_path
             
             if not undistortedpath:
                 raise Exception("Hey Buddy, you have to set the undistorted images path !")
@@ -577,7 +577,7 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
         bpy.ops.image.project_edit()
         obj_camera = bpy.context.scene.camera
 
-        undistortedpath = bpy.context.scene.path
+        undistortedpath = bpy.context.scene.BL_undistorted_path
         if not undistortedpath:
             raise Exception("Hey Buddy, you have to set the undistorted images path !")
         
