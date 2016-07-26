@@ -79,16 +79,20 @@ class ToolsPanel3(bpy.types.Panel):
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "Quick Utils"
+#    bl_options = {'REGISTER', 'UNDO'}
      
     def draw(self, context):
         layout = self.layout
         obj = context.object
+        scene = context.scene
         row = layout.row()
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
         self.layout.operator("bi2cycles.material", icon="TEXTURE", text='Create cycles nodes')
+#        row.label("Texture correction")
+#        row.prop(scene, "colcor_bricon") # Input button for bpy.types.Scene.colcor_bricon.
 
 
 class ToolsPanel5(bpy.types.Panel):
@@ -593,7 +597,7 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
 class OBJECT_OT_applypaintcam(bpy.types.Operator):
     bl_idname = "applypaint.cam"
     bl_label = "Apply paint"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {"REGISTER"}
     
     def execute(self, context):
         bpy.ops.paint.texture_paint_toggle()
@@ -815,14 +819,14 @@ class OBJECT_OT_material(bpy.types.Operator):
             'redstone_wire_on'
         ]
         # create a group
-        test_group = bpy.data.node_groups.new('testGroup7', 'ShaderNodeTree')
+        active_object_name = bpy.context.scene.objects.active.name
+        test_group = bpy.data.node_groups.new(active_object_name, 'ShaderNodeTree')
         
         # create group inputs
         group_inputs = test_group.nodes.new('NodeGroupInput')
-        group_inputs.location = (-350,0)
+        group_inputs.location = (-450,0)
         test_group.inputs.new('NodeSocketColor','tex')
-        test_group.inputs.new('NodeSocketFloat','brightness')
-        test_group.inputs.new('NodeSocketFloat','contrast')
+
         # create group outputs
         group_outputs = test_group.nodes.new('NodeGroupOutput')
         group_outputs.location = (300,0)
@@ -830,24 +834,26 @@ class OBJECT_OT_material(bpy.types.Operator):
 
         # create three math nodes in a group
 
-
-
         bricon = test_group.nodes.new('ShaderNodeBrightContrast')
-        bricon.location = (-100, -100)
+        bricon.location = (-200, -100)
         bricon.label = 'bricon'
-        bricon.inputs[1].default_value = 0
+#        bricon.inputs[1].default_value = 0
+#        bricon.inputs[2].default_value = 0
+
+        sathue = test_group.nodes.new('ShaderNodeHueSaturation')
+        sathue.location = (-100, -100)
+        sathue.label = 'sathue'
+#        sathue.inputs[0].default_value = 0
 
         # link nodes together
-#        test_group.links.new(node_add.inputs[0], node_greater.outputs[0])
+        test_group.links.new(sathue.inputs[4], bricon.outputs[0])
 #        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
 
         # link inputs
         test_group.links.new(group_inputs.outputs['tex'], bricon.inputs[0])
-        test_group.links.new(group_inputs.outputs['brightness'], bricon.inputs[1])
-        test_group.links.new(group_inputs.outputs['contrast'], bricon.inputs[2])
         
         #link output
-        test_group.links.new(bricon.outputs[0], group_outputs.inputs['cortex'])
+        test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
         
         for matslot in bpy.context.active_object.material_slots:
             mat = matslot.material
@@ -873,7 +879,7 @@ class OBJECT_OT_material(bpy.types.Operator):
             teximg.location = (-1100, -50)
             teximg.image = image
             colcor = nodes.new(type="ShaderNodeGroup")
-            colcor.node_tree = (bpy.data.node_groups['testGroup7'])
+            colcor.node_tree = (bpy.data.node_groups[active_object_name])
             colcor.location = (-800, -50)
             links.new(transparent.outputs[0], mix.inputs[1])
             links.new(teximg.outputs[0], colcor.inputs[0])
@@ -1065,12 +1071,12 @@ def register():
     bpy.utils.register_class(OBJECT_OT_ExportButton)
     bpy.utils.register_class(OBJECT_OT_ExportButtonName)
     bpy.utils.register_class(OBJECT_OT_ExportCamButton)
-    bpy.utils.register_class(OBJECT_OT_TranslatetoSCSButton)
-    bpy.utils.register_class(OBJECT_OT_TranslatetoDPButton)
+#    bpy.utils.register_class(OBJECT_OT_TranslatetoSCSButton)
+#    bpy.utils.register_class(OBJECT_OT_TranslatetoDPButton)
     bpy.utils.register_class(OBJECT_OT_CenterMass)
     bpy.utils.register_class(OBJECT_OT_LocalTexture)
     bpy.utils.register_class(OBJECT_OT_LOD2)
-    bpy.utils.register_class(OBJECT_OT_AutomatorDP2)
+#    bpy.utils.register_class(OBJECT_OT_AutomatorDP2)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
@@ -1083,8 +1089,15 @@ def register():
 #bpy.utils.register_module(__name__)
 #
 #
-def register():
+#def register():
     bpy.utils.register_module(__name__)
+#    bpy.types.Scene.colcor_bricon = bpy.props.FloatProperty(
+#        name = "Brightness",
+#        description = "Color correction brightness",
+#        default = 0.0,
+#        min = -3.0,
+#        max = 3.0
+#    )
 
 # define path to undistorted image 
     bpy.types.Scene.BL_undistorted_path = StringProperty(
@@ -1099,6 +1112,7 @@ def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
+    del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.BL_undistorted_path
 #
