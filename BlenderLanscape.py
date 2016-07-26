@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.1),
+    "version": (1,2.2),
     "blender": (2, 7, 7),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -796,72 +796,108 @@ class VIEW3D_OT_tex_to_material(bpy.types.Operator):
 #_______________________________________________________________________________________________________________
 
 
-class OBJECT_OT_bi2cycles_material(bpy.types.Operator):
-    """This appears in the tooltip of the operator and in the generated docs"""
+class OBJECT_OT_material(bpy.types.Operator):
+    """Create cycles materials for selected object"""
     bl_idname = "bi2cycles.material"
     bl_label = "Create cycles materials for selected object"
-    bl_options = {'PRESET', 'UNDO'}
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
     
-    bpy.context.scene.render.engine = 'CYCLES'
+        bpy.context.scene.render.engine = 'CYCLES'
 
-    emissionNames = [
-        'torch_flame',
-        'fire',
-        'lava',
-        'lava_flowing',
-        'glowstone',
-        'redstone_wire_on'
-    ]
+        emissionNames = [
+            'torch_flame',
+            'fire',
+            'lava',
+            'lava_flowing',
+            'glowstone',
+            'redstone_wire_on'
+        ]
+        # create a group
+        test_group = bpy.data.node_groups.new('testGroup7', 'ShaderNodeTree')
+        
+        # create group inputs
+        group_inputs = test_group.nodes.new('NodeGroupInput')
+        group_inputs.location = (-350,0)
+        test_group.inputs.new('NodeSocketColor','tex')
+        test_group.inputs.new('NodeSocketFloat','brightness')
+        test_group.inputs.new('NodeSocketFloat','contrast')
+        # create group outputs
+        group_outputs = test_group.nodes.new('NodeGroupOutput')
+        group_outputs.location = (300,0)
+        test_group.outputs.new('NodeSocketColor','cortex')
 
-    for matslot in bpy.context.active_object.material_slots:
-        mat = matslot.material
-        image = mat.texture_slots[0].texture.image
-        mat.use_nodes = True
-        mat.node_tree.nodes.clear()
-        links = mat.node_tree.links
-        nodes = mat.node_tree.nodes
-        output = nodes.new('ShaderNodeOutputMaterial')
-        output.location = (0, 0)
-        mix = nodes.new('ShaderNodeMixShader')
-        mix.location = (-200, 0)
-        transparent = nodes.new('ShaderNodeBsdfTransparent')
-        transparent.inputs[0].default_value = (1,1,1,1)
-        transparent.location = (-400, 100)
-        if(mat.name in emissionNames):
-            mainNode = nodes.new('ShaderNodeEmission')
-            mainNode.inputs[1].default_value = 3.0
-        else:
-            mainNode = nodes.new('ShaderNodeBsdfDiffuse')
-            mainNode.location = (-400, -50)
-        teximg = nodes.new('ShaderNodeTexImage')
-        teximg.location = (-1100, -50)
-        teximg.image = image
-        bricon = nodes.new('ShaderNodeBrightContrast')
-        bricon.location = (-600, -50)
+        # create three math nodes in a group
+
+
+
+        bricon = test_group.nodes.new('ShaderNodeBrightContrast')
+        bricon.location = (-100, -100)
+        bricon.label = 'bricon'
         bricon.inputs[1].default_value = 0
 
-        links.new(transparent.outputs[0], mix.inputs[1])
-        links.new(teximg.outputs[0], bricon.inputs[0])
-        links.new(bricon.outputs[0], mainNode.inputs[0])
-        links.new(mainNode.outputs[0], mix.inputs[2])
-        links.new(teximg.outputs[1], mix.inputs[0])
-        if(mat.name.startswith('glass') or mat.name.startswith('water')):
-            mix2 = nodes.new('ShaderNodeMixShader')
-            if(mat.name.startswith('glass')):
-                mix2.inputs[0].default_value = 0.5
+        # link nodes together
+#        test_group.links.new(node_add.inputs[0], node_greater.outputs[0])
+#        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
+
+        # link inputs
+        test_group.links.new(group_inputs.outputs['tex'], bricon.inputs[0])
+        test_group.links.new(group_inputs.outputs['brightness'], bricon.inputs[1])
+        test_group.links.new(group_inputs.outputs['contrast'], bricon.inputs[2])
+        
+        #link output
+        test_group.links.new(bricon.outputs[0], group_outputs.inputs['cortex'])
+        
+        for matslot in bpy.context.active_object.material_slots:
+            mat = matslot.material
+            image = mat.texture_slots[0].texture.image
+            mat.use_nodes = True
+            mat.node_tree.nodes.clear()
+            links = mat.node_tree.links
+            nodes = mat.node_tree.nodes
+            output = nodes.new('ShaderNodeOutputMaterial')
+            output.location = (0, 0)
+            mix = nodes.new('ShaderNodeMixShader')
+            mix.location = (-200, 0)
+            transparent = nodes.new('ShaderNodeBsdfTransparent')
+            transparent.inputs[0].default_value = (1,1,1,1)
+            transparent.location = (-400, 100)
+            if(mat.name in emissionNames):
+                mainNode = nodes.new('ShaderNodeEmission')
+                mainNode.inputs[1].default_value = 3.0
             else:
-                mix2.inputs[0].default_value = 0.3
-            mix2.location = (0, 0)
-            output.location = (200, 0)
-            glossy = nodes.new('ShaderNodeBsdfGlossy')
-            glossy.inputs[1].default_value = 0.0
-            glossy.location = (-200, -150)
-            links.new(mix.outputs[0], mix2.inputs[1])
-            links.new(glossy.outputs[0], mix2.inputs[2])
-            links.new(mix2.outputs[0], output.inputs[0])
-        else:
-            links.new(mix.outputs[0], output.inputs[0])
-#-------------------------------------------------------------
+                mainNode = nodes.new('ShaderNodeBsdfDiffuse')
+                mainNode.location = (-400, -50)
+            teximg = nodes.new('ShaderNodeTexImage')
+            teximg.location = (-1100, -50)
+            teximg.image = image
+            colcor = nodes.new(type="ShaderNodeGroup")
+            colcor.node_tree = (bpy.data.node_groups['testGroup7'])
+            colcor.location = (-800, -50)
+            links.new(transparent.outputs[0], mix.inputs[1])
+            links.new(teximg.outputs[0], colcor.inputs[0])
+            links.new(colcor.outputs[0], mainNode.inputs[0])
+            links.new(mainNode.outputs[0], mix.inputs[2])
+            links.new(teximg.outputs[1], mix.inputs[0])
+            if(mat.name.startswith('glass') or mat.name.startswith('water')):
+                mix2 = nodes.new('ShaderNodeMixShader')
+                if(mat.name.startswith('glass')):
+                    mix2.inputs[0].default_value = 0.5
+                else:
+                    mix2.inputs[0].default_value = 0.3
+                mix2.location = (0, 0)
+                output.location = (200, 0)
+                glossy = nodes.new('ShaderNodeBsdfGlossy')
+                glossy.inputs[1].default_value = 0.0
+                glossy.location = (-200, -150)
+                links.new(mix.outputs[0], mix2.inputs[1])
+                links.new(glossy.outputs[0], mix2.inputs[2])
+                links.new(mix2.outputs[0], output.inputs[0])
+            else:
+                links.new(mix.outputs[0], output.inputs[0])
+        return {'FINISHED'}
+    #-------------------------------------------------------------
 
 
 class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
@@ -1040,7 +1076,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
     bpy.utils.register_class(OBJECT_OT_Canon6D35)
     bpy.utils.register_class(ImportMultipleObjs)
-    bpy.utils.register_class(OBJECT_OT_bi2cycles_material)
+    bpy.utils.register_class(OBJECT_OT_material)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 #    
