@@ -90,7 +90,15 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
-        self.layout.operator("bi2cycles.material", icon="TEXTURE", text='Create cycles nodes')
+#        box = layout.box()
+#        box.
+        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
+        row = layout.row()
+        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
+
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
+        
+        
 #        row.label("Texture correction")
 #        row.prop(scene, "colcor_bricon") # Input button for bpy.types.Scene.colcor_bricon.
 
@@ -810,100 +818,139 @@ class OBJECT_OT_material(bpy.types.Operator):
     
         bpy.context.scene.render.engine = 'CYCLES'
 
-        emissionNames = [
-            'torch_flame',
-            'fire',
-            'lava',
-            'lava_flowing',
-            'glowstone',
-            'redstone_wire_on'
-        ]
-        # create a group
-        active_object_name = bpy.context.scene.objects.active.name
-        test_group = bpy.data.node_groups.new(active_object_name, 'ShaderNodeTree')
-        
-        # create group inputs
-        group_inputs = test_group.nodes.new('NodeGroupInput')
-        group_inputs.location = (-450,0)
-        test_group.inputs.new('NodeSocketColor','tex')
+        for obj in bpy.context.selected_objects:
 
-        # create group outputs
-        group_outputs = test_group.nodes.new('NodeGroupOutput')
-        group_outputs.location = (300,0)
-        test_group.outputs.new('NodeSocketColor','cortex')
+            emissionNames = [
+                'torch_flame',
+                'fire',
+                'lava',
+                'lava_flowing',
+                'glowstone',
+                'redstone_wire_on'
+            ]
+            # create a group
+            active_object_name = bpy.context.scene.objects.active.name
+            test_group = bpy.data.node_groups.new(active_object_name, 'ShaderNodeTree')
+            
+            # create group inputs
+            group_inputs = test_group.nodes.new('NodeGroupInput')
+            group_inputs.location = (-450,0)
+            test_group.inputs.new('NodeSocketColor','tex')
 
-        # create three math nodes in a group
+            # create group outputs
+            group_outputs = test_group.nodes.new('NodeGroupOutput')
+            group_outputs.location = (300,0)
+            test_group.outputs.new('NodeSocketColor','cortex')
 
-        bricon = test_group.nodes.new('ShaderNodeBrightContrast')
-        bricon.location = (-200, -100)
-        bricon.label = 'bricon'
-#        bricon.inputs[1].default_value = 0
-#        bricon.inputs[2].default_value = 0
+            # create three math nodes in a group
 
-        sathue = test_group.nodes.new('ShaderNodeHueSaturation')
-        sathue.location = (-100, -100)
-        sathue.label = 'sathue'
-#        sathue.inputs[0].default_value = 0
+            bricon = test_group.nodes.new('ShaderNodeBrightContrast')
+            bricon.location = (-200, -100)
+            bricon.label = 'bricon'
+    #        bricon.inputs[1].default_value = 0
+    #        bricon.inputs[2].default_value = 0
 
-        # link nodes together
-        test_group.links.new(sathue.inputs[4], bricon.outputs[0])
-#        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
+            sathue = test_group.nodes.new('ShaderNodeHueSaturation')
+            sathue.location = (-100, -100)
+            sathue.label = 'sathue'
+    #        sathue.inputs[0].default_value = 0
 
-        # link inputs
-        test_group.links.new(group_inputs.outputs['tex'], bricon.inputs[0])
-        
-        #link output
-        test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
-        
-        for matslot in bpy.context.active_object.material_slots:
-            mat = matslot.material
-            image = mat.texture_slots[0].texture.image
-            mat.use_nodes = True
-            mat.node_tree.nodes.clear()
-            links = mat.node_tree.links
-            nodes = mat.node_tree.nodes
-            output = nodes.new('ShaderNodeOutputMaterial')
-            output.location = (0, 0)
-            mix = nodes.new('ShaderNodeMixShader')
-            mix.location = (-200, 0)
-            transparent = nodes.new('ShaderNodeBsdfTransparent')
-            transparent.inputs[0].default_value = (1,1,1,1)
-            transparent.location = (-400, 100)
-            if(mat.name in emissionNames):
-                mainNode = nodes.new('ShaderNodeEmission')
-                mainNode.inputs[1].default_value = 3.0
-            else:
-                mainNode = nodes.new('ShaderNodeBsdfDiffuse')
-                mainNode.location = (-400, -50)
-            teximg = nodes.new('ShaderNodeTexImage')
-            teximg.location = (-1100, -50)
-            teximg.image = image
-            colcor = nodes.new(type="ShaderNodeGroup")
-            colcor.node_tree = (bpy.data.node_groups[active_object_name])
-            colcor.location = (-800, -50)
-            links.new(transparent.outputs[0], mix.inputs[1])
-            links.new(teximg.outputs[0], colcor.inputs[0])
-            links.new(colcor.outputs[0], mainNode.inputs[0])
-            links.new(mainNode.outputs[0], mix.inputs[2])
-            links.new(teximg.outputs[1], mix.inputs[0])
-            if(mat.name.startswith('glass') or mat.name.startswith('water')):
-                mix2 = nodes.new('ShaderNodeMixShader')
-                if(mat.name.startswith('glass')):
-                    mix2.inputs[0].default_value = 0.5
+            # link nodes together
+            test_group.links.new(sathue.inputs[4], bricon.outputs[0])
+    #        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
+
+            # link inputs
+            test_group.links.new(group_inputs.outputs['tex'], bricon.inputs[0])
+            
+            #link output
+            test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
+            
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                image = mat.texture_slots[0].texture.image
+                mat.use_nodes = True
+                mat.node_tree.nodes.clear()
+                links = mat.node_tree.links
+                nodes = mat.node_tree.nodes
+                output = nodes.new('ShaderNodeOutputMaterial')
+                output.location = (0, 0)
+                mix = nodes.new('ShaderNodeMixShader')
+                mix.location = (-200, 0)
+                transparent = nodes.new('ShaderNodeBsdfTransparent')
+                transparent.inputs[0].default_value = (1,1,1,1)
+                transparent.location = (-400, 100)
+                if(mat.name in emissionNames):
+                    mainNode = nodes.new('ShaderNodeEmission')
+                    mainNode.inputs[1].default_value = 3.0
                 else:
-                    mix2.inputs[0].default_value = 0.3
-                mix2.location = (0, 0)
-                output.location = (200, 0)
-                glossy = nodes.new('ShaderNodeBsdfGlossy')
-                glossy.inputs[1].default_value = 0.0
-                glossy.location = (-200, -150)
-                links.new(mix.outputs[0], mix2.inputs[1])
-                links.new(glossy.outputs[0], mix2.inputs[2])
-                links.new(mix2.outputs[0], output.inputs[0])
-            else:
-                links.new(mix.outputs[0], output.inputs[0])
+                    mainNode = nodes.new('ShaderNodeBsdfDiffuse')
+                    mainNode.location = (-400, -50)
+                teximg = nodes.new('ShaderNodeTexImage')
+                teximg.location = (-1100, -50)
+                teximg.image = image
+                colcor = nodes.new(type="ShaderNodeGroup")
+                colcor.node_tree = (bpy.data.node_groups[active_object_name])
+                colcor.location = (-800, -50)
+                links.new(transparent.outputs[0], mix.inputs[1])
+                links.new(teximg.outputs[0], colcor.inputs[0])
+                links.new(colcor.outputs[0], mainNode.inputs[0])
+                links.new(mainNode.outputs[0], mix.inputs[2])
+                links.new(teximg.outputs[1], mix.inputs[0])
+                if(mat.name.startswith('glass') or mat.name.startswith('water')):
+                    mix2 = nodes.new('ShaderNodeMixShader')
+                    if(mat.name.startswith('glass')):
+                        mix2.inputs[0].default_value = 0.5
+                    else:
+                        mix2.inputs[0].default_value = 0.3
+                    mix2.location = (0, 0)
+                    output.location = (200, 0)
+                    glossy = nodes.new('ShaderNodeBsdfGlossy')
+                    glossy.inputs[1].default_value = 0.0
+                    glossy.location = (-200, -150)
+                    links.new(mix.outputs[0], mix2.inputs[1])
+                    links.new(glossy.outputs[0], mix2.inputs[2])
+                    links.new(mix2.outputs[0], output.inputs[0])
+                else:
+                    links.new(mix.outputs[0], output.inputs[0])
         return {'FINISHED'}
     #-------------------------------------------------------------
+
+#_______________________________________________________________________________________________________________
+
+
+class OBJECT_OT_deactivatematerial(bpy.types.Operator):
+    """De-activate node  materials for selected object"""
+    bl_idname = "deactivatenode.material"
+    bl_label = "De-activate node materials for selected object"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+    
+        bpy.context.scene.render.engine = 'BLENDER_RENDER'
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                mat.use_nodes = False
+
+        return {'FINISHED'}
+#-------------------------------------------------------------
+
+class OBJECT_OT_activatematerial(bpy.types.Operator):
+    """Activate node materials for selected object"""
+    bl_idname = "activatenode.material"
+    bl_label = "Activate node materials for selected object"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+    
+        bpy.context.scene.render.engine = 'CYCLES'
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                mat.use_nodes = True
+
+        return {'FINISHED'}
+#-------------------------------------------------------------
 
 
 class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
