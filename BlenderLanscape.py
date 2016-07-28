@@ -834,7 +834,7 @@ class OBJECT_OT_material(bpy.types.Operator):
             
             # create group inputs
             group_inputs = test_group.nodes.new('NodeGroupInput')
-            group_inputs.location = (-450,0)
+            group_inputs.location = (-750,0)
             test_group.inputs.new('NodeSocketColor','tex')
 
             # create group outputs
@@ -845,22 +845,27 @@ class OBJECT_OT_material(bpy.types.Operator):
             # create three math nodes in a group
 
             bricon = test_group.nodes.new('ShaderNodeBrightContrast')
-            bricon.location = (-200, -100)
+            bricon.location = (-220, -100)
             bricon.label = 'bricon'
     #        bricon.inputs[1].default_value = 0
     #        bricon.inputs[2].default_value = 0
 
             sathue = test_group.nodes.new('ShaderNodeHueSaturation')
-            sathue.location = (-100, -100)
+            sathue.location = (0, -100)
             sathue.label = 'sathue'
     #        sathue.inputs[0].default_value = 0
+    
+            RGBcurve = test_group.nodes.new('ShaderNodeRGBCurve')
+            RGBcurve.location = (-500, -100)
+            RGBcurve.label = 'RGBcurve'
 
             # link nodes together
             test_group.links.new(sathue.inputs[4], bricon.outputs[0])
+            test_group.links.new(bricon.inputs[0], RGBcurve.outputs[0])
     #        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
 
             # link inputs
-            test_group.links.new(group_inputs.outputs['tex'], bricon.inputs[0])
+            test_group.links.new(group_inputs.outputs['tex'], RGBcurve.inputs[1])
             
             #link output
             test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
