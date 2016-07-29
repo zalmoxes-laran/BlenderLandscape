@@ -1,29 +1,57 @@
-import bpy
+import bpy, os
 
 
-basedir = os.path.dirname(bpy.data.filepath)
+bpy.context.scene.render.engine = 'CYCLES'
 
-if not basedir:
-    raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+for obj in bpy.context.selected_objects:
+    for matslot in obj.material_slots:
+        mat = matslot.material
+        o_image = mat.texture_slots[0].texture.image
+# da commentare
+        o_imagepath = mat.texture_slots[0].texture.image.filepath
+        o_imagedir = os.path.dirname(o_imagepath)
 
-selection = bpy.context.selected_objects
-bpy.ops.object.select_all(action='DESELECT')
-activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-fn = os.path.join(basedir, activename)
+#        basedir = os.path.dirname(bpy.data.filepath)
 
-tempimage = bpy.data.images.new(name=lod2name, width=2048, height=2048, alpha=False)
-tempimage.filepath_raw = "//"+lod2name+".png"
-tempimage.file_format = 'PNG'
+#        if not basedir:
+#            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
+#        activename = bpy.path.clean_name(timagepath)
+#        fn = os.path.join(basedir, activename)
+#        o_activename = bpy.path.clean_name(o_image)
+        nodes = mat.node_tree.nodes
+        node_tree = bpy.data.materials[mat.name].node_tree
+        t_image_name = "cc_"+o_image.name
+        t_image = bpy.data.images.new(name=t_image_name, width=2048, height=2048, alpha=False)
+        
+#        t_image.filepath_raw = '\\'+t_image_name+".png"
+# da commentare
+        fn = os.path.join(o_imagedir, t_image_name)
+        t_image.filepath_raw = fn+".png"
+        
+        t_image.file_format = 'PNG'
 
-bpy.context.scene.cycles.samples = 1
-bpy.context.scene.cycles.max_bounces = 4
-bpy.context.scene.cycles.bake_type = 'DIFFUSE'
-bpy.context.scene.use_pass_color = True
-bpy.context.scene.use_pass_indirect = False
-bpy.context.scene.use_pass_direct = False
-bpy.context.scene.use_selected_to_active = False
+        tteximg = nodes.new('ShaderNodeTexImage')
+        tteximg.location = (-1100, -400)
+        tteximg.image = t_image
+        
+        for currnode in nodes:
+            currnode.select = False
 
+#        node_tree.nodes.select_all(action='DESELECT')
+        tteximg.select = True
+        node_tree.nodes.active = tteximg
 
-bpy.ops.object.bake_image()
-tempimage.save()
+#active_object_name = bpy.context.scene.objects.active.name
+
+    bpy.context.scene.cycles.samples = 1
+    bpy.context.scene.cycles.max_bounces = 7
+    bpy.context.scene.cycles.bake_type = 'DIFFUSE'
+#    bpy.context.scene.use_pass_color = True
+#    bpy.context.scene.use_pass_indirect = False
+#    bpy.context.scene.use_pass_direct = False
+#    bpy.context.scene.use_selected_to_active = False
+    
+    bpy.ops.object.bake(type='DIFFUSE', use_clear=True, margin=16)
+    t_image.save()
+    mat.texture_slots[0].texture.image = t_image

@@ -90,15 +90,24 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
+# DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
+#        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
 #        box = layout.box()
-#        box.
-        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         row = layout.row()
-        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
+#        box.
 
-        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
-        
-        
+        row = layout.row()
+
+
+        row.label(text="Color correction", icon='TPAINT_HLT')
+        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create nodes')
+        self.layout.operator("apply.cc", icon="FILE_TICK", text='Apply')
+        self.layout.operator("remove.cc", icon="CANCEL", text='Remove')
+        row = layout.row()
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate nodes')
+        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate nodes')
+
+             
 #        row.label("Texture correction")
 #        row.prop(scene, "colcor_bricon") # Input button for bpy.types.Scene.colcor_bricon.
 
@@ -594,7 +603,7 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
 
         undistortedpath = bpy.context.scene.BL_undistorted_path
         if not undistortedpath:
-            raise Exception("Hey Buddy, you have to set the undistorted images path !")
+            raise Exception("Hey, you have to set the undistorted images path !")
         
         undistortedphoto = undistortedpath+obj_camera.name
         cleanpath = bpy.path.abspath(undistortedphoto)
@@ -1109,6 +1118,127 @@ class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
 
         return {'FINISHED'}
 
+#-------------------------------------------------------------
+
+class OBJECT_OT_purge(bpy.types.Operator):
+    """Purge resources BE CAREFULL !!"""
+    bl_idname = "purge.resources"
+    bl_label = "Purge resources BE CAREFULL !!"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+    
+        bpy.ops.outliner.orphans_purge()
+        bpy.ops.outliner.orphans_purge()
+        bpy.ops.outliner.orphans_purge()
+        bpy.ops.outliner.orphans_purge()
+        bpy.ops.outliner.orphans_purge()
+
+        return {'FINISHED'}
+
+
+#-------------------------------------------------------------
+
+
+class OBJECT_OT_applycc(bpy.types.Operator):
+    """Apply color correction to new texs"""
+    bl_idname = "apply.cc"
+    bl_label = "Apply color correction to new texs"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        
+        bpy.context.scene.render.engine = 'CYCLES'
+
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                o_image = mat.texture_slots[0].texture.image
+                # estrarre percorso immagine
+                o_imagepath = mat.texture_slots[0].texture.image.filepath
+                o_imagedir = os.path.dirname(o_imagepath)
+                # new image
+                nodes = mat.node_tree.nodes
+                node_tree = bpy.data.materials[mat.name].node_tree
+                t_image_name = "cc_"+o_image.name
+                t_image = bpy.data.images.new(name=t_image_name, width=2048, height=2048, alpha=False)
+                # set path to new image
+                fn = os.path.join(o_imagedir, t_image_name)
+                t_image.filepath_raw = fn+".png"                
+                t_image.file_format = 'PNG'
+
+                tteximg = nodes.new('ShaderNodeTexImage')
+                tteximg.location = (-1100, -400)
+                tteximg.image = t_image
+                
+                for currnode in nodes:
+                    currnode.select = False
+
+                # node_tree.nodes.select_all(action='DESELECT')
+                tteximg.select = True
+                node_tree.nodes.active = tteximg
+                mat.texture_slots[0].texture.image = t_image
+
+        #active_object_name = bpy.context.scene.objects.active.name
+
+#            bpy.context.scene.cycles.samples = 1
+#            bpy.context.scene.cycles.max_bounces = 7
+#            bpy.context.scene.cycles.bake_type = 'DIFFUSE'
+#            #    bpy.context.scene.use_pass_color = True
+#            #    bpy.context.scene.use_pass_indirect = False
+#            #    bpy.context.scene.use_pass_direct = False
+#            #    bpy.context.scene.use_selected_to_active = False
+                
+#            bpy.ops.object.bake(type='DIFFUSE', use_clear=True, margin=16)
+#            bpy.ops.image.save_dirty()
+
+#
+#            remove.cc()
+#            for matslot in obj.material_slots:
+#                mat = matslot.material
+#                t_image = mat.texture_slots[0].texture.image
+#                t_image.save()
+#                
+        return {'FINISHED'}
+
+
+#-------------------------------------------------------------
+
+
+class OBJECT_OT_removecc(bpy.types.Operator):
+    """Remove color correction nodes"""
+    bl_idname = "remove.cc"
+    bl_label = "Remove color correction nodes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'CYCLES'
+
+        for obj in bpy.context.selected_objects:
+        #    for matslot in obj.material_slots:
+        #        mat = matslot.material
+        #        nodes = mat.node_tree.nodes
+        #        cc_node = nodes.get(mat.name)
+        #        bpy.ops.node.delete_reconnect(cc_node)
+        #        
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                nodes = mat.node_tree.nodes
+                links = mat.node_tree.links
+                for mat_node in mat.node_tree.nodes:
+                    if mat_node.type == 'GROUP' and mat_node.node_tree.name == obj.name:
+        #                print ("nodegroup"+mat_node.name+" in "+mat.name)
+                        nodes.remove(mat_node)
+                for mat_node in mat.node_tree.nodes:
+                    if mat_node.type == 'TEX_IMAGE':
+                        imagenode = mat_node
+                    if mat_node.type == 'BSDF_DIFFUSE':
+                        diffusenode = mat_node
+                links.new(imagenode.outputs[0], diffusenode.inputs[0])
+
+        return {'FINISHED'}
+
 #_______________________________________________________________________________________________________________
 
 
@@ -1135,6 +1265,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_Canon6D35)
     bpy.utils.register_class(ImportMultipleObjs)
     bpy.utils.register_class(OBJECT_OT_material)
+    bpy.utils.register_class(OBJECT_OT_removecc)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 #    
@@ -1163,6 +1294,7 @@ def register():
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.utils.unregister_class(ImportMultipleObjs)
+    bpy.utils.unregister_class(OBJECT_OT_removecc)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
