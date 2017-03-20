@@ -1,8 +1,8 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.2),
-    "blender": (2, 7, 7),
+    "version": (1,2.4),
+    "blender": (2, 7, 8),
     "api": 48000,
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -70,6 +70,8 @@ class ToolsPanel(bpy.types.Panel):
         self.layout.operator("obj.exportbatch", icon="OBJECT_DATA", text='Export selected in several obj files')
         row = layout.row()
         self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx files')
+        row = layout.row()
+        self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
         row = layout.row()
         self.layout.operator("export.camdata", icon="OBJECT_DATA", text='Export cameras')
 
@@ -287,6 +289,8 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
             ma.use_transparent_shadows = True
             ma.specular_intensity = 0.0
             ma.ambient = 0.0
+            for img in bpy.data.images:
+                img.use_alpha = False
         return {'FINISHED'}
 
 
@@ -687,7 +691,33 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
     
 
 #_______________________________________________________________________________________________________________
+class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
+    bl_idname = "osgt.exportbatch"
+    bl_label = "osgt export batch"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
 
+        basedir = os.path.dirname(bpy.data.filepath)
+        if not basedir:
+            raise Exception("Blend file is not saved")
+        
+        bpy.ops.osg.export(SELECTED=True)
+        
+#        selection = bpy.context.selected_objects
+#        bpy.ops.object.select_all(action='DESELECT')
+#        
+#        for obj in selection:
+#            obj.select = True
+#            name = bpy.path.clean_name(obj.name)
+#            fn = os.path.join(basedir, name)
+#            bpy.ops.osg.export(filepath = fn + ".osgt", SELECTED=True)
+#            bpy.ops.osg.export(SELECTED=True)
+#            obj.select = False
+        return {'FINISHED'}
+    
+
+#_______________________________________________________________________________________________________________
 
 def assignmatslots(ob, matlist):
     #given an object and a list of material names
