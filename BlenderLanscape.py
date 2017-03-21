@@ -282,15 +282,20 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
-        for ma in bpy.data.materials:
-            ma.alpha = 1.0
-            ma.use_transparency = False
-            ma.transparency_method = 'Z_TRANSPARENCY'
-            ma.use_transparent_shadows = True
-            ma.specular_intensity = 0.0
-            ma.ambient = 0.0
-            for img in bpy.data.images:
-                img.use_alpha = False
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:    
+            obj.select = True
+            for i in range(0,len(obj.material_slots)):
+#                bpy.ops.object.material_slot_remove()
+                obj.active_material_index = i
+                ma = obj.active_material
+                ma.specular_intensity = 0
+                ma.alpha = 1.0
+                ma.use_transparency = False
+                ma.transparency_method = 'Z_TRANSPARENCY'
+                ma.use_transparent_shadows = True
+                ma.ambient = 0.0
         return {'FINISHED'}
 
 
