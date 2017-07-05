@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.4),
+    "version": (1,2.5),
     "blender": (2, 7, 8),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -326,6 +326,8 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
                 ma.transparency_method = 'Z_TRANSPARENCY'
                 ma.use_transparent_shadows = True
                 ma.ambient = 0.0
+                image = ma.texture_slots[0].texture.image
+                image.use_alpha = False        
         return {'FINISHED'}
 
 
