@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.5),
+    "version": (1,2.6),
     "blender": (2, 7, 8),
     "api": 48000,
     "location": "Tool Shelf panel",
@@ -109,6 +109,9 @@ class ToolsPanel3(bpy.types.Panel):
         row.label(text="Color correction", icon='TPAINT_HLT')
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create nodes')
         self.layout.operator("apply.cc", icon="FILE_TICK", text='Apply')
+        row = layout.row()
+        row.label(text="NOW Bake Diffuse, color only")        
+        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
         self.layout.operator("remove.cc", icon="CANCEL", text='Remove')
         row = layout.row()
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate nodes')
@@ -956,44 +959,45 @@ class OBJECT_OT_material(bpy.types.Operator):
                 nodes = mat.node_tree.nodes
                 output = nodes.new('ShaderNodeOutputMaterial')
                 output.location = (0, 0)
-                mix = nodes.new('ShaderNodeMixShader')
-                mix.location = (-200, 0)
-                transparent = nodes.new('ShaderNodeBsdfTransparent')
-                transparent.inputs[0].default_value = (1,1,1,1)
-                transparent.location = (-400, 100)
-                if(mat.name in emissionNames):
-                    mainNode = nodes.new('ShaderNodeEmission')
-                    mainNode.inputs[1].default_value = 3.0
-                else:
-                    mainNode = nodes.new('ShaderNodeBsdfDiffuse')
-                    mainNode.location = (-400, -50)
+#                mix = nodes.new('ShaderNodeMixShader')
+#                mix.location = (-200, 0)
+#                transparent = nodes.new('ShaderNodeBsdfTransparent')
+#                transparent.inputs[0].default_value = (1,1,1,1)
+#                transparent.location = (-400, 100)
+#                if(mat.name in emissionNames):
+#                    mainNode = nodes.new('ShaderNodeEmission')
+#                    mainNode.inputs[1].default_value = 3.0
+#                else:
+                mainNode = nodes.new('ShaderNodeBsdfDiffuse')
+                mainNode.location = (-400, -50)
                 teximg = nodes.new('ShaderNodeTexImage')
                 teximg.location = (-1100, -50)
                 teximg.image = image
                 colcor = nodes.new(type="ShaderNodeGroup")
                 colcor.node_tree = (bpy.data.node_groups[active_object_name])
                 colcor.location = (-800, -50)
-                links.new(transparent.outputs[0], mix.inputs[1])
+#                links.new(transparent.outputs[0], mix.inputs[1])
                 links.new(teximg.outputs[0], colcor.inputs[0])
                 links.new(colcor.outputs[0], mainNode.inputs[0])
-                links.new(mainNode.outputs[0], mix.inputs[2])
-                links.new(teximg.outputs[1], mix.inputs[0])
-                if(mat.name.startswith('glass') or mat.name.startswith('water')):
-                    mix2 = nodes.new('ShaderNodeMixShader')
-                    if(mat.name.startswith('glass')):
-                        mix2.inputs[0].default_value = 0.5
-                    else:
-                        mix2.inputs[0].default_value = 0.3
-                    mix2.location = (0, 0)
-                    output.location = (200, 0)
-                    glossy = nodes.new('ShaderNodeBsdfGlossy')
-                    glossy.inputs[1].default_value = 0.0
-                    glossy.location = (-200, -150)
-                    links.new(mix.outputs[0], mix2.inputs[1])
-                    links.new(glossy.outputs[0], mix2.inputs[2])
-                    links.new(mix2.outputs[0], output.inputs[0])
-                else:
-                    links.new(mix.outputs[0], output.inputs[0])
+                links.new(mainNode.outputs[0], output.inputs[0])
+#                links.new(mainNode.outputs[0], mix.inputs[2])
+#                links.new(teximg.outputs[1], mix.inputs[0])
+#                if(mat.name.startswith('glass') or mat.name.startswith('water')):
+#                    mix2 = nodes.new('ShaderNodeMixShader')
+#                    if(mat.name.startswith('glass')):
+#                        mix2.inputs[0].default_value = 0.5
+#                    else:
+#                        mix2.inputs[0].default_value = 0.3
+#                    mix2.location = (0, 0)
+#                    output.location = (200, 0)
+#                    glossy = nodes.new('ShaderNodeBsdfGlossy')
+#                    glossy.inputs[1].default_value = 0.0
+#                    glossy.location = (-200, -150)
+#                    links.new(mix.outputs[0], mix2.inputs[1])
+#                    links.new(glossy.outputs[0], mix2.inputs[2])
+#                    links.new(mix2.outputs[0], output.inputs[0])
+#                else:
+#                    links.new(mix.outputs[0], output.inputs[0])
         return {'FINISHED'}
     #-------------------------------------------------------------
 
