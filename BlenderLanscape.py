@@ -103,19 +103,40 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
 #        box.
 
+class ToolsPanel9(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "TOOLS"
+    bl_context = "objectmode"
+    bl_category = "BL"
+    bl_label = "Color Correction tool (cycles)"
+#    bl_options = {'REGISTER', 'UNDO'}
+     
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+        scene = context.scene
         row = layout.row()
 
+# DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
+#        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
+#        box = layout.box()
+#        row = layout.row()
+#        box.
 
-        row.label(text="Color correction", icon='TPAINT_HLT')
-        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create nodes')
-        self.layout.operator("apply.cc", icon="FILE_TICK", text='Apply')
+#        row = layout.row()
+
+        row.label(text="Step by step procedure (selected objects):")
+   
+        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create correction nodes')
+        self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
         row = layout.row()
-        row.label(text="NOW Bake Diffuse, color only")        
-        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
-        self.layout.operator("remove.cc", icon="CANCEL", text='Remove')
+        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')   
+        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
+        self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
         row = layout.row()
-        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate nodes')
-        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate nodes')
+        row.label(text="Switch engine")   
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')    
+        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
 
              
 #        row.label("Texture correction")
@@ -900,14 +921,6 @@ class OBJECT_OT_material(bpy.types.Operator):
 
         for obj in bpy.context.selected_objects:
 
-            emissionNames = [
-                'torch_flame',
-                'fire',
-                'lava',
-                'lava_flowing',
-                'glowstone',
-                'redstone_wire_on'
-            ]
             # create a group
             active_object_name = bpy.context.scene.objects.active.name
             test_group = bpy.data.node_groups.new(active_object_name, 'ShaderNodeTree')
@@ -923,17 +936,13 @@ class OBJECT_OT_material(bpy.types.Operator):
             test_group.outputs.new('NodeSocketColor','cortex')
 
             # create three math nodes in a group
-
             bricon = test_group.nodes.new('ShaderNodeBrightContrast')
             bricon.location = (-220, -100)
             bricon.label = 'bricon'
-    #        bricon.inputs[1].default_value = 0
-    #        bricon.inputs[2].default_value = 0
 
             sathue = test_group.nodes.new('ShaderNodeHueSaturation')
             sathue.location = (0, -100)
             sathue.label = 'sathue'
-    #        sathue.inputs[0].default_value = 0
     
             RGBcurve = test_group.nodes.new('ShaderNodeRGBCurve')
             RGBcurve.location = (-500, -100)
@@ -942,7 +951,6 @@ class OBJECT_OT_material(bpy.types.Operator):
             # link nodes together
             test_group.links.new(sathue.inputs[4], bricon.outputs[0])
             test_group.links.new(bricon.inputs[0], RGBcurve.outputs[0])
-    #        test_group.links.new(node_add.inputs[1], node_less.outputs[0])
 
             # link inputs
             test_group.links.new(group_inputs.outputs['tex'], RGBcurve.inputs[1])
@@ -959,15 +967,6 @@ class OBJECT_OT_material(bpy.types.Operator):
                 nodes = mat.node_tree.nodes
                 output = nodes.new('ShaderNodeOutputMaterial')
                 output.location = (0, 0)
-#                mix = nodes.new('ShaderNodeMixShader')
-#                mix.location = (-200, 0)
-#                transparent = nodes.new('ShaderNodeBsdfTransparent')
-#                transparent.inputs[0].default_value = (1,1,1,1)
-#                transparent.location = (-400, 100)
-#                if(mat.name in emissionNames):
-#                    mainNode = nodes.new('ShaderNodeEmission')
-#                    mainNode.inputs[1].default_value = 3.0
-#                else:
                 mainNode = nodes.new('ShaderNodeBsdfDiffuse')
                 mainNode.location = (-400, -50)
                 teximg = nodes.new('ShaderNodeTexImage')
@@ -976,38 +975,17 @@ class OBJECT_OT_material(bpy.types.Operator):
                 colcor = nodes.new(type="ShaderNodeGroup")
                 colcor.node_tree = (bpy.data.node_groups[active_object_name])
                 colcor.location = (-800, -50)
-#                links.new(transparent.outputs[0], mix.inputs[1])
                 links.new(teximg.outputs[0], colcor.inputs[0])
                 links.new(colcor.outputs[0], mainNode.inputs[0])
                 links.new(mainNode.outputs[0], output.inputs[0])
-#                links.new(mainNode.outputs[0], mix.inputs[2])
-#                links.new(teximg.outputs[1], mix.inputs[0])
-#                if(mat.name.startswith('glass') or mat.name.startswith('water')):
-#                    mix2 = nodes.new('ShaderNodeMixShader')
-#                    if(mat.name.startswith('glass')):
-#                        mix2.inputs[0].default_value = 0.5
-#                    else:
-#                        mix2.inputs[0].default_value = 0.3
-#                    mix2.location = (0, 0)
-#                    output.location = (200, 0)
-#                    glossy = nodes.new('ShaderNodeBsdfGlossy')
-#                    glossy.inputs[1].default_value = 0.0
-#                    glossy.location = (-200, -150)
-#                    links.new(mix.outputs[0], mix2.inputs[1])
-#                    links.new(glossy.outputs[0], mix2.inputs[2])
-#                    links.new(mix2.outputs[0], output.inputs[0])
-#                else:
-#                    links.new(mix.outputs[0], output.inputs[0])
         return {'FINISHED'}
-    #-------------------------------------------------------------
 
-#_______________________________________________________________________________________________________________
-
+#________________________________________________________
 
 class OBJECT_OT_deactivatematerial(bpy.types.Operator):
     """De-activate node  materials for selected object"""
     bl_idname = "deactivatenode.material"
-    bl_label = "De-activate node materials for selected object"
+    bl_label = "De-activate cycles node materials for selected object and switch to BI"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -1024,7 +1002,7 @@ class OBJECT_OT_deactivatematerial(bpy.types.Operator):
 class OBJECT_OT_activatematerial(bpy.types.Operator):
     """Activate node materials for selected object"""
     bl_idname = "activatenode.material"
-    bl_label = "Activate node materials for selected object"
+    bl_label = "Activate cycles node materials for selected object and switch to cycles"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
