@@ -69,7 +69,7 @@ class ToolsPanel(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("obj.exportbatch", icon="OBJECT_DATA", text='Export selected in several obj files')
         row = layout.row()
-        self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx files')
+        self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx for UE4')
         row = layout.row()
         self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
         row = layout.row()
@@ -726,10 +726,9 @@ class OBJECT_OT_objexportbatch(bpy.types.Operator):
     
 #_______________________________________________________________________________________________________________
 
-
 class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
     bl_idname = "fbx.exportbatch"
-    bl_label = "Fbx export batch"
+    bl_label = "Fbx export batch UE4"
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
@@ -745,11 +744,9 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
             obj.select = True
             name = bpy.path.clean_name(obj.name)
             fn = os.path.join(basedir, name)
-            bpy.ops.export_scene.fbx(filepath = fn + ".fbx", filter_glob="*.fbx", version='BIN7400', use_selection=True, global_scale=1.0, axis_forward='-Z', axis_up='Y', bake_space_transform=False, object_types={'MESH'}, use_mesh_modifiers=False, mesh_smooth_type='FACE', use_mesh_edges=False, use_tspace=False, use_armature_deform_only=False, bake_anim=False, bake_anim_use_nla_strips=False, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=False, use_anim_action_all=False, use_default_take=False, use_anim_optimize=False, anim_optimize_precision=6.0, path_mode='COPY', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
+            bpy.ops.export_scene.fbx(filepath = fn + ".fbx", filter_glob="*.fbx", version='BIN7400', use_selection=True, global_scale=1.0, axis_forward='-Z', axis_up='Y', bake_space_transform=False, object_types={'MESH'}, use_mesh_modifiers=False, mesh_smooth_type='FACE', use_mesh_edges=False, use_tspace=False, use_armature_deform_only=False, bake_anim=False, bake_anim_use_nla_strips=False, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=False, use_anim_action_all=False, use_default_take=False, use_anim_optimize=False, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
             obj.select = False
         return {'FINISHED'}
-    
-
 #_______________________________________________________________________________________________________________
 class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
     bl_idname = "osgt.exportbatch"
@@ -1309,7 +1306,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_LOD2)
 #    bpy.utils.register_class(OBJECT_OT_AutomatorDP2)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
-    bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
+    bpy.utils.register_class(OBJECT_OT_fbxexportbatch)  
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
     bpy.utils.register_class(OBJECT_OT_Canon6D35)
     bpy.utils.register_class(ImportMultipleObjs)
