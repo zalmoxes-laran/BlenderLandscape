@@ -39,10 +39,10 @@ class EMToolsPanel(bpy.types.Panel):
         row.label(text="EM file")
         row = layout.row()
         row.prop(context.scene, 'EM_file', toggle = True)
+#        row = layout.row()
+#        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
         row = layout.row()
-        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
-        row = layout.row()
-        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
+        self.layout.operator("import.em_graphml", icon="STICKY_UVS_DISABLE", text='Read EM file')
 
 #### da qui si definiscono gli operatori
 
@@ -52,7 +52,7 @@ class EM_import_GraphML(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
-        graphml_file = bpy.types.Scene.EM_file
+        graphml_file = bpy.data.scenes['Scene'].EM_file
         tree = etree.parse(graphml_file)
         test = tree.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel')
         for n in test:
@@ -90,7 +90,7 @@ def register():
       name = "EM GraphML file",
       default = "",
       description = "Define the path to the EM GraphML file",
-      subtype = 'DIR_PATH'
+      subtype = 'FILE_PATH'
       )
 
 def unregister():
