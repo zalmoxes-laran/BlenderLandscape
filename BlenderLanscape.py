@@ -1,9 +1,8 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.6),
-    "blender": (2, 7, 8),
-    "api": 48000,
+    "version": (1,2.7),
+    "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
     "warning": "",
@@ -179,7 +178,27 @@ class ToolsPanel5(bpy.types.Panel):
         self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
         self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
- 
+
+class ToolsPanel100(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "TOOLS"
+#    bl_context = "objectmode"
+    bl_category = "BL"
+    bl_label = "Spherical Photogrammetry tool"
+#    bpy.types.Scene.scn_property = bpy.props.StringProperty(name = "UndistortedPath")
+     
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+        row = layout.row()
+        row.label(text="Folder with the oriented 360 collection")
+        row = layout.row()
+        row.prop(context.scene, 'BL_oriented360_path', toggle = True)
+        row = layout.row()
+        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
+        row = layout.row()
+        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
+
 class ToolsPanel2(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -1296,6 +1315,7 @@ def register():
     bpy.utils.register_class(ToolsPanel)
     bpy.utils.register_class(ToolsPanel3)
     bpy.utils.register_class(ToolsPanel2)
+    bpy.utils.register_class(ToolsPanel100) 
     bpy.utils.register_class(OBJECT_OT_ExportButton)
     bpy.utils.register_class(OBJECT_OT_ExportButtonName)
     bpy.utils.register_class(OBJECT_OT_ExportCamButton)
@@ -1333,6 +1353,13 @@ def register():
       name = "Undistorted Path",
       default = "",
       description = "Define the root path of the undistorted images",
+      subtype = 'DIR_PATH'
+      )
+      
+    bpy.types.Scene.BL_oriented360_path = StringProperty(
+      name = "Oriented 360 Path",
+      default = "",
+      description = "Define the root path of the oriented 360 collection",
       subtype = 'DIR_PATH'
       )
 #
