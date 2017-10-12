@@ -64,17 +64,10 @@ class EM_import_GraphML(bpy.types.Operator):
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-        fn = os.path.join(basedir, activename)
-        file = open(fn + ".txt", 'w')
+#        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+#        fn = os.path.join(basedir, activename)
+#        file = open(fn + ".txt", 'w')
         
-        # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
-            file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
-        file.close()
         return {'FINISHED'}
 
 
