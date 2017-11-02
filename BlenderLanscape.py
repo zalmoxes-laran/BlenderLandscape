@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.7),
+    "version": (1,2.8),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -594,7 +594,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
             obj_exists = False
             for obj in cam_ob.children:
                 if obj.name.startswith("objplane_"):
-                    obj.visible = 1
+                    obj.hide = False
                     obj_exists = True
                     break
                 else:
