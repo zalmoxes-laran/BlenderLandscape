@@ -152,28 +152,35 @@ class ToolsPanel5(bpy.types.Panel):
      
     def draw(self, context):
         layout = self.layout
+        scene = context.scene
         obj = context.object 
         cam_ob = bpy.context.scene.camera
         cam_cam = bpy.context.scene.camera.data
+        obj_selected = scene.objects.active
+        
         row = layout.row()
-        row.label(text="Set up cams and scene", icon='RADIO')
+        row.label(text="Set up scene", icon='RADIO')
         row = layout.row()
         self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
-        row = layout.row()
         self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
-        self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Set as Canon6D 35mm')
-        self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Set as Canon6D 14mm')
         row = layout.row()
-        self.layout.operator("better.cameras", icon="RENDER_REGION", text='Better Cams')
-        self.layout.operator("nobetter.cameras", icon="RENDER_REGION", text='Disable Better Cams')
+        row.label(text="Set selected cams as:", icon='RENDER_STILL')        
+        self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
+        self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
+        self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
+        
+        row = layout.row()
+        row.label(text="Visual mode for selected cams:", icon='NODE_SEL')  
+        self.layout.operator("better.cameras", icon="NODE_SEL", text='Better Cams')
+        self.layout.operator("nobetter.cameras", icon="NODE_SEL", text='Disable Better Cams')
+        row = layout.row()
+        row = layout.row()
+        row.label(text="Painting Toolbox", icon='TPAINT_HLT')
         row = layout.row()
         row.label(text="Folder with undistorted images:")
         row = layout.row()
         row.prop(context.scene, 'BL_undistorted_path', toggle = True)
-        row = layout.row()
-        row = layout.row()
-        row.label(text="Painting Toolbox", icon='TPAINT_HLT')
         row = layout.row()
         row.label(text="Active Cam: " + cam_ob.name)
 
@@ -182,8 +189,9 @@ class ToolsPanel5(bpy.types.Panel):
 
         row = layout.row()
         row.prop(cam_cam, "lens")
-
-        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
+        row = layout.row()
+        row.label(text="Active object: " + obj.name)
+        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
         self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
 
@@ -430,6 +438,22 @@ class OBJECT_OT_Canon6D35(bpy.types.Operator):
             obj.data.sensor_height = 23.9
         return {'FINISHED'}
 
+class OBJECT_OT_Canon6D24(bpy.types.Operator):
+    bl_idname = "canon6d24mm.camera"
+    bl_label = "Set as Canon 6D 14mm"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select = True
+            obj.data.lens = 24
+            obj.data.sensor_fit = 'HORIZONTAL'
+            obj.data.sensor_width = 35.8
+            obj.data.sensor_height = 23.9
+        return {'FINISHED'}
+
 class OBJECT_OT_Canon6D14(bpy.types.Operator):
     bl_idname = "canon6d14mm.camera"
     bl_label = "Set as Canon 6D 14mm"
@@ -582,12 +606,10 @@ class CreateCameraImagePlane(bpy.types.Operator):
             for obj in cam_ob.children:
                 if obj.name.startswith("objplane_"):
                     obj.hide = False
-                    bpy.ops.object.select_all(action='DESELECT')
-                    obj.select = True
-                    bpy.context.scene.objects.active = obj
                     obj_exists = True
-                    return{'FINISHED'}
-            if obj_exists == False:
+                    obj.select = True
+                    return {'FINISHED'}
+            if obj_exists is False:
                 camera = bpy.context.scene.camera
                 return self.createImagePlaneForCamera(camera)
 
@@ -708,18 +730,18 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
         scene = context.scene
         undistortedpath = bpy.context.scene.BL_undistorted_path
         cam_ob = bpy.context.scene.camera        
+            
         if not undistortedpath:
             raise Exception("Set the Undistort path before to activate this command")
         else:
             for obj in cam_ob.children:
                 if obj.name.startswith("objplane_"):
-                    obj.hide = True
-#                    return{'FINISHED'}
+                    obj.hide = True        
             bpy.ops.paint.texture_paint_toggle()
             bpy.context.space_data.show_only_render = True
             bpy.ops.image.project_edit()
             obj_camera = bpy.context.scene.camera
-    
+        
             undistortedphoto = undistortedpath+obj_camera.name
             cleanpath = bpy.path.abspath(undistortedphoto)
             bpy.ops.image.external_edit(filepath=cleanpath)
@@ -737,7 +759,6 @@ class OBJECT_OT_applypaintcam(bpy.types.Operator):
     def execute(self, context):
         bpy.ops.paint.texture_paint_toggle()
         bpy.ops.image.project_apply()  
-        bpy.context.space_data.show_only_render = False
         bpy.ops.paint.texture_paint_toggle()
         return {'FINISHED'}
 
