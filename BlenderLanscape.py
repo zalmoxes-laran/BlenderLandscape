@@ -154,8 +154,7 @@ class ToolsPanel5(bpy.types.Panel):
         layout = self.layout
         obj = context.object 
         cam_ob = bpy.context.scene.camera
-#        cam_lens = bpy.data.cameras[cam_ob.name].lens
-#        cam_lens = bpy.data.cameras[cam_ob.name].lens
+        cam_cam = bpy.context.scene.camera.data
         
 #if cam_ob is None:
 #    print("no scene camera")
@@ -167,8 +166,7 @@ class ToolsPanel5(bpy.types.Panel):
 #ob = bpy.context.object
 #if ob is not None and ob.type == 'CAMERA':
 #    print("Active camera object")
-        
-        
+
         row = layout.row()
         row.label(text="Set up cams and scene", icon='RADIO')
         row = layout.row()
@@ -184,16 +182,19 @@ class ToolsPanel5(bpy.types.Panel):
         row = layout.row()
         row.label(text="Folder with undistorted images:")
         row = layout.row()
-        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
+#        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
+        row.prop(context.scene, 'BL_undistorted_path')
         row = layout.row()
         row = layout.row()
         row.label(text="Painting Toolbox", icon='TPAINT_HLT')
         row = layout.row()
         row.label(text="Active Cam: " + cam_ob.name)
-        row = layout.row()
-#        row.label(text="Focal: " + cam_lens)
+
         self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
         row = layout.row()
+
+        row = layout.row()
+        row.prop(cam_cam, "lens")
 
         self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
         self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
@@ -491,8 +492,6 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
     
 #_______________________________________________________________________________________________________________
 
-
-
 class CreateCameraImagePlane(bpy.types.Operator):
     """Create image plane for camera"""
     bl_idname= "object.createcameraimageplane"
@@ -584,8 +583,25 @@ class CreateCameraImagePlane(bpy.types.Operator):
         return {'FINISHED'}
     
     def execute(self, context):
-        camera = bpy.context.active_object #bpy.data.objects['Camera']
-        return self.createImagePlaneForCamera(camera)
+#        camera = bpy.context.active_object #bpy.data.objects['Camera']
+        scene = context.scene
+        undistortedpath = bpy.context.scene.BL_undistorted_path
+        cam_ob = bpy.context.scene.camera        
+            
+        if not undistortedpath:
+            raise Exception("Set the Undistort path before to activate this command")
+        else:
+            obj_exists = False
+            for obj in cam_ob.children:
+                if obj.name.startswith("objplane_"):
+                    obj.visible = 1
+                    obj_exists = True
+                    break
+                else:
+                    return
+            if obj_exists = False
+                camera = bpy.context.scene.camera
+                return self.createImagePlaneForCamera(camera)
 
 #_______________________________________________________________________________________________________________
 
