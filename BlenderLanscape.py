@@ -152,7 +152,23 @@ class ToolsPanel5(bpy.types.Panel):
      
     def draw(self, context):
         layout = self.layout
-        obj = context.object
+        obj = context.object 
+        cam_ob = bpy.context.scene.camera
+#        cam_lens = bpy.data.cameras[cam_ob.name].lens
+#        cam_lens = bpy.data.cameras[cam_ob.name].lens
+        
+#if cam_ob is None:
+#    print("no scene camera")
+#elif cam_ob.type == 'CAMERA':
+#    print("regular scene cam")
+#else:
+#    print("%s object as camera" % cam_ob.type)
+
+#ob = bpy.context.object
+#if ob is not None and ob.type == 'CAMERA':
+#    print("Active camera object")
+        
+        
         row = layout.row()
         row.label(text="Set up cams and scene", icon='RADIO')
         row = layout.row()
@@ -172,6 +188,10 @@ class ToolsPanel5(bpy.types.Panel):
         row = layout.row()
         row = layout.row()
         row.label(text="Painting Toolbox", icon='TPAINT_HLT')
+        row = layout.row()
+        row.label(text="Active Cam: " + cam_ob.name)
+        row = layout.row()
+#        row.label(text="Focal: " + cam_lens)
         self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
         row = layout.row()
 
