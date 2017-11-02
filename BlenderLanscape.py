@@ -155,18 +155,6 @@ class ToolsPanel5(bpy.types.Panel):
         obj = context.object 
         cam_ob = bpy.context.scene.camera
         cam_cam = bpy.context.scene.camera.data
-        
-#if cam_ob is None:
-#    print("no scene camera")
-#elif cam_ob.type == 'CAMERA':
-#    print("regular scene cam")
-#else:
-#    print("%s object as camera" % cam_ob.type)
-
-#ob = bpy.context.object
-#if ob is not None and ob.type == 'CAMERA':
-#    print("Active camera object")
-
         row = layout.row()
         row.label(text="Set up cams and scene", icon='RADIO')
         row = layout.row()
@@ -182,8 +170,7 @@ class ToolsPanel5(bpy.types.Panel):
         row = layout.row()
         row.label(text="Folder with undistorted images:")
         row = layout.row()
-#        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
-        row.prop(context.scene, 'BL_undistorted_path')
+        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
         row = layout.row()
         row = layout.row()
         row.label(text="Painting Toolbox", icon='TPAINT_HLT')
@@ -595,10 +582,11 @@ class CreateCameraImagePlane(bpy.types.Operator):
             for obj in cam_ob.children:
                 if obj.name.startswith("objplane_"):
                     obj.hide = False
+                    bpy.ops.object.select_all(action='DESELECT')
+                    obj.select = True
+                    bpy.context.scene.objects.active = obj
                     obj_exists = True
-                    break
-                else:
-                    return
+                    return{'FINISHED'}
             if obj_exists == False:
                 camera = bpy.context.scene.camera
                 return self.createImagePlaneForCamera(camera)
@@ -716,19 +704,29 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
-        bpy.ops.paint.texture_paint_toggle()
-        bpy.context.space_data.show_only_render = True
-        bpy.ops.image.project_edit()
-        obj_camera = bpy.context.scene.camera
-
-        undistortedpath = bpy.context.scene.BL_undistorted_path
-        if not undistortedpath:
-            raise Exception("Hey, you have to set the undistorted images path !")
         
-        undistortedphoto = undistortedpath+obj_camera.name
-        cleanpath = bpy.path.abspath(undistortedphoto)
-        bpy.ops.image.external_edit(filepath=cleanpath)
+        scene = context.scene
+        undistortedpath = bpy.context.scene.BL_undistorted_path
+        cam_ob = bpy.context.scene.camera        
+        if not undistortedpath:
+            raise Exception("Set the Undistort path before to activate this command")
+        else:
+            for obj in cam_ob.children:
+                if obj.name.startswith("objplane_"):
+                    obj.hide = True
+#                    return{'FINISHED'}
+            bpy.ops.paint.texture_paint_toggle()
+            bpy.context.space_data.show_only_render = True
+            bpy.ops.image.project_edit()
+            obj_camera = bpy.context.scene.camera
+    
+            undistortedphoto = undistortedpath+obj_camera.name
+            cleanpath = bpy.path.abspath(undistortedphoto)
+            bpy.ops.image.external_edit(filepath=cleanpath)
 
+            bpy.context.space_data.show_only_render = False
+            bpy.ops.paint.texture_paint_toggle()
+            
         return {'FINISHED'}
 
 class OBJECT_OT_applypaintcam(bpy.types.Operator):
@@ -740,6 +738,7 @@ class OBJECT_OT_applypaintcam(bpy.types.Operator):
         bpy.ops.paint.texture_paint_toggle()
         bpy.ops.image.project_apply()  
         bpy.context.space_data.show_only_render = False
+        bpy.ops.paint.texture_paint_toggle()
         return {'FINISHED'}
 
 class OBJECT_OT_savepaintcam(bpy.types.Operator):
