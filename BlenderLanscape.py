@@ -599,7 +599,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
                     break
                 else:
                     return
-            if obj_exists = False
+            if obj_exists == False:
                 camera = bpy.context.scene.camera
                 return self.createImagePlaneForCamera(camera)
 
