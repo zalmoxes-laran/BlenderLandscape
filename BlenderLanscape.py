@@ -596,6 +596,8 @@ class CreateCameraImagePlane(bpy.types.Operator):
                 if obj.name.startswith("objplane_"):
                     obj.hide = False
                     obj_exists = True
+                    bpy.ops.object.select_all(action='DESELECT')
+                    scene.objects.active = obj
                     obj.select = True
                     return {'FINISHED'}
             if obj_exists is False:
