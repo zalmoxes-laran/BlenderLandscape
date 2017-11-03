@@ -194,6 +194,8 @@ class ToolsPanel5(bpy.types.Panel):
         self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
         self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
+        row = layout.row()
+        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
 
 class ToolsPanel100(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -1276,12 +1278,14 @@ class OBJECT_OT_applycc(bpy.types.Operator):
                 mat = matslot.material
                 o_image = mat.texture_slots[0].texture.image
                 # estrarre percorso immagine
-                o_imagepath = mat.texture_slots[0].texture.image.filepath
-                o_imagedir = os.path.dirname(o_imagepath)
+				o_imagepath = mat.texture_slots[0].texture.image.filepath
+				o_imagepath_abs = bpy.path.abspath(o_imagepath)
+				o_imagedir, o_filename = os.path.split(o_imagepath_abs)
+#				o_imagedir_rel = bpy.path.relpath(o_imagedir)
                 # new image
                 nodes = mat.node_tree.nodes
                 node_tree = bpy.data.materials[mat.name].node_tree
-                t_image_name = "cc_"+o_image.name
+                t_image_name = "cc_"+o_filename
                 t_image = bpy.data.images.new(name=t_image_name, width=2048, height=2048, alpha=False)
                 # set path to new image
                 fn = os.path.join(o_imagedir, t_image_name)
