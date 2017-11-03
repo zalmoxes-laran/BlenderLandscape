@@ -143,8 +143,7 @@ class ToolsPanel5(bpy.types.Panel):
         obj = context.object 
         cam_ob = bpy.context.scene.camera
         cam_cam = bpy.context.scene.camera.data
-        obj_selected = scene.objects.active
-        
+        obj_selected = scene.objects.active        
         row = layout.row()
         row.label(text="Set up scene", icon='RADIO')
         row = layout.row()
@@ -156,7 +155,6 @@ class ToolsPanel5(bpy.types.Panel):
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
         self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
         self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
-        
         row = layout.row()
         row.label(text="Visual mode for selected cams:", icon='NODE_SEL')  
         self.layout.operator("better.cameras", icon="NODE_SEL", text='Better Cams')
