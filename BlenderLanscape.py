@@ -108,21 +108,13 @@ class ToolsPanel9(bpy.types.Panel):
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "Color Correction tool (cycles)"
-#    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER', 'UNDO'}
      
     def draw(self, context):
         layout = self.layout
         obj = context.object
         scene = context.scene
         row = layout.row()
-
-# DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
-#        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
-#        box = layout.box()
-#        row = layout.row()
-#        box.
-
-#        row = layout.row()
 
         row.label(text="Step by step procedure (selected objects):")
    
@@ -136,11 +128,6 @@ class ToolsPanel9(bpy.types.Panel):
         row.label(text="Switch engine")   
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')    
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
-
-             
-#        row.label("Texture correction")
-#        row.prop(scene, "colcor_bricon") # Input button for bpy.types.Scene.colcor_bricon.
-
 
 class ToolsPanel5(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -1277,10 +1264,9 @@ class OBJECT_OT_applycc(bpy.types.Operator):
             for matslot in obj.material_slots:
                 mat = matslot.material
                 o_image = mat.texture_slots[0].texture.image
-                # estrarre percorso immagine
-				o_imagepath = mat.texture_slots[0].texture.image.filepath
-				o_imagepath_abs = bpy.path.abspath(o_imagepath)
-				o_imagedir, o_filename = os.path.split(o_imagepath_abs)
+                o_imagepath = mat.texture_slots[0].texture.image.filepath
+                o_imagepath_abs = bpy.path.abspath(o_imagepath)
+                o_imagedir, o_filename = os.path.split(o_imagepath_abs)
 #				o_imagedir_rel = bpy.path.relpath(o_imagedir)
                 # new image
                 nodes = mat.node_tree.nodes
