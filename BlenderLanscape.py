@@ -60,7 +60,9 @@ class ToolsPanel(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("export.coordname", icon="WORLD_DATA", text='position-name of selected')
         row = layout.row()
-        row.label(text="Resulting file: " + obj.name + "-inst.txt")
+        self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
+        row = layout.row()
+        row.label(text="Resulting file: " + obj.name + ".txt")
         row = layout.row()
         self.layout.operator("export.object", icon="OBJECT_DATA", text='Export selected in one file')
         row = layout.row()
@@ -271,6 +273,33 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
         for obj in selection:    
             obj.select = True  
             file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
+        file.close()
+        return {'FINISHED'}
+
+class OBJECT_OT_ExportabsButtonName(bpy.types.Operator):
+    bl_idname = "export.abscoordname"
+    bl_label = "Export abs coord name"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+
+        basedir = os.path.dirname(bpy.data.filepath)
+        
+        if not basedir:
+            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+        fn = os.path.join(basedir, activename)
+        file = open(fn + ".txt", 'w')
+        
+        # write selected objects coordinate
+        for obj in selection:    
+            obj.select = True  
+            x_abs = obj.location[0] + bpy.data.window_managers['WinMan'].crsx
+            y_abs = obj.location[1] + bpy.data.window_managers['WinMan'].crsy
+            file.write("%s %s %s %s\n" % (obj.name, x_abs, y_abs, obj.location[2]))
         file.close()
         return {'FINISHED'}
 
