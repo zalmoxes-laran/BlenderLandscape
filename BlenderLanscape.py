@@ -110,7 +110,7 @@ class ToolsPanel9(bpy.types.Panel):
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "Color Correction tool (cycles)"
-    bl_options = {'REGISTER', 'UNDO'}
+#    bl_options = {'REGISTER', 'UNDO'}
      
     def draw(self, context):
         layout = self.layout
