@@ -22,6 +22,19 @@ from bpy.props import (BoolProperty,
                        CollectionProperty
                        )
 
+class EM_NODES_LIST(bpy.types.UIList):
+
+    def draw_item(self, context, layout, test, active_data, active_propname, index, flt_flag):
+        pass
+    def draw_filter(self, context, layout):
+        # Nothing much to say here, it's usual UI code...
+        pass
+        flt_flags = []
+        flt_neworder = []
+
+        # Do filtering/reordering here...
+
+        return flt_flags, flt_neworder
 
 ##### da qui inizia la definizione delle classi pannello
 
@@ -43,6 +56,8 @@ class EMToolsPanel(bpy.types.Panel):
 #        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
         row = layout.row()
         self.layout.operator("import.em_graphml", icon="STICKY_UVS_DISABLE", text='Read EM file')
+        row = layout.row()
+        layout.template_list("EM_NODE_LIST", "", obj, "material_slots", obj, "active_material_index")
 
 #### da qui si definiscono gli operatori
 
@@ -59,18 +74,16 @@ class EM_import_GraphML(bpy.types.Operator):
             print(n.text)
             print(n.tag)
             
-        basedir = os.path.dirname(bpy.data.filepath)
-        
-        if not basedir:
-            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+#        basedir = os.path.dirname(bpy.data.filepath)
+#        
+#        if not basedir:
+#            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
 #        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
 #        fn = os.path.join(basedir, activename)
 #        file = open(fn + ".txt", 'w')
         
         return {'FINISHED'}
-
-
 
     
 # qui registro e cancello tutte le classi
@@ -79,6 +92,7 @@ def register():
     bpy.utils.register_class(EMToolsPanel)
 #    bpy.utils.register_class(EM_import_GraphML)
     bpy.utils.register_module(__name__)
+#    bpy.utils.register_class(EM_NODES_LIST)
     bpy.types.Scene.EM_file = StringProperty(
       name = "EM GraphML file",
       default = "",
