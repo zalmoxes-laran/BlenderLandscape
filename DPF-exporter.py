@@ -43,12 +43,16 @@ class OBJECT_OT_SETUPCAMERA(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     def execute(self, context):
+        scene = context.scene
+        scene.render.resolution_x = 8192
+        scene.render.resolution_y = 4096        
 #        bpy.context.scene.render.engine = 'CYCLES'
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
             obj.select = True
             obj.data.type = 'PANO'
+            obj.rotation_euler[0] = 1.570796
 #            obj.data.sensor_fit = 'HORIZONTAL'
 #            obj.data.sensor_width = 35.8
 #            obj.data.sensor_height = 23.9
