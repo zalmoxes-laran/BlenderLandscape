@@ -1,7 +1,7 @@
 bl_info = {
     "name": "EM tools",
     "author": "E. Demetrescu",
-    "version": (1,0,0),
+    "version": (1,0,1),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Extended Matrix",
@@ -31,6 +31,11 @@ class EMListItem(bpy.types.PropertyGroup):
            name="Name",
            description="A name for this item",
            default="Untitled")
+    
+    description = prop.StringProperty(
+           name="Description",
+           description="A description for this item",
+           default="Empty")
 
     icon = prop.StringProperty(
            name="code for icon",
@@ -43,15 +48,18 @@ class EM_UL_List(bpy.types.UIList):
         # We could write some code to decide which icon to use here...
         
         scene = context.scene
-        custom_icon = 'CANCEL'
+#        custom_icon = 'CANCEL'
 
         # Make sure your code supports all 3 layout types
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(item.name, icon = item.icon)
+#        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+        layout.label(item.name, icon = item.icon)
+        layout.label(item.description, icon='NONE', icon_value=0)
+#        layout.prop(item, "description", text="", emboss=False)
+#        icon = item.icon
 
-        elif self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
-            layout.label("", icon = custom_icon)
+#        elif self.layout_type in {'GRID'}:
+#            layout.alignment = 'CENTER'
+#            layout.label("", icon = custom_icon)
 
 ##### da qui inizia la definizione delle classi pannello
 
@@ -69,9 +77,7 @@ class EMToolsPanel(bpy.types.Panel):
         row = layout.row()
         row.label(text="EM file")
         row = layout.row()
-        row.prop(context.scene, 'EM_file', toggle = True)
-#        row = layout.row()
-#        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
+        row.prop(context.scene, 'EM_file', toggle = True) 
         row = layout.row()
         self.layout.operator("import.em_graphml", icon="STICKY_UVS_DISABLE", text='Read EM file')
         row = layout.row()
@@ -84,6 +90,17 @@ class EMToolsPanel(bpy.types.Panel):
             
                     
 #### da qui si definiscono gli operatori
+
+#Check the presence-absence of US against the GraphML
+def EM_check_GraphML_Blender(node_name):
+    data = bpy.data
+    for ob in data.objects:
+        if ob.name == node_name:
+            icon_check = 'FILE_TICK'
+        else:
+            icon_check = 'CANCEL'
+    return icon_check
+    
 
 class EM_import_GraphML(bpy.types.Operator):
     bl_idname = "import.em_graphml"
@@ -100,13 +117,14 @@ class EM_import_GraphML(bpy.types.Operator):
         list_lenght = len(scene.em_list)
         for x in range(list_lenght):
             scene.em_list.remove(0)
-                         
+
         em_list_index_ema = 0
         for n in test:
             if n.text.startswith("SU") or n.text.startswith("USV") or n.text.startswith("USM") or n.text.startswith("USR"):
                 scene.em_list.add()
                 scene.em_list[em_list_index_ema].name = n.text
-                scene.em_list[em_list_index_ema].icon = "OBJECT_DATAMODE"
+                scene.em_list[em_list_index_ema].icon = EM_check_GraphML_Blender(n.text)
+                scene.em_list[em_list_index_ema].description = 'to be implemented'
                 em_list_index_ema += 1
 #        
         return {'FINISHED'}
