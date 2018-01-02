@@ -157,22 +157,34 @@ class EM_import_GraphML(bpy.types.Operator):
         scene = context.scene
         graphml_file = scene.EM_file
         tree = ET.parse(graphml_file)
-        test = tree.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel')
-        
-        scene.em_list.update()
-        list_lenght = len(scene.em_list)
-        for x in range(list_lenght):
-            scene.em_list.remove(0)
+#        tree = ET.parse('/Users/emanueldemetrescu/Desktop/EM_test.graphml')
+        allnodes = tree.findall('.//{http://graphml.graphdrawing.org/xmlns}node')
+        for node_element in allnodes:
+            if EM_check_node_type(node_element) == 'node_simple':
+                if EM_check_node_us(node_element):
+                    my_nodename, my_node_description, my_node_url, my_node_shape = EM_extract_node_name(node_element)
+                else:
+                    pass
+            else:
+                pass        
 
-        em_list_index_ema = 0
-        for n in test:
-            if n.text.startswith("SU") or n.text.startswith("USV") or n.text.startswith("USM") or n.text.startswith("USR"):
-                scene.em_list.add()
-                scene.em_list[em_list_index_ema].name = n.text
-                scene.em_list[em_list_index_ema].icon = EM_check_GraphML_Blender(n.text)
-                scene.em_list[em_list_index_ema].description = 'to be implemented'
-                em_list_index_ema += 1
+        
+#        test = tree.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel')
 #        
+#        scene.em_list.update()
+#        list_lenght = len(scene.em_list)
+#        for x in range(list_lenght):
+#            scene.em_list.remove(0)
+
+#        em_list_index_ema = 0
+#        for n in test:
+#            if n.text.startswith("SU") or n.text.startswith("USV") or n.text.startswith("USM") or n.text.startswith("USR"):
+#                scene.em_list.add()
+#                scene.em_list[em_list_index_ema].name = n.text
+#                scene.em_list[em_list_index_ema].icon = EM_check_GraphML_Blender(n.text)
+#                scene.em_list[em_list_index_ema].description = 'to be implemented'
+#                em_list_index_ema += 1
+##        
         return {'FINISHED'}
 
     
