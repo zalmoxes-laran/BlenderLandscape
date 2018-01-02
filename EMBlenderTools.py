@@ -1,7 +1,7 @@
 bl_info = {
     "name": "EM tools",
     "author": "E. Demetrescu",
-    "version": (1,0,1),
+    "version": (1,0,2),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Extended Matrix",
@@ -9,8 +9,6 @@ bl_info = {
     "wiki_url": "",
     "tracker_url": "",
     "category": "Tools"}
-
-#### iniziamo a importare un po' di moduli
 
 import xml.etree.ElementTree as ET
 import bpy
@@ -40,26 +38,26 @@ class EMListItem(bpy.types.PropertyGroup):
     icon = prop.StringProperty(
            name="code for icon",
            description="",
-           default="")
-
+           default="QUESTION")
+    
+    url = prop.StringProperty(
+           name="url",
+           description="An url behind this item",
+           default="Empty")
+    
+    shape = prop.StringProperty(
+           name="shape",
+           description="The shape of this item",
+           default="Empty")
+           
 class EM_UL_List(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 
-        # We could write some code to decide which icon to use here...
-        
         scene = context.scene
-#        custom_icon = 'CANCEL'
-
-        # Make sure your code supports all 3 layout types
-#        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+#        layout.column_flow(align = True)
         layout.label(item.name, icon = item.icon)
+#        layout.column_flow(align = True)
         layout.label(item.description, icon='NONE', icon_value=0)
-#        layout.prop(item, "description", text="", emboss=False)
-#        icon = item.icon
-
-#        elif self.layout_type in {'GRID'}:
-#            layout.alignment = 'CENTER'
-#            layout.label("", icon = custom_icon)
 
 ##### da qui inizia la definizione delle classi pannello
 
@@ -81,35 +79,46 @@ class EMToolsPanel(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("import.em_graphml", icon="STICKY_UVS_DISABLE", text='Read/Refresh EM file')
         row = layout.row()
-        row.template_list("EM_UL_List", "EM nodes", scene, "em_list", scene, "em_list_index" )
+        layout.alignment = 'LEFT'
+        row.template_list("EM_UL_List", "EM nodes", scene, "em_list", scene, "em_list_index")
         if scene.em_list_index >= 0 and len(scene.em_list) > 0:
             item = scene.em_list[scene.em_list_index]
             row = layout.row()
-            row.prop(item, "name")
-#            row.prop(item, "random_property")
+            row.label(text="Name:")
+            row = layout.row()
+            row.prop(item, "name", text="")
+            row = layout.row()
+#            layout.alignment = 'EXPAND'
+            row.label(text="Description:")
+            row = layout.row()
+            layout.alignment = 'LEFT'
+            row.prop(item, "description", text="", slider=True)
             
                     
 #### da qui si definiscono le funzioni e gli operatori
 
 def EM_extract_node_name(node_element):
+    is_d4 = False
+    is_d5 = False
     for subnode in node_element.findall('.//{http://graphml.graphdrawing.org/xmlns}data'):
         attrib = subnode.attrib
         if attrib == {'key': 'd4'}:
+            is_d4 = True
             nodeurl = subnode.text
-        else:
-            nodeurl = 'Non assegnato'
-        print(nodeurl)
         if attrib == {'key': 'd5'}:
+            is_d5 = True
             nodedescription = subnode.text
-        else:
-            nodedescription = 'Non assegnato'
-        print(nodedescription)
-        for USname in subnode.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel'):
-            nodename = USname.text
-            print(nodename)
-        for USshape in subnode.findall('.//{http://www.yworks.com/xml/graphml}Shape'):
-            nodeshape = USshape.attrib
-            print(nodeshape)   
+        if attrib == {'key': 'd6'}:
+            for USname in subnode.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel'):
+                nodename = USname.text
+#                print(nodename)
+            for USshape in subnode.findall('.//{http://www.yworks.com/xml/graphml}Shape'):
+                nodeshape = USshape.attrib
+#                print(nodeshape)        
+    if not is_d4:
+        nodeurl = '--None--'
+    if not is_d5:
+        nodedescription = '--None--'
     return nodename, nodedescription, nodeurl, nodeshape 
 
 def EM_check_node_type(node_element):
@@ -118,13 +127,13 @@ def EM_check_node_type(node_element):
         tablenode = node_element.find('.//{http://www.yworks.com/xml/graphml}TableNode')
 #        print(tablenode.attrib)
         if tablenode is not None:
-            print('è un nodo swimlane: ' + id_node)
+#            print('è un nodo swimlane: ' + id_node)
             node_type = 'node_swimlane'
         else:
-            print('è un nodo group: ' + id_node)
+#            print('è un nodo group: ' + id_node)
             node_type = 'node_group'
     else:
-        print('è un semplice nodo: ' + id_node)
+#        print('è un semplice nodo: ' + id_node)
         node_type = 'node_simple'
     return node_type
 
@@ -136,15 +145,21 @@ def EM_check_node_us(node_element):
         id_node_us = False
     return id_node_us
 
+def EM_list_clear(context):
+    scene = context.scene
+    scene.em_list.update()
+    list_lenght = len(scene.em_list)
+    for x in range(list_lenght):
+        scene.em_list.remove(0)
+    return
 
 #Check the presence-absence of US against the GraphML
 def EM_check_GraphML_Blender(node_name):
     data = bpy.data
+    icon_check = 'CANCEL'
     for ob in data.objects:
         if ob.name == node_name:
             icon_check = 'FILE_TICK'
-        else:
-            icon_check = 'CANCEL'
     return icon_check
     
 
@@ -156,25 +171,29 @@ class EM_import_GraphML(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         graphml_file = scene.EM_file
-        tree = ET.parse(graphml_file)
+        tree = ET.parse(graphml_file)      
+        EM_list_clear(context)       
+        em_list_index_ema = 0   
 #        tree = ET.parse('/Users/emanueldemetrescu/Desktop/EM_test.graphml')
         allnodes = tree.findall('.//{http://graphml.graphdrawing.org/xmlns}node')
         for node_element in allnodes:
-            if EM_check_node_type(node_element) == 'node_simple':
-                if EM_check_node_us(node_element):
+            if EM_check_node_type(node_element) == 'node_simple': # The node is not a group or a swimlane
+                if EM_check_node_us(node_element): # Check if the node is an US, SU, USV, USM or USR node
                     my_nodename, my_node_description, my_node_url, my_node_shape = EM_extract_node_name(node_element)
+                    scene.em_list.add()
+                    scene.em_list[em_list_index_ema].name = my_nodename
+                    scene.em_list[em_list_index_ema].icon = EM_check_GraphML_Blender(my_nodename)
+                    print('-' + my_nodename + '-' + ' has an icon: ' + EM_check_GraphML_Blender(my_nodename))
+                    scene.em_list[em_list_index_ema].description = my_node_description
+                    em_list_index_ema += 1                    
                 else:
                     pass
             else:
                 pass        
 
-        
 #        test = tree.findall('.//{http://www.yworks.com/xml/graphml}NodeLabel')
 #        
-#        scene.em_list.update()
-#        list_lenght = len(scene.em_list)
-#        for x in range(list_lenght):
-#            scene.em_list.remove(0)
+
 
 #        em_list_index_ema = 0
 #        for n in test:
