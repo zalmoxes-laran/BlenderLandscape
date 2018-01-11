@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.8),
+    "version": (1,2.9),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -98,6 +98,9 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
+        self.layout.operator("create.personalgroups", icon="GROUP", text='Create per-object groups')
+        row = layout.row()
+        
 # DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
 #        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
 #        box = layout.box()
@@ -142,9 +145,8 @@ class ToolsPanel5(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        obj = context.object 
-        cam_ob = bpy.context.scene.camera
-        cam_cam = bpy.context.scene.camera.data
+        obj = context.object
+
         obj_selected = scene.objects.active        
         row = layout.row()
         row.label(text="Set up scene", icon='RADIO')
@@ -169,20 +171,25 @@ class ToolsPanel5(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, 'BL_undistorted_path', toggle = True)
         row = layout.row()
-        row.label(text="Active Cam: " + cam_ob.name)
 
-        self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
-        row = layout.row()
-
-        row = layout.row()
-        row.prop(cam_cam, "lens")
-        row = layout.row()
-        row.label(text="Active object: " + obj.name)
-        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
-        self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
-        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
-        row = layout.row()
-        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
+        if bpy.context.scene.camera is not None:
+            cam_ob = scene.camera
+            cam_cam = scene.camera.data
+            row.label(text="Active Cam: " + cam_ob.name)
+            self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
+            row = layout.row()
+            row = layout.row()
+            row.prop(cam_cam, "lens")
+            row = layout.row()
+            row.label(text="Active object: " + obj.name)
+            self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
+            self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
+            self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
+            row = layout.row()
+        else:
+            row.label(text="!!! Import some cams to start !!!")
+            
+#        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
 
 class ToolsPanel100(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -328,6 +335,33 @@ class OBJECT_OT_ExportButton(bpy.types.Operator):
             file.write("%s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.data.lens))
             file.close()
         return {'FINISHED'}
+    
+    
+
+def make_group(ob,context):
+    nomeoggetto = str(ob.name)
+    if bpy.data.groups.get(nomeoggetto) is not None:
+        currentgroup = bpy.data.groups.get(nomeoggetto)
+        bpy.ops.group.objects_remove_all()
+#        for object in currentgroup.objects:
+#            bpy.ops.group.objects_remove(group=currentgroup)
+    else:            
+        bpy.ops.group.create(name=nomeoggetto)
+    ob.select = True
+    bpy.ops.object.group_link(group=nomeoggetto)
+
+class OBJECT_OT_createpersonalgroups(bpy.types.Operator):
+    bl_idname = "create.personalgroups"
+    bl_label = "Create groups per single object"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        for ob in bpy.context.selected_objects:
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            make_group(ob,context)        
+        return {'FINISHED'}   
     
 class OBJECT_OT_ExportCamButton(bpy.types.Operator):
     bl_idname = "export.camdata"
@@ -1394,12 +1428,10 @@ def register():
     bpy.utils.register_class(OBJECT_OT_ExportButton)
     bpy.utils.register_class(OBJECT_OT_ExportButtonName)
     bpy.utils.register_class(OBJECT_OT_ExportCamButton)
-#    bpy.utils.register_class(OBJECT_OT_TranslatetoSCSButton)
-#    bpy.utils.register_class(OBJECT_OT_TranslatetoDPButton)
+    bpy.utils.register_class(OBJECT_OT_createpersonalgroups)
     bpy.utils.register_class(OBJECT_OT_CenterMass)
     bpy.utils.register_class(OBJECT_OT_LocalTexture)
     bpy.utils.register_class(OBJECT_OT_LOD2)
-#    bpy.utils.register_class(OBJECT_OT_AutomatorDP2)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexportbatch)  
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
@@ -1443,6 +1475,7 @@ def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.utils.unregister_class(OBJECT_OT_removecc)
+    bpy.utils.unregister_class(OBJECT_OT_createpersonalgroups)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
