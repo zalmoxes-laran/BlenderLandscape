@@ -681,11 +681,15 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
         
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+
         for obj in bpy.context.selected_objects:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select = True
+            bpy.context.scene.objects.active = obj
             baseobj = obj.name
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
             for obj in bpy.context.selected_objects:
-                obj.name = "LOD1_" + baseobj
+                obj.name = baseobj + "_LOD1"
                 newobj = obj
             for obj in bpy.context.selected_objects:
                 lod1name = obj.name
@@ -698,18 +702,23 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.uv.pack_islands(margin=0.001)
 
             # procedura di semplificazione mesh
-            bpy.ops.mesh.select_all(action='DESELECT')
-            bpy.ops.mesh.select_non_manifold()
-            bpy.ops.object.vertex_group_add()
-            bpy.ops.object.vertex_group_assign()
-            bpy.ops.object.editmode_toggle()
-            bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
-            obj.modifiers["Decimate"].ratio = 0.8
-            obj.modifiers["Decimate"].vertex_group = "Group"
-            obj.modifiers["Decimate"].invert_vertex_group = True
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
+#            bpy.ops.mesh.select_all(action='DESELECT')
+#            bpy.ops.mesh.select_non_manifold()
+#            bpy.ops.object.vertex_group_add()
+#            bpy.ops.object.vertex_group_assign()
+#            bpy.ops.object.editmode_toggle()
+#            bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
+#            obj.modifiers["Decimate"].ratio = 0.8
+#            obj.modifiers["Decimate"].vertex_group = "Group"
+#            obj.modifiers["Decimate"].invert_vertex_group = True
+#            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
+            
             # ora la mesh è semplificata
             #------------------------------------------------------------------
+            
+            # se riattivo la semplificazione mesh devo cancellare la riga qui sotto
+            bpy.ops.object.editmode_toggle()
+            
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
             oggetto.select = True
@@ -738,6 +747,8 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
             oggetto.select = True
+            bpy.context.scene.objects.active = oggetto
+            bpy.ops.view3d.texface_to_material()
 
     #        basedir = os.path.dirname(bpy.data.filepath)
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
@@ -771,7 +782,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             baseobj = obj.name
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
             for obj in bpy.context.selected_objects:
-                obj.name = "LOD2_" + baseobj
+                obj.name = baseobj + "_LOD2"
                 newobj = obj
             for obj in bpy.context.selected_objects:
                 lod2name = obj.name
