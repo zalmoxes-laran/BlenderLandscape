@@ -225,25 +225,30 @@ class ToolsPanel2(bpy.types.Panel):
         layout = self.layout        
         obj = context.object
         row = layout.row()
-        row.label(text="Override name:")
-        row = layout.row()
         if obj:
+            row.label(text="Override name:")
+            row = layout.row()
             row.prop(obj, "name", text='')
             row = layout.row()
-        self.layout.operator("lod0.b2osg", icon="MESH_UVSPHERE", text='LOD 0')
+        row.label(text="Actions on selected objects:")
         row = layout.row()
-        self.layout.operator("lod1.b2osg", icon="MESH_ICOSPHERE", text='LOD 1')
+        self.layout.operator("lod0.b2osg", icon="MESH_UVSPHERE", text='LOD 0 (set as)')
         row = layout.row()
-        self.layout.operator("lod2.b2osg", icon="MESH_CUBE", text='LOD 2')
+        row.label(text="Start always selecting LOD0 objs")
+        self.layout.operator("lod1.b2osg", icon="MESH_ICOSPHERE", text='LOD 1 (creation)')
+        self.layout.operator("lod2.b2osg", icon="MESH_CUBE", text='LOD 2 (creation)')
         row = layout.row()
         if obj:
             row.label(text="Resulting files: ")
             row = layout.row()
             row.label(text= "LOD1/LOD2_"+ obj.name + ".obj" )
             row = layout.row()
-            self.layout.operator("create.grouplod", icon="OOPS", text='Create LOD cluster')
+        self.layout.operator("create.grouplod", icon="OOPS", text='Create LOD cluster(s)')
         row = layout.row()
-        
+        self.layout.operator("remove.grouplod", icon="CANCEL", text='Create LOD cluster(s)')
+        row = layout.row()
+        self.layout.operator("exportfbx.grouplod", icon="MESH_GRID", text='FBX Export LOD cluster(s)')
+        row = layout.row()
 
 class OBJECT_OT_ExportButtonName(bpy.types.Operator):
     bl_idname = "export.coordname"
@@ -916,7 +921,70 @@ def selectLOD(listobjects, lodnum, basename):
         else:
             objatgivenlod = None            
     return objatgivenlod
+
+def getChildren(myObject):
+    children = []
+    for ob in bpy.data.objects:
+        if ob.parent == myObject:
+            children.append(ob)
+    return children
+
 #_______________________________________________________________
+
+class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
+    bl_idname = "exportfbx.grouplod"
+    bl_label = "Export Group LOD"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        basedir = os.path.dirname(bpy.data.filepath)
+        if not basedir:
+            raise Exception("Blend file is not saved")
+        scene = context.scene
+        listobjects = bpy.context.selected_objects
+        for obj in listobjects:
+            if obj.get('fbx_type') is not None:
+                bpy.ops.object.select_all(action='DESELECT')
+                obj.select = True
+                bpy.context.scene.objects.active = obj
+                for ob in getChildren(obj):
+                    ob.select = True
+                name = bpy.path.clean_name(obj.name)
+                fn = os.path.join(basedir, name)
+                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=100.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)       
+            else:
+                print('The "' + obj.name + '" GLOD empty object has not the correct settings to export an FBX - LOD enabled file.')
+                obj.select = False
+
+        return {'FINISHED'}
+
+#_______________________________________________________________
+
+
+
+class OBJECT_OT_RemoveGroupsLOD(bpy.types.Operator):
+    bl_idname = "remove.grouplod"
+    bl_label = "Remove Group LOD"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        listobjects = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in listobjects:
+            if obj.get('fbx_type') is not None:
+                obj.select = True
+                bpy.context.scene.objects.active = obj
+                for ob in getChildren(obj):
+                    ob.select = True
+                bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+                bpy.ops.object.select_all(action='DESELECT')
+                obj.select = True
+                bpy.context.scene.objects.active = obj
+                bpy.ops.object.delete()
+        return {'FINISHED'}
+
+#_______________________________________________________________
+
 
 class OBJECT_OT_CreateGroupsLOD(bpy.types.Operator):
     bl_idname = "create.grouplod"
@@ -1671,6 +1739,8 @@ def register():
     bpy.utils.register_class(OBJECT_OT_LOD1)
     bpy.utils.register_class(OBJECT_OT_LOD2)
     bpy.utils.register_class(OBJECT_OT_CreateGroupsLOD)
+    bpy.utils.register_class(OBJECT_OT_ExportGroupsLOD)
+    bpy.utils.register_class(OBJECT_OT_RemoveGroupsLOD)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
     bpy.utils.register_class(OBJECT_OT_fbxexp)
@@ -1717,6 +1787,8 @@ def unregister():
     bpy.utils.unregister_class(OBJECT_OT_LOD1)
     bpy.utils.unregister_class(OBJECT_OT_LOD2)
     bpy.utils.unregister_class(OBJECT_OT_CreateGroupsLOD)
+    bpy.utils.unregister_class(OBJECT_OT_ExportGroupsLOD)
+    bpy.utils.unregister_class(OBJECT_OT_RemoveGroupsLOD)
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.utils.unregister_class(OBJECT_OT_removecc)
     bpy.utils.unregister_class(OBJECT_OT_createpersonalgroups)
