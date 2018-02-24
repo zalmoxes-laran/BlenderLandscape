@@ -103,6 +103,8 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("create.personalgroups", icon="GROUP", text='Create per-object groups')
         row = layout.row()
+        self.layout.operator("remove.alluvexcept1", icon="GROUP", text='Only UV0 will survive')
+        row = layout.row()        
         
 # DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
 #        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
@@ -379,7 +381,21 @@ class OBJECT_OT_createpersonalgroups(bpy.types.Operator):
             bpy.context.scene.objects.active = ob
             make_group(ob,context)        
         return {'FINISHED'}   
+
+
+class OBJECT_OT_removealluvexcept1(bpy.types.Operator):
+    bl_idname = "remove.alluvexcept1"
+    bl_label = "Remove all the UVs except the first one"
+    bl_options = {"REGISTER", "UNDO"}
     
+    def execute(self, context):
+        for ob in bpy.context.selected_objects:
+            if ob.data.uv_textures[1]:
+                uv_textures = ob.data.uv_textures
+                uv_textures.remove(uv_textures[1])
+        return {'FINISHED'}
+
+
 class OBJECT_OT_ExportCamButton(bpy.types.Operator):
     bl_idname = "export.camdata"
     bl_label = "Export cam data"
@@ -1736,6 +1752,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_ExportButtonName)
     bpy.utils.register_class(OBJECT_OT_ExportCamButton)
     bpy.utils.register_class(OBJECT_OT_createpersonalgroups)
+    bpy.utils.register_class(OBJECT_OT_removealluvexcept1)
     bpy.utils.register_class(OBJECT_OT_CenterMass)
     bpy.utils.register_class(OBJECT_OT_LocalTexture)
     bpy.utils.register_class(OBJECT_OT_LOD0)
@@ -1795,6 +1812,7 @@ def unregister():
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.utils.unregister_class(OBJECT_OT_removecc)
     bpy.utils.unregister_class(OBJECT_OT_createpersonalgroups)
+    bpy.utils.unregister_class(OBJECT_OT_removealluvexcept1)
     bpy.utils.unregister_class(OBJECT_OT_fbxexp)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
