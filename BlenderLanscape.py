@@ -730,9 +730,11 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+        subfolder = 'LOD1'
+        if not os.path.exists(os.path.join(basedir, subfolder)):
+            os.mkdir(os.path.join(basedir, subfolder))
         if not basedir:
-            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+            raise Exception("Il file Blender non è stato salvato, per favore, prima salvalo")
 
         for obj in bpy.context.selected_objects:
             bpy.ops.object.select_all(action='DESELECT')
@@ -768,7 +770,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             oggetto.select = True
 
             tempimage = bpy.data.images.new(name=lod1name, width=2048, height=2048, alpha=False)
-            tempimage.filepath_raw = "//"+lod1name+".jpg"
+            tempimage.filepath_raw = "//"+subfolder+'/'+lod1name+".jpg"
             tempimage.file_format = 'JPEG'
 
             for uv_face in oggetto.data.uv_textures.active.data:
@@ -797,7 +799,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             oggetto.data.name = 'SM_' + oggetto.name
     #        basedir = os.path.dirname(bpy.data.filepath)
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-            fn = os.path.join(basedir, activename)
+            fn = os.path.join(basedir, subfolder, activename)
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False))
@@ -818,7 +820,9 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+        subfolder = 'LOD2'
+        if not os.path.exists(os.path.join(basedir, subfolder)):
+            os.mkdir(os.path.join(basedir, subfolder))        
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
         for obj in bpy.context.selected_objects:
@@ -869,7 +873,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             oggetto.select = True
 
             tempimage = bpy.data.images.new(name=lod2name, width=512, height=512, alpha=False)
-            tempimage.filepath_raw = "//"+lod2name+".jpg"
+            tempimage.filepath_raw = "//"+subfolder+'/'+lod2name+".jpg"
             tempimage.file_format = 'JPEG'
 
             for uv_face in oggetto.data.uv_textures.active.data:
@@ -899,9 +903,8 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             oggetto.active_material.name = 'M_'+ oggetto.name
             oggetto.data.name = 'SM_' + oggetto.name
 
-    #        basedir = os.path.dirname(bpy.data.filepath)
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-            fn = os.path.join(basedir, activename)
+            fn = os.path.join(basedir, subfolder, activename)
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False))
@@ -951,7 +954,7 @@ class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
                     ob.select = True
                 name = bpy.path.clean_name(obj.name)
                 fn = os.path.join(basedir, name)
-                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=100.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)       
+                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=1.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='RELATIVE', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)       
             else:
                 print('The "' + obj.name + '" GLOD empty object has not the correct settings to export an FBX - LOD enabled file.')
                 obj.select = False
