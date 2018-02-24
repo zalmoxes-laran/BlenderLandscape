@@ -780,7 +780,23 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 bpy.ops.uv.select_all(action='SELECT')
                 bpy.ops.uv.pack_islands(margin=0.001)
                 bpy.ops.object.editmode_toggle()
-            
+
+            # procedura di semplificazione mesh
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.mesh.select_non_manifold()
+            bpy.ops.object.vertex_group_add()
+            bpy.ops.object.vertex_group_assign()
+            bpy.ops.object.editmode_toggle()
+            bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
+            obj.modifiers["Decimate"].ratio = 0.5
+            obj.modifiers["Decimate"].vertex_group = "Group"
+            obj.modifiers["Decimate"].invert_vertex_group = True
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
+            # ora la mesh è semplificata
+            #------------------------------------------------------------------
+
+
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
             oggetto.select = True
