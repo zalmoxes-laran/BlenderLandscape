@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,2.9),
+    "version": (1,3.0),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -14,6 +14,7 @@ bl_info = {
 import bpy
 import os
 
+from mathutils import Vector
 from bpy_extras.io_utils import ImportHelper
 
 from bpy.props import (BoolProperty,
@@ -56,8 +57,8 @@ class ToolsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(obj, "name")
         row = layout.row()
-        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates of selected')
-        row = layout.row()
+#        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates of selected')
+#        row = layout.row()
         self.layout.operator("export.coordname", icon="WORLD_DATA", text='position-name of selected')
         row = layout.row()
         self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
@@ -71,6 +72,8 @@ class ToolsPanel(bpy.types.Panel):
         self.layout.operator("obj.exportbatch", icon="OBJECT_DATA", text='Export selected in several obj files')
         row = layout.row()
         self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx for UE4')
+        row = layout.row()
+        self.layout.operator("fbx.exp", icon="OBJECT_DATA", text='Export selected in fbx for UE4')
         row = layout.row()
         self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
         row = layout.row()
@@ -222,18 +225,25 @@ class ToolsPanel2(bpy.types.Panel):
         layout = self.layout        
         obj = context.object
         row = layout.row()
-        row.label(text="Active object is: " + obj.name)
+        row.label(text="Override name:")
         row = layout.row()
-        row.prop(obj, "name")
+        if obj:
+            row.prop(obj, "name", text='')
+            row = layout.row()
+        self.layout.operator("lod0.b2osg", icon="MESH_UVSPHERE", text='LOD 0')
         row = layout.row()
-        self.layout.operator("lod1.b2osg", icon="COLOR", text='LOD 1')
+        self.layout.operator("lod1.b2osg", icon="MESH_ICOSPHERE", text='LOD 1')
         row = layout.row()
-        self.layout.operator("lod2.b2osg", icon="COLOR", text='LOD 2')
+        self.layout.operator("lod2.b2osg", icon="MESH_CUBE", text='LOD 2')
         row = layout.row()
-        row.label(text="Resulting files: ")
+        if obj:
+            row.label(text="Resulting files: ")
+            row = layout.row()
+            row.label(text= "LOD1/LOD2_"+ obj.name + ".obj" )
+            row = layout.row()
+            self.layout.operator("create.grouplod", icon="OOPS", text='Create LOD cluster')
         row = layout.row()
-        row.label(text= "LOD1/LOD2_"+ obj.name + ".obj" )
-        row = layout.row()
+        
 
 class OBJECT_OT_ExportButtonName(bpy.types.Operator):
     bl_idname = "export.coordname"
@@ -669,6 +679,43 @@ class CreateCameraImagePlane(bpy.types.Operator):
 
 #_____________________________________________________________________________
 
+class OBJECT_OT_LOD0(bpy.types.Operator):
+    bl_idname = "lod0.b2osg"
+    bl_label = "LOD0"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+
+        for obj in bpy.context.selected_objects:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select = True
+            bpy.context.scene.objects.active = obj
+            baseobj = obj.name
+            if not baseobj.endswith('LOD0'):
+                obj.name = baseobj + '_LOD0'
+            if obj.data.uv_textures[0].name =='MultiTex' and obj.data.uv_textures[1].name =='Atlas':                
+                pass
+            else:
+                mesh = obj.data
+                mesh.uv_textures.active_index = 0
+                multitex_uvmap = mesh.uv_textures.active
+                multitex_uvmap_name = multitex_uvmap.name
+                multitex_uvmap.name = 'MultiTex'
+                atlas_uvmap = mesh.uv_textures.new()
+                atlas_uvmap.name = 'Atlas'
+                mesh.uv_textures.active_index = 1
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.remove_doubles()
+                bpy.ops.uv.select_all(action='SELECT')
+                bpy.ops.uv.pack_islands(margin=0.001)
+                bpy.ops.object.editmode_toggle()
+                mesh.uv_textures.active_index = 0
+
+        return {'FINISHED'}
+
+#_____________________________________________________________________________
+
 
 class OBJECT_OT_LOD1(bpy.types.Operator):
     bl_idname = "lod1.b2osg"
@@ -686,7 +733,11 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             obj.select = True
             bpy.context.scene.objects.active = obj
-            baseobj = obj.name
+            baseobjwithlod = obj.name
+            if '_LOD0' in baseobjwithlod:
+                baseobj = baseobjwithlod.replace("_LOD0", "")
+            else:
+                baseobj = baseobjwithlod
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
             for obj in bpy.context.selected_objects:
                 obj.name = baseobj + "_LOD1"
@@ -695,29 +746,17 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 lod1name = obj.name
             for i in range(0,len(bpy.data.objects[lod1name].material_slots)):
                 bpy.ops.object.material_slot_remove()
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.remove_doubles()
-            bpy.ops.uv.select_all(action='SELECT')
-            bpy.ops.uv.pack_islands(margin=0.001)
 
-            # procedura di semplificazione mesh
-#            bpy.ops.mesh.select_all(action='DESELECT')
-#            bpy.ops.mesh.select_non_manifold()
-#            bpy.ops.object.vertex_group_add()
-#            bpy.ops.object.vertex_group_assign()
-#            bpy.ops.object.editmode_toggle()
-#            bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
-#            obj.modifiers["Decimate"].ratio = 0.8
-#            obj.modifiers["Decimate"].vertex_group = "Group"
-#            obj.modifiers["Decimate"].invert_vertex_group = True
-#            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            
-            # ora la mesh è semplificata
-            #------------------------------------------------------------------
-            
-            # se riattivo la semplificazione mesh devo cancellare la riga qui sotto
-            bpy.ops.object.editmode_toggle()
+            if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
+                uv_textures = obj.data.uv_textures
+                uv_textures.remove(uv_textures[0])
+            else:
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.remove_doubles()
+                bpy.ops.uv.select_all(action='SELECT')
+                bpy.ops.uv.pack_islands(margin=0.001)
+                bpy.ops.object.editmode_toggle()
             
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
@@ -735,7 +774,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.context.scene.render.use_bake_selected_to_active = True
             bpy.context.scene.render.bake_type = 'TEXTURE'
 
-            object = bpy.data.objects[baseobj]
+            object = bpy.data.objects[baseobjwithlod]
             object.select = True
 
             bpy.context.scene.objects.active = bpy.data.objects[lod1name]
@@ -749,7 +788,8 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             oggetto.select = True
             bpy.context.scene.objects.active = oggetto
             bpy.ops.view3d.texface_to_material()
-
+            oggetto.active_material.name = 'M_'+ oggetto.name
+            oggetto.data.name = 'SM_' + oggetto.name
     #        basedir = os.path.dirname(bpy.data.filepath)
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
             fn = os.path.join(basedir, activename)
@@ -765,8 +805,6 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
 #______________________________________
 
 
-
-
 class OBJECT_OT_LOD2(bpy.types.Operator):
     bl_idname = "lod2.b2osg"
     bl_label = "LOD2"
@@ -779,7 +817,14 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
         for obj in bpy.context.selected_objects:
-            baseobj = obj.name
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select = True
+            bpy.context.scene.objects.active = obj
+            baseobjwithlod = obj.name
+            if '_LOD0' in baseobjwithlod:
+                baseobj = baseobjwithlod.replace("_LOD0", "")
+            else:
+                baseobj = baseobjwithlod
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
             for obj in bpy.context.selected_objects:
                 obj.name = baseobj + "_LOD2"
@@ -788,11 +833,18 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
                 lod2name = obj.name
             for i in range(0,len(bpy.data.objects[lod2name].material_slots)):
                 bpy.ops.object.material_slot_remove()
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.remove_doubles()
-            bpy.ops.uv.select_all(action='SELECT')
-            bpy.ops.uv.pack_islands(margin=0.001)
+
+# se abbiamo già un atlas è inutile rifarlo
+            if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
+                uv_textures = obj.data.uv_textures
+                uv_textures.remove(uv_textures[0])
+                bpy.ops.object.editmode_toggle()
+            else:
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.remove_doubles()
+                bpy.ops.uv.select_all(action='SELECT')
+                bpy.ops.uv.pack_islands(margin=0.001)
 
             # procedura di semplificazione mesh
             bpy.ops.mesh.select_all(action='DESELECT')
@@ -823,7 +875,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.context.scene.render.use_bake_selected_to_active = True
             bpy.context.scene.render.bake_type = 'TEXTURE'
 
-            object = bpy.data.objects[baseobj]
+            object = bpy.data.objects[baseobjwithlod]
             object.select = True
 
             bpy.context.scene.objects.active = bpy.data.objects[lod2name]
@@ -836,6 +888,12 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             oggetto = bpy.data.objects[lod2name]
             oggetto.select = True
 
+            bpy.context.scene.objects.active = oggetto
+            bpy.ops.view3d.texface_to_material()
+
+            oggetto.active_material.name = 'M_'+ oggetto.name
+            oggetto.data.name = 'SM_' + oggetto.name
+
     #        basedir = os.path.dirname(bpy.data.filepath)
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
             fn = os.path.join(basedir, activename)
@@ -847,7 +905,63 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
         bpy.context.scene.layers[0] = False
         return {'FINISHED'}
 
+#_______________________________________________________________
 
+def selectLOD(listobjects, lodnum, basename):
+    name2search = basename + '_LOD' + str(lodnum)
+    for ob in listobjects:
+        if ob.name == name2search:
+            objatgivenlod = ob
+            return objatgivenlod
+        else:
+            objatgivenlod = None            
+    return objatgivenlod
+#_______________________________________________________________
+
+class OBJECT_OT_CreateGroupsLOD(bpy.types.Operator):
+    bl_idname = "create.grouplod"
+    bl_label = "Create Group LOD"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+        listobjects = bpy.context.selected_objects
+        for obj in listobjects:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select = True
+            bpy.context.scene.objects.active = obj
+            baseobjwithlod = obj.name
+
+            if '_LOD0' in baseobjwithlod:
+                baseobj = baseobjwithlod.replace("_LOD0", "")
+                print('Found LOD0 object:' + baseobjwithlod)
+                local_bbox_center = 0.125 * sum((Vector(b) for b in obj.bound_box), Vector())
+                global_bbox_center = obj.matrix_world * local_bbox_center
+                emptyofname = 'GLOD_' + baseobj
+                obempty = bpy.data.objects.new( emptyofname, None )
+                bpy.context.scene.objects.link( obempty )
+                obempty.empty_draw_size = 2
+                obempty.empty_draw_type = 'PLAIN_AXES'
+                obempty.location = global_bbox_center
+                bpy.ops.object.select_all(action='DESELECT')
+                obempty.select = True
+                bpy.context.scene.objects.active = obempty
+                obempty['fbx_type'] = 'LodGroup'
+#                bpy.ops.wm.properties_edit(data_path="object", property="Fbx_Type", value="LodGroup", min=0, max=1, use_soft_limits=False, soft_min=0, soft_max=1, description="")
+
+                num = 0
+                child = selectLOD(listobjects, num, baseobj)
+                while child is not None:
+                    bpy.ops.object.select_all(action='DESELECT')
+                    child.select = True
+                    obempty.select = True
+                    bpy.context.scene.objects.active = obempty
+                    bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
+#                    child.parent= obempty
+#                    child.location.x = child.location.x - obempty.location.x
+#                    child.location.y = child.location.y - obempty.location.y
+                    num += 1
+                    child = selectLOD(listobjects, num, baseobj)
+        return {'FINISHED'}
 
 class OBJECT_OT_ExportObjButton(bpy.types.Operator):
     bl_idname = "export.object"
@@ -948,6 +1062,27 @@ class OBJECT_OT_objexportbatch(bpy.types.Operator):
             fn = os.path.join(basedir, name)
             bpy.ops.export_scene.obj(filepath=str(fn + '.obj'), use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
             obj.select = False
+        return {'FINISHED'}
+
+#_______________________________________________________________________________________________________________
+
+class OBJECT_OT_fbxexp(bpy.types.Operator):
+    bl_idname = "fbx.exp"
+    bl_label = "Fbx export UE4"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    def execute(self, context):
+
+        basedir = os.path.dirname(bpy.data.filepath)
+        if not basedir:
+            raise Exception("Blend file is not saved")
+        obj = bpy.context.scene.objects.active
+        name = bpy.path.clean_name(obj.name)
+        fn = os.path.join(basedir, name)
+        bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=100.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
+#filepath = fn + ".fbx", filter_glob="*.fbx", version='BIN7400', use_selection=True, global_scale=100.0, axis_forward='-Z', axis_up='Y', bake_space_transform=False, object_types={'MESH','EMPTY'}, use_mesh_modifiers=False, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_armature_deform_only=False, bake_anim=False, bake_anim_use_nla_strips=False, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=False, use_anim_action_all=False, use_default_take=False, use_anim_optimize=False, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
+        
+#        obj.select = False
         return {'FINISHED'}
     
 #_______________________________________________________________________________________________________________
@@ -1515,6 +1650,8 @@ class OBJECT_OT_removecc(bpy.types.Operator):
 #_______________________________________________________________________________________________________________
 
 
+
+
 def menu_func_import(self, context):
     self.layout.operator(ImportMultipleObjs.bl_idname, text="Wavefont Batch (.obj)")
 
@@ -1530,10 +1667,13 @@ def register():
     bpy.utils.register_class(OBJECT_OT_createpersonalgroups)
     bpy.utils.register_class(OBJECT_OT_CenterMass)
     bpy.utils.register_class(OBJECT_OT_LocalTexture)
+    bpy.utils.register_class(OBJECT_OT_LOD0)
     bpy.utils.register_class(OBJECT_OT_LOD1)
     bpy.utils.register_class(OBJECT_OT_LOD2)
+    bpy.utils.register_class(OBJECT_OT_CreateGroupsLOD)
     bpy.utils.register_class(OBJECT_OT_objexportbatch)
-    bpy.utils.register_class(OBJECT_OT_fbxexportbatch)  
+    bpy.utils.register_class(OBJECT_OT_fbxexportbatch)
+    bpy.utils.register_class(OBJECT_OT_fbxexp)
     bpy.utils.register_class(OBJECT_OT_ExportObjButton)
     bpy.utils.register_class(OBJECT_OT_Canon6D35)
     bpy.utils.register_class(ImportMultipleObjs)
@@ -1573,9 +1713,14 @@ def register():
 #
 def unregister():
     bpy.utils.unregister_module(__name__)
+    bpy.utils.unregister_class(OBJECT_OT_LOD0)
+    bpy.utils.unregister_class(OBJECT_OT_LOD1)
+    bpy.utils.unregister_class(OBJECT_OT_LOD2)
+    bpy.utils.unregister_class(OBJECT_OT_CreateGroupsLOD)
     bpy.utils.unregister_class(ImportMultipleObjs)
     bpy.utils.unregister_class(OBJECT_OT_removecc)
     bpy.utils.unregister_class(OBJECT_OT_createpersonalgroups)
+    bpy.utils.unregister_class(OBJECT_OT_fbxexp)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
