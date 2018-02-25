@@ -13,6 +13,7 @@ bl_info = {
 
 import bpy
 import os
+import time
 
 from mathutils import Vector
 from bpy_extras.io_utils import ImportHelper
@@ -744,7 +745,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-
+        start.time = time.time
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD1'
         if not os.path.exists(os.path.join(basedir, subfolder)):
@@ -862,8 +863,9 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
 
         bpy.context.scene.layers[11] = True
         bpy.context.scene.layers[0] = False
+        end_time = start_time - time.time()
         print('<<<<<<< Process done >>>>>>')
-        print('>>>'+str(ob_tot)+' objects processed.')
+        print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
 
 
@@ -876,7 +878,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-
+        start.time = time.time
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD2'
         if not os.path.exists(os.path.join(basedir, subfolder)):
@@ -996,8 +998,9 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
 
         bpy.context.scene.layers[10] = True
         bpy.context.scene.layers[0] = False
+        end_time = start_time - time.time()
         print('<<<<<<< Process done >>>>>>')
-        print('>>>'+str(ob_tot)+' objects processed.')
+        print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
 
 #_______________________________________________________________
