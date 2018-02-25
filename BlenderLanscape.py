@@ -745,7 +745,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        start.time = time.time
+        start_time = time.time()
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD1'
         if not os.path.exists(os.path.join(basedir, subfolder)):
@@ -878,7 +878,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        start.time = time.time
+        start_time = time.time()
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD2'
         if not os.path.exists(os.path.join(basedir, subfolder)):
@@ -1707,6 +1707,8 @@ class OBJECT_OT_purge(bpy.types.Operator):
 
 #-------------------------------------------------------------
 
+def substring_after(s, delim):
+    return s.partition(delim)[2]
 
 class OBJECT_OT_applycc(bpy.types.Operator):
     """Apply color correction to new texs"""
@@ -1722,15 +1724,23 @@ class OBJECT_OT_applycc(bpy.types.Operator):
             for matslot in obj.material_slots:
                 mat = matslot.material
                 o_image = mat.texture_slots[0].texture.image
+                x_image = mat.texture_slots[0].texture.image.size[0]
+                y_image = mat.texture_slots[0].texture.image.size[1]
                 o_imagepath = mat.texture_slots[0].texture.image.filepath
                 o_imagepath_abs = bpy.path.abspath(o_imagepath)
                 o_imagedir, o_filename = os.path.split(o_imagepath_abs)
+                o_filename_no_ext = os.path.splitext(o_filename)[0]
 #				o_imagedir_rel = bpy.path.relpath(o_imagedir)
                 # new image
                 nodes = mat.node_tree.nodes
                 node_tree = bpy.data.materials[mat.name].node_tree
-                t_image_name = "cc_"+o_filename
-                t_image = bpy.data.images.new(name=t_image_name, width=2048, height=2048, alpha=False)
+                if o_filename_no_ext.startswith("cc_"):
+                    print(substring_after(o_filename, "cc_"))
+                    t_image_name = "cc_2_"+o_filename_no_ext
+                else:
+                    t_image_name = "cc_"+o_filename_no_ext
+                    print(substring_after(o_filename, "cc_"))
+                t_image = bpy.data.images.new(name=t_image_name, width=x_image, height=y_image, alpha=False)
                 # set path to new image
                 fn = os.path.join(o_imagedir, t_image_name)
                 t_image.filepath_raw = fn+".png"
