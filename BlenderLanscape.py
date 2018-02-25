@@ -247,7 +247,7 @@ class ToolsPanel2(bpy.types.Panel):
             row = layout.row()
         self.layout.operator("create.grouplod", icon="OOPS", text='Create LOD cluster(s)')
         row = layout.row()
-        self.layout.operator("remove.grouplod", icon="CANCEL", text='Create LOD cluster(s)')
+        self.layout.operator("remove.grouplod", icon="CANCEL", text='Remove LOD cluster(s)')
         row = layout.row()
         self.layout.operator("exportfbx.grouplod", icon="MESH_GRID", text='FBX Export LOD cluster(s)')
         row = layout.row()
