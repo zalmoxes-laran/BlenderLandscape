@@ -863,7 +863,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
 
         bpy.context.scene.layers[11] = True
         bpy.context.scene.layers[0] = False
-        end_time = start_time - time.time()
+        end_time = time.time() - start_time
         print('<<<<<<< Process done >>>>>>')
         print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
@@ -998,7 +998,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
 
         bpy.context.scene.layers[10] = True
         bpy.context.scene.layers[0] = False
-        end_time = start_time - time.time()
+        end_time = time.time() - start_time
         print('<<<<<<< Process done >>>>>>')
         print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
