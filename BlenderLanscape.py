@@ -32,21 +32,21 @@ class ToolsPanel4(bpy.types.Panel):
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "Importer"
-     
+
     def draw(self, context):
         layout = self.layout
         obj = context.object
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
 #        row = layout.row()
-                
+
 class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "Exporters"
-     
+
     def draw(self, context):
         layout = self.layout
         obj = context.object
@@ -83,7 +83,7 @@ class ToolsPanel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Resulting file: cams.csv")
         row = layout.row()
-        
+
 class ToolsPanel3(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -91,7 +91,7 @@ class ToolsPanel3(bpy.types.Panel):
     bl_category = "BL"
     bl_label = "Quick Utils"
 #    bl_options = {'REGISTER', 'UNDO'}
-     
+
     def draw(self, context):
         layout = self.layout
         obj = context.object
@@ -104,8 +104,8 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("create.personalgroups", icon="GROUP", text='Create per-object groups')
         row = layout.row()
         self.layout.operator("remove.alluvexcept1", icon="GROUP", text='Only UV0 will survive')
-        row = layout.row()        
-        
+        row = layout.row()
+
 # DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
 #        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
 #        box = layout.box()
@@ -119,7 +119,7 @@ class ToolsPanel9(bpy.types.Panel):
     bl_category = "BL"
     bl_label = "Color Correction tool (cycles)"
 #    bl_options = {'REGISTER', 'UNDO'}
-     
+
     def draw(self, context):
         layout = self.layout
         obj = context.object
@@ -127,16 +127,16 @@ class ToolsPanel9(bpy.types.Panel):
         row = layout.row()
 
         row.label(text="Step by step procedure (selected objects):")
-   
+
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create correction nodes')
         self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
         row = layout.row()
-        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')   
+        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
         self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
         row = layout.row()
-        row.label(text="Switch engine")   
-        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')    
+        row.label(text="Switch engine")
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
 
 class ToolsPanel5(bpy.types.Panel):
@@ -146,13 +146,13 @@ class ToolsPanel5(bpy.types.Panel):
     bl_category = "BL"
     bl_label = "Photogrammetry tool"
 #    bpy.types.Scene.scn_property = bpy.props.StringProperty(name = "UndistortedPath")
-     
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         obj = context.object
 
-        obj_selected = scene.objects.active        
+        obj_selected = scene.objects.active
         row = layout.row()
         row.label(text="Set up scene", icon='RADIO')
         row = layout.row()
@@ -160,12 +160,12 @@ class ToolsPanel5(bpy.types.Panel):
         self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
         row = layout.row()
-        row.label(text="Set selected cams as:", icon='RENDER_STILL')        
+        row.label(text="Set selected cams as:", icon='RENDER_STILL')
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
         self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
         self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
         row = layout.row()
-        row.label(text="Visual mode for selected cams:", icon='NODE_SEL')  
+        row.label(text="Visual mode for selected cams:", icon='NODE_SEL')
         self.layout.operator("better.cameras", icon="NODE_SEL", text='Better Cams')
         self.layout.operator("nobetter.cameras", icon="NODE_SEL", text='Disable Better Cams')
         row = layout.row()
@@ -181,7 +181,7 @@ class ToolsPanel5(bpy.types.Panel):
             cam_ob = scene.camera
             cam_cam = scene.camera.data
             row.label(text="Active Cam: " + cam_ob.name)
-            self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')      
+            self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')
             row = layout.row()
             row = layout.row()
             row.prop(cam_cam, "lens")
@@ -193,7 +193,7 @@ class ToolsPanel5(bpy.types.Panel):
             row = layout.row()
         else:
             row.label(text="!!! Import some cams to start !!!")
-            
+
 #        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
 
 class ToolsPanel100(bpy.types.Panel):
@@ -203,7 +203,7 @@ class ToolsPanel100(bpy.types.Panel):
     bl_category = "BL"
     bl_label = "Spherical Photogrammetry tool"
 #    bpy.types.Scene.scn_property = bpy.props.StringProperty(name = "UndistortedPath")
-     
+
     def draw(self, context):
         layout = self.layout
         obj = context.object
@@ -212,7 +212,7 @@ class ToolsPanel100(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, 'BL_oriented360_path', toggle = True)
         row = layout.row()
-        row.label(text="Painting Toolbox", icon='TPAINT_HLT')    
+        row.label(text="Painting Toolbox", icon='TPAINT_HLT')
         row = layout.row()
         self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint selected from cam')
 
@@ -222,9 +222,9 @@ class ToolsPanel2(bpy.types.Panel):
     bl_context = "objectmode"
     bl_category = "BL"
     bl_label = "LOD generator"
-     
+
     def draw(self, context):
-        layout = self.layout        
+        layout = self.layout
         obj = context.object
         row = layout.row()
         if obj:
@@ -256,11 +256,11 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
     bl_idname = "export.coordname"
     bl_label = "Export coord name"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
@@ -269,10 +269,10 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
         fn = os.path.join(basedir, activename)
         file = open(fn + ".txt", 'w')
-        
+
         # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
+        for obj in selection:
+            obj.select = True
             file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
         file.close()
         return {'FINISHED'}
@@ -281,11 +281,11 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
     bl_idname = "export.coordname"
     bl_label = "Export coord name"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
@@ -294,10 +294,10 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
         fn = os.path.join(basedir, activename)
         file = open(fn + ".txt", 'w')
-        
+
         # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
+        for obj in selection:
+            obj.select = True
             file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
         file.close()
         return {'FINISHED'}
@@ -306,11 +306,11 @@ class OBJECT_OT_ExportabsButtonName(bpy.types.Operator):
     bl_idname = "export.abscoordname"
     bl_label = "Export abs coord name"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
@@ -319,10 +319,10 @@ class OBJECT_OT_ExportabsButtonName(bpy.types.Operator):
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
         fn = os.path.join(basedir, activename)
         file = open(fn + ".txt", 'w')
-        
+
         # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
+        for obj in selection:
+            obj.select = True
             x_abs = obj.location[0] + bpy.data.window_managers['WinMan'].crsx
             y_abs = obj.location[1] + bpy.data.window_managers['WinMan'].crsy
             file.write("%s %s %s %s\n" % (obj.name, x_abs, y_abs, obj.location[2]))
@@ -333,11 +333,11 @@ class OBJECT_OT_ExportButton(bpy.types.Operator):
     bl_idname = "export.coordnamelens"
     bl_label = "Export coord name lens"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
@@ -347,15 +347,15 @@ class OBJECT_OT_ExportButton(bpy.types.Operator):
 #        fn = os.path.join(basedir, activename)
         fn = os.path.join(basedir, 'cams')
         file = open(fn + ".csv", 'w')
-        
+
         # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
+        for obj in selection:
+            obj.select = True
             file.write("%s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.data.lens))
             file.close()
         return {'FINISHED'}
-    
-    
+
+
 
 def make_group(ob,context):
     nomeoggetto = str(ob.name)
@@ -364,7 +364,7 @@ def make_group(ob,context):
         bpy.ops.group.objects_remove_all()
 #        for object in currentgroup.objects:
 #            bpy.ops.group.objects_remove(group=currentgroup)
-    else:            
+    else:
         bpy.ops.group.create(name=nomeoggetto)
     ob.select = True
     bpy.ops.object.group_link(group=nomeoggetto)
@@ -373,21 +373,21 @@ class OBJECT_OT_createpersonalgroups(bpy.types.Operator):
     bl_idname = "create.personalgroups"
     bl_label = "Create groups per single object"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         for ob in bpy.context.selected_objects:
             bpy.ops.object.select_all(action='DESELECT')
             ob.select = True
             bpy.context.scene.objects.active = ob
-            make_group(ob,context)        
-        return {'FINISHED'}   
+            make_group(ob,context)
+        return {'FINISHED'}
 
 
 class OBJECT_OT_removealluvexcept1(bpy.types.Operator):
     bl_idname = "remove.alluvexcept1"
     bl_label = "Remove all the UVs except the first one"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         for ob in bpy.context.selected_objects:
             if ob.data.uv_textures[1]:
@@ -400,11 +400,11 @@ class OBJECT_OT_ExportCamButton(bpy.types.Operator):
     bl_idname = "export.camdata"
     bl_label = "Export cam data"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
         selection = bpy.context.selected_objects
@@ -412,10 +412,10 @@ class OBJECT_OT_ExportCamButton(bpy.types.Operator):
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
         fn = os.path.join(basedir, activename)
         file = open(fn + ".txt", 'w')
-        
+
         # write selected objects coordinate
-        for obj in selection:    
-            obj.select = True  
+        for obj in selection:
+            obj.select = True
             file.write("%s %s %s %s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.data.lens))
         file.close()
         return {'FINISHED'}
@@ -424,14 +424,14 @@ class OBJECT_OT_CenterMass(bpy.types.Operator):
     bl_idname = "center.mass"
     bl_label = "Center Mass"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         selection = bpy.context.selected_objects
 #        bpy.ops.object.select_all(action='DESELECT')
-        
+
         # translate objects in SCS coordinate
-        for obj in selection:    
+        for obj in selection:
             obj.select = True
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
         return {'FINISHED'}
@@ -440,7 +440,7 @@ class OBJECT_OT_LocalTexture(bpy.types.Operator):
     bl_idname = "local.texture"
     bl_label = "Local texture mode ON"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         bpy.ops.file.autopack_toggle()
         bpy.ops.file.autopack_toggle()
@@ -452,11 +452,11 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
     bl_idname = "correct.material"
     bl_label = "Correct photogr. mats"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
-        for obj in selection:    
+        for obj in selection:
             obj.select = True
             for i in range(0,len(obj.material_slots)):
 #                bpy.ops.object.material_slot_remove()
@@ -469,7 +469,7 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
                 ma.use_transparent_shadows = True
                 ma.ambient = 0.0
                 image = ma.texture_slots[0].texture.image
-                image.use_alpha = False        
+                image.use_alpha = False
         return {'FINISHED'}
 
 
@@ -477,7 +477,7 @@ class OBJECT_OT_IsometricScene(bpy.types.Operator):
     bl_idname = "isometric.scene"
     bl_label = "Isometric scene"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 #        bpy.context.scene.compression = 90
         bpy.context.scene.render.resolution_x = 3000
@@ -494,7 +494,7 @@ class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
     bl_idname = "canon6d.scene"
     bl_label = "Canon 6D scene"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         bpy.context.scene.render.resolution_x = 5472
         bpy.context.scene.render.resolution_y = 3648
@@ -509,7 +509,7 @@ class OBJECT_OT_Canon6D35(bpy.types.Operator):
     bl_idname = "canon6d35mm.camera"
     bl_label = "Set as Canon 6D 35mm"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -525,7 +525,7 @@ class OBJECT_OT_Canon6D24(bpy.types.Operator):
     bl_idname = "canon6d24mm.camera"
     bl_label = "Set as Canon 6D 14mm"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -541,7 +541,7 @@ class OBJECT_OT_Canon6D14(bpy.types.Operator):
     bl_idname = "canon6d14mm.camera"
     bl_label = "Set as Canon 6D 14mm"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -557,7 +557,7 @@ class OBJECT_OT_BetterCameras(bpy.types.Operator):
     bl_idname = "better.cameras"
     bl_label = "Better Cameras"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -575,7 +575,7 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
     bl_idname = "nobetter.cameras"
     bl_label = "Disable Better Cameras"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -583,7 +583,7 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
             cam.select = True
             cam.data.show_limits = False
         return {'FINISHED'}
-    
+
 #_______________________________________________________________________________________________________________
 
 class CreateCameraImagePlane(bpy.types.Operator):
@@ -597,26 +597,26 @@ class CreateCameraImagePlane(bpy.types.Operator):
         camAngle.type = 'SINGLE_PROP'
         camAngle.targets[0].id = imageplane.parent
         camAngle.targets[0].data_path="data.angle"
-        
+
         depth = driver.variables.new()
         depth.name = 'depth'
         depth.type = 'TRANSFORMS'
-        depth.targets[0].id = imageplane    
+        depth.targets[0].id = imageplane
         depth.targets[0].data_path = 'location'
         depth.targets[0].transform_type = 'LOC_Z'
         depth.targets[0].transform_space = 'LOCAL_SPACE'
-    
+
     def SetupDriversForImagePlane(self, imageplane):
         driver = imageplane.driver_add('scale',1).driver
         driver.type = 'SCRIPTED'
-        self.SetupDriverVariables( driver, imageplane) 
+        self.SetupDriverVariables( driver, imageplane)
         #driver.expression ="-depth*math.tan(camAngle/2)*resolution_y*pixel_y/(resolution_x*pixel_x)"
         driver.expression ="-depth*tan(camAngle/2)*bpy.context.scene.render.resolution_y * bpy.context.scene.render.pixel_aspect_y/(bpy.context.scene.render.resolution_x * bpy.context.scene.render.pixel_aspect_x)"
         driver = imageplane.driver_add('scale',0).driver
         driver.type= 'SCRIPTED'
         self.SetupDriverVariables( driver, imageplane)
         driver.expression ="-depth*tan(camAngle/2)"
-    
+
     # get selected camera (might traverse children of selected object until a camera is found?)
     # for now just pick the active object
 
@@ -624,7 +624,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
         imageplane = None
         try:
             depth = 10
-            
+
             #create imageplane
             bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
             imageplane = bpy.context.active_object
@@ -636,15 +636,15 @@ class CreateCameraImagePlane(bpy.types.Operator):
             bpy.ops.uv.smart_project(angle_limit=66,island_margin=0, user_area_weight=0)
             bpy.ops.uv.select_all(action='TOGGLE')
             bpy.ops.transform.rotate(value=1.5708, axis=(0,0,1) )
-            bpy.ops.object.editmode_toggle()        
-            
+            bpy.ops.object.editmode_toggle()
+
             imageplane.location = (0,0,-depth)
             imageplane.parent = camera
-                        
+
             #calculate scale
             #REPLACED WITH CREATING EXPRESSIONS
             self.SetupDriversForImagePlane(imageplane)
-    
+
             #setup material
             if( len( imageplane.material_slots) == 0 ):
                 bpy.ops.object.material_slot_add()
@@ -657,12 +657,12 @@ class CreateCameraImagePlane(bpy.types.Operator):
             material.name = 'mat_imageplane_'+camera.name
 
             material.use_nodes = False
-                        
-            
+
+
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
 
             undistortedpath = bpy.context.scene.BL_undistorted_path
-            
+
             if not undistortedpath:
                 raise Exception("Hey Buddy, you have to set the undistorted images path !")
 
@@ -670,18 +670,18 @@ class CreateCameraImagePlane(bpy.types.Operator):
 
             bpy.ops.view3d.tex_to_material()
 
-        except Exception as e: 
+        except Exception as e:
             imageplane.select=False
             camera.select = True
-            raise e    
+            raise e
         return {'FINISHED'}
-    
+
     def execute(self, context):
 #        camera = bpy.context.active_object #bpy.data.objects['Camera']
         scene = context.scene
         undistortedpath = bpy.context.scene.BL_undistorted_path
-        cam_ob = bpy.context.scene.camera        
-            
+        cam_ob = bpy.context.scene.camera
+
         if not undistortedpath:
             raise Exception("Set the Undistort path before to activate this command")
         else:
@@ -704,7 +704,7 @@ class OBJECT_OT_LOD0(bpy.types.Operator):
     bl_idname = "lod0.b2osg"
     bl_label = "LOD0"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         for obj in bpy.context.selected_objects:
@@ -714,7 +714,7 @@ class OBJECT_OT_LOD0(bpy.types.Operator):
             baseobj = obj.name
             if not baseobj.endswith('LOD0'):
                 obj.name = baseobj + '_LOD0'
-            if obj.data.uv_textures[0].name =='MultiTex' and obj.data.uv_textures[1].name =='Atlas':                
+            if obj.data.uv_textures[0].name =='MultiTex' and obj.data.uv_textures[1].name =='Atlas':
                 pass
             else:
                 mesh = obj.data
@@ -742,17 +742,28 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
     bl_idname = "lod1.b2osg"
     bl_label = "LOD1"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD1'
         if not os.path.exists(os.path.join(basedir, subfolder)):
             os.mkdir(os.path.join(basedir, subfolder))
+            print('There is no LOD1 folder. Creating one...')
+        else:
+            print('Found previously created LOD1 folder. I will use it')
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, per favore, prima salvalo")
 
+        ob_counter = 1
+        ob_tot = len(bpy.context.selected_objects)
+        print('<<<<<<<<<<<<<< CREATION OF LOD 1 >>>>>>>>>>>>>>')
+        print('>>>>>> '+str(ob_tot)+' objects will be processed')
+
         for obj in bpy.context.selected_objects:
+
+            print('>>> LOD 1 >>>')
+            print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
             bpy.ops.object.select_all(action='DESELECT')
             obj.select = True
             bpy.context.scene.objects.active = obj
@@ -761,7 +772,9 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 baseobj = baseobjwithlod.replace("_LOD0", "")
             else:
                 baseobj = baseobjwithlod
+            print('Creating new LOD1 object..')
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+
             for obj in bpy.context.selected_objects:
                 obj.name = baseobj + "_LOD1"
                 newobj = obj
@@ -771,9 +784,12 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 bpy.ops.object.material_slot_remove()
 
             if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
+                print('Found Atlas UV mapping layer. I will use it.')
+                uv_textures = obj.data.uv_textures
                 uv_textures = obj.data.uv_textures
                 uv_textures.remove(uv_textures[0])
             else:
+                print('Creating new UV mapping layer.')
                 bpy.ops.object.editmode_toggle()
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.remove_doubles()
@@ -781,8 +797,10 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 bpy.ops.uv.pack_islands(margin=0.001)
                 bpy.ops.object.editmode_toggle()
 
+
             # procedura di semplificazione mesh
             bpy.ops.object.editmode_toggle()
+            print('Decimating the original mesh to obtain the LOD1 mesh...')
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.mesh.select_non_manifold()
             bpy.ops.object.vertex_group_add()
@@ -800,6 +818,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
             oggetto.select = True
+            print('Creating new texture atlas for LOD1....')
 
             tempimage = bpy.data.images.new(name=lod1name, width=2048, height=2048, alpha=False)
             tempimage.filepath_raw = "//"+subfolder+'/'+lod1name+".jpg"
@@ -809,6 +828,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 uv_face.image = tempimage
 
             #--------------------------------------------------------------
+            print('Passing color data from LOD0 to LOD1...')
             bpy.context.scene.render.engine = 'BLENDER_RENDER'
             bpy.context.scene.render.use_bake_selected_to_active = True
             bpy.context.scene.render.bake_type = 'TEXTURE'
@@ -822,6 +842,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.object.bake_image()
             tempimage.save()
 
+            print('Creating custom material for LOD1...')
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod1name]
             oggetto.select = True
@@ -830,14 +851,19 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             oggetto.active_material.name = 'M_'+ oggetto.name
             oggetto.data.name = 'SM_' + oggetto.name
     #        basedir = os.path.dirname(bpy.data.filepath)
+
+            print('Saving on obj/mtl file for LOD1...')
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
             fn = os.path.join(basedir, subfolder, activename)
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False))
-            
+            ob_counter += 1
+
         bpy.context.scene.layers[11] = True
         bpy.context.scene.layers[0] = False
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(ob_tot)+' objects processed.')
         return {'FINISHED'}
 
 
@@ -848,16 +874,28 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
     bl_idname = "lod2.b2osg"
     bl_label = "LOD2"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD2'
         if not os.path.exists(os.path.join(basedir, subfolder)):
-            os.mkdir(os.path.join(basedir, subfolder))        
+            os.mkdir(os.path.join(basedir, subfolder))
+            print('There is no LOD2 folder. Creating one...')
+        else:
+            print('Found previously created LOD1 folder. I will use it')
         if not basedir:
-            raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
+            raise Exception("Il file Blender non è stato salvato, per favore, prima salvalo")
+        ob_counter = 1
+        ob_tot = len(bpy.context.selected_objects)
+        print('<<<<<<<<<<<<<< CREATION OF LOD 2 >>>>>>>>>>>>>>')
+        print('>>>>>> '+str(ob_tot)+' objects will be processed')
+
         for obj in bpy.context.selected_objects:
+            print('>>> LOD 2 >>>')
+            print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
+
+
             bpy.ops.object.select_all(action='DESELECT')
             obj.select = True
             bpy.context.scene.objects.active = obj
@@ -866,28 +904,37 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
                 baseobj = baseobjwithlod.replace("_LOD0", "")
             else:
                 baseobj = baseobjwithlod
+            print('Creating new LOD2 object..')
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+
             for obj in bpy.context.selected_objects:
                 obj.name = baseobj + "_LOD2"
                 newobj = obj
             for obj in bpy.context.selected_objects:
                 lod2name = obj.name
+
             for i in range(0,len(bpy.data.objects[lod2name].material_slots)):
                 bpy.ops.object.material_slot_remove()
 
 # se abbiamo già un atlas è inutile rifarlo
             if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
+                print('Found Atlas UV mapping layer. I will use it.')
                 uv_textures = obj.data.uv_textures
                 uv_textures.remove(uv_textures[0])
-                bpy.ops.object.editmode_toggle()
+
             else:
+                print('Creating new UV mapping layer.')
                 bpy.ops.object.editmode_toggle()
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.remove_doubles()
                 bpy.ops.uv.select_all(action='SELECT')
                 bpy.ops.uv.pack_islands(margin=0.001)
+                bpy.ops.object.editmode_toggle()
 
             # procedura di semplificazione mesh
+
+            print('Decimating the original mesh to obtain the LOD2 mesh...')
+            bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.mesh.select_non_manifold()
             bpy.ops.object.vertex_group_add()
@@ -903,6 +950,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod2name]
             oggetto.select = True
+            print('Creating new texture atlas for LOD2....')
 
             tempimage = bpy.data.images.new(name=lod2name, width=512, height=512, alpha=False)
             tempimage.filepath_raw = "//"+subfolder+'/'+lod2name+".jpg"
@@ -912,6 +960,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
                 uv_face.image = tempimage
 
             #--------------------------------------------------------------
+            print('Passing color data from LOD0 to LOD2...')
             bpy.context.scene.render.engine = 'BLENDER_RENDER'
             bpy.context.scene.render.use_bake_selected_to_active = True
             bpy.context.scene.render.bake_type = 'TEXTURE'
@@ -925,6 +974,8 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.ops.object.bake_image()
             tempimage.save()
 
+            print('Creating custom material for LOD2...')
+
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod2name]
             oggetto.select = True
@@ -935,14 +986,18 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             oggetto.active_material.name = 'M_'+ oggetto.name
             oggetto.data.name = 'SM_' + oggetto.name
 
+            print('Saving on obj/mtl file for LOD2...')
             activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
             fn = os.path.join(basedir, subfolder, activename)
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False))
-            
+            ob_counter += 1
+
         bpy.context.scene.layers[10] = True
         bpy.context.scene.layers[0] = False
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(ob_tot)+' objects processed.')
         return {'FINISHED'}
 
 #_______________________________________________________________
@@ -954,7 +1009,7 @@ def selectLOD(listobjects, lodnum, basename):
             objatgivenlod = ob
             return objatgivenlod
         else:
-            objatgivenlod = None            
+            objatgivenlod = None
     return objatgivenlod
 
 def getChildren(myObject):
@@ -970,7 +1025,7 @@ class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
     bl_idname = "exportfbx.grouplod"
     bl_label = "Export Group LOD"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         basedir = os.path.dirname(bpy.data.filepath)
         if not basedir:
@@ -986,7 +1041,7 @@ class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
                     ob.select = True
                 name = bpy.path.clean_name(obj.name)
                 fn = os.path.join(basedir, name)
-                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=1.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='RELATIVE', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)       
+                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=1.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='RELATIVE', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
             else:
                 print('The "' + obj.name + '" GLOD empty object has not the correct settings to export an FBX - LOD enabled file.')
                 obj.select = False
@@ -1001,7 +1056,7 @@ class OBJECT_OT_RemoveGroupsLOD(bpy.types.Operator):
     bl_idname = "remove.grouplod"
     bl_label = "Remove Group LOD"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         listobjects = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
@@ -1025,7 +1080,7 @@ class OBJECT_OT_CreateGroupsLOD(bpy.types.Operator):
     bl_idname = "create.grouplod"
     bl_label = "Create Group LOD"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
         listobjects = bpy.context.selected_objects
         for obj in listobjects:
@@ -1070,11 +1125,11 @@ class OBJECT_OT_ExportObjButton(bpy.types.Operator):
     bl_idname = "export.object"
     bl_label = "Export object"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
-        
+
         if not basedir:
             raise Exception("Il file Blender non è stato salvato, prima salvalo per la miseria !")
 
@@ -1082,9 +1137,9 @@ class OBJECT_OT_ExportObjButton(bpy.types.Operator):
 #        bpy.ops.object.select_all(action='DESELECT')
         activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
         fn = os.path.join(basedir, activename)
-        
+
         # write active object in obj format
-        bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')        
+        bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
         return {'FINISHED'}
 
 
@@ -1092,41 +1147,41 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
     bl_idname = "paint.cam"
     bl_label = "Paint selected from current cam"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
-        
+
         scene = context.scene
         undistortedpath = bpy.context.scene.BL_undistorted_path
-        cam_ob = bpy.context.scene.camera        
-            
+        cam_ob = bpy.context.scene.camera
+
         if not undistortedpath:
             raise Exception("Set the Undistort path before to activate this command")
         else:
             for obj in cam_ob.children:
                 if obj.name.startswith("objplane_"):
-                    obj.hide = True        
+                    obj.hide = True
             bpy.ops.paint.texture_paint_toggle()
             bpy.context.space_data.show_only_render = True
             bpy.ops.image.project_edit()
             obj_camera = bpy.context.scene.camera
-        
+
             undistortedphoto = undistortedpath+obj_camera.name
             cleanpath = bpy.path.abspath(undistortedphoto)
             bpy.ops.image.external_edit(filepath=cleanpath)
 
             bpy.context.space_data.show_only_render = False
             bpy.ops.paint.texture_paint_toggle()
-            
+
         return {'FINISHED'}
 
 class OBJECT_OT_applypaintcam(bpy.types.Operator):
     bl_idname = "applypaint.cam"
     bl_label = "Apply paint"
     bl_options = {"REGISTER"}
-    
+
     def execute(self, context):
         bpy.ops.paint.texture_paint_toggle()
-        bpy.ops.image.project_apply()  
+        bpy.ops.image.project_apply()
         bpy.ops.paint.texture_paint_toggle()
         return {'FINISHED'}
 
@@ -1134,12 +1189,12 @@ class OBJECT_OT_savepaintcam(bpy.types.Operator):
     bl_idname = "savepaint.cam"
     bl_label = "Save paint"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 #        bpy.ops.paint.texture_paint_toggle()
-        bpy.ops.image.save_dirty()  
+        bpy.ops.image.save_dirty()
         return {'FINISHED'}
-    
+
 #    print("written:", fn)
 
 #_______________________________________________________________________________________________________________
@@ -1149,16 +1204,16 @@ class OBJECT_OT_objexportbatch(bpy.types.Operator):
     bl_idname = "obj.exportbatch"
     bl_label = "Obj export batch"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
         if not basedir:
             raise Exception("Blend file is not saved")
-        
+
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
-        
+
         for obj in selection:
             obj.select = True
             name = bpy.path.clean_name(obj.name)
@@ -1173,7 +1228,7 @@ class OBJECT_OT_fbxexp(bpy.types.Operator):
     bl_idname = "fbx.exp"
     bl_label = "Fbx export UE4"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
@@ -1184,26 +1239,26 @@ class OBJECT_OT_fbxexp(bpy.types.Operator):
         fn = os.path.join(basedir, name)
         bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=100.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
 #filepath = fn + ".fbx", filter_glob="*.fbx", version='BIN7400', use_selection=True, global_scale=100.0, axis_forward='-Z', axis_up='Y', bake_space_transform=False, object_types={'MESH','EMPTY'}, use_mesh_modifiers=False, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_armature_deform_only=False, bake_anim=False, bake_anim_use_nla_strips=False, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=False, use_anim_action_all=False, use_default_take=False, use_anim_optimize=False, anim_optimize_precision=6.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
-        
+
 #        obj.select = False
         return {'FINISHED'}
-    
+
 #_______________________________________________________________________________________________________________
 
 class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
     bl_idname = "fbx.exportbatch"
     bl_label = "Fbx export batch UE4"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
         if not basedir:
             raise Exception("Blend file is not saved")
-        
+
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
-        
+
         for obj in selection:
             obj.select = True
             name = bpy.path.clean_name(obj.name)
@@ -1216,18 +1271,18 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
     bl_idname = "osgt.exportbatch"
     bl_label = "osgt export batch"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     def execute(self, context):
 
         basedir = os.path.dirname(bpy.data.filepath)
         if not basedir:
             raise Exception("Blend file is not saved")
-        
+
         bpy.ops.osg.export(SELECTED=True)
-        
+
 #        selection = bpy.context.selected_objects
 #        bpy.ops.object.select_all(action='DESELECT')
-#        
+#
 #        for obj in selection:
 #            obj.select = True
 #            name = bpy.path.clean_name(obj.name)
@@ -1236,7 +1291,7 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
 #            bpy.ops.osg.export(SELECTED=True)
 #            obj.select = False
         return {'FINISHED'}
-    
+
 
 #_______________________________________________________________________________________________________________
 
@@ -1376,7 +1431,7 @@ class OBJECT_OT_material(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-    
+
         bpy.context.scene.render.engine = 'CYCLES'
 
         for obj in bpy.context.selected_objects:
@@ -1384,7 +1439,7 @@ class OBJECT_OT_material(bpy.types.Operator):
             # create a group
             active_object_name = bpy.context.scene.objects.active.name
             test_group = bpy.data.node_groups.new(active_object_name, 'ShaderNodeTree')
-            
+
             # create group inputs
             group_inputs = test_group.nodes.new('NodeGroupInput')
             group_inputs.location = (-750,0)
@@ -1403,7 +1458,7 @@ class OBJECT_OT_material(bpy.types.Operator):
             sathue = test_group.nodes.new('ShaderNodeHueSaturation')
             sathue.location = (0, -100)
             sathue.label = 'sathue'
-    
+
             RGBcurve = test_group.nodes.new('ShaderNodeRGBCurve')
             RGBcurve.location = (-500, -100)
             RGBcurve.label = 'RGBcurve'
@@ -1414,10 +1469,10 @@ class OBJECT_OT_material(bpy.types.Operator):
 
             # link inputs
             test_group.links.new(group_inputs.outputs['tex'], RGBcurve.inputs[1])
-            
+
             #link output
             test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
-            
+
             for matslot in obj.material_slots:
                 mat = matslot.material
                 image = mat.texture_slots[0].texture.image
@@ -1449,7 +1504,7 @@ class OBJECT_OT_deactivatematerial(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-    
+
         bpy.context.scene.render.engine = 'BLENDER_RENDER'
         for obj in bpy.context.selected_objects:
             for matslot in obj.material_slots:
@@ -1466,7 +1521,7 @@ class OBJECT_OT_activatematerial(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-    
+
         bpy.context.scene.render.engine = 'CYCLES'
         for obj in bpy.context.selected_objects:
             for matslot in obj.material_slots:
@@ -1613,12 +1668,12 @@ class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
             # generate full path to file
             path_to_file = (os.path.join(folder, i.name))
 
-            # call obj operator and assign ui values                  
+            # call obj operator and assign ui values
             bpy.ops.import_scene.obj(filepath = path_to_file,
                                 axis_forward = self.axis_forward_setting,
-                                axis_up = self.axis_up_setting, 
+                                axis_up = self.axis_up_setting,
                                 use_edges = self.edges_setting,
-                                use_smooth_groups = self.smooth_groups_setting, 
+                                use_smooth_groups = self.smooth_groups_setting,
                                 use_split_objects = self.split_objects_setting,
                                 use_split_groups = self.split_groups_setting,
                                 use_groups_as_vgroups = self.groups_as_vgroups_setting,
@@ -1637,7 +1692,7 @@ class OBJECT_OT_purge(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-    
+
         bpy.ops.outliner.orphans_purge()
         bpy.ops.outliner.orphans_purge()
         bpy.ops.outliner.orphans_purge()
@@ -1657,7 +1712,7 @@ class OBJECT_OT_applycc(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        
+
         bpy.context.scene.render.engine = 'CYCLES'
 
         for obj in bpy.context.selected_objects:
@@ -1675,13 +1730,13 @@ class OBJECT_OT_applycc(bpy.types.Operator):
                 t_image = bpy.data.images.new(name=t_image_name, width=2048, height=2048, alpha=False)
                 # set path to new image
                 fn = os.path.join(o_imagedir, t_image_name)
-                t_image.filepath_raw = fn+".png"                
+                t_image.filepath_raw = fn+".png"
                 t_image.file_format = 'PNG'
 
                 tteximg = nodes.new('ShaderNodeTexImage')
                 tteximg.location = (-1100, -400)
                 tteximg.image = t_image
-                
+
                 for currnode in nodes:
                     currnode.select = False
 
@@ -1699,7 +1754,7 @@ class OBJECT_OT_applycc(bpy.types.Operator):
 #            #    bpy.context.scene.use_pass_indirect = False
 #            #    bpy.context.scene.use_pass_direct = False
 #            #    bpy.context.scene.use_selected_to_active = False
-                
+
 #            bpy.ops.object.bake(type='DIFFUSE', use_clear=True, margin=16)
 #            bpy.ops.image.save_dirty()
 
@@ -1709,7 +1764,7 @@ class OBJECT_OT_applycc(bpy.types.Operator):
 #                mat = matslot.material
 #                t_image = mat.texture_slots[0].texture.image
 #                t_image.save()
-#                
+#
         return {'FINISHED'}
 
 
@@ -1732,7 +1787,7 @@ class OBJECT_OT_removecc(bpy.types.Operator):
         #        nodes = mat.node_tree.nodes
         #        cc_node = nodes.get(mat.name)
         #        bpy.ops.node.delete_reconnect(cc_node)
-        #        
+        #
             for matslot in obj.material_slots:
                 mat = matslot.material
                 nodes = mat.node_tree.nodes
@@ -1763,7 +1818,7 @@ def register():
     bpy.utils.register_class(ToolsPanel)
     bpy.utils.register_class(ToolsPanel3)
     bpy.utils.register_class(ToolsPanel2)
-    bpy.utils.register_class(ToolsPanel100) 
+    bpy.utils.register_class(ToolsPanel100)
     bpy.utils.register_class(OBJECT_OT_ExportButton)
     bpy.utils.register_class(OBJECT_OT_ExportButtonName)
     bpy.utils.register_class(OBJECT_OT_ExportCamButton)
@@ -1787,7 +1842,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_removecc)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
-#    
+#
 #bpy.utils.register_module(__name__)
 #
 #
@@ -1801,14 +1856,14 @@ def register():
 #        max = 3.0
 #    )
 
-# define path to undistorted image 
+# define path to undistorted image
     bpy.types.Scene.BL_undistorted_path = StringProperty(
       name = "Undistorted Path",
       default = "",
       description = "Define the root path of the undistorted images",
       subtype = 'DIR_PATH'
       )
-      
+
     bpy.types.Scene.BL_oriented360_path = StringProperty(
       name = "Oriented 360 Path",
       default = "",
