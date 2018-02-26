@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.1),
+    "version": (1,3.2),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -864,6 +864,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False))
+            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time)+' seconds')
             ob_counter += 1
 
         bpy.context.scene.layers[11] = True
@@ -999,6 +1000,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False))
+            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time)+' seconds')
             ob_counter += 1
 
         bpy.context.scene.layers[10] = True
