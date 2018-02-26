@@ -1037,24 +1037,34 @@ class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
+        start_time = time.time()
         basedir = os.path.dirname(bpy.data.filepath)
         if not basedir:
             raise Exception("Blend file is not saved")
+        ob_counter = 1
         scene = context.scene
         listobjects = bpy.context.selected_objects
         for obj in listobjects:
-            if obj.get('fbx_type') is not None:
-                bpy.ops.object.select_all(action='DESELECT')
-                obj.select = True
-                bpy.context.scene.objects.active = obj
-                for ob in getChildren(obj):
-                    ob.select = True
-                name = bpy.path.clean_name(obj.name)
-                fn = os.path.join(basedir, name)
-                bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=1.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='RELATIVE', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
-            else:
-                print('The "' + obj.name + '" GLOD empty object has not the correct settings to export an FBX - LOD enabled file.')
-                obj.select = False
+            if obj.type == 'EMPTY':
+                if obj.get('fbx_type') is not None:
+                    print('Found LOD cluster to export: "'+obj.name+'", object')
+                    bpy.ops.object.select_all(action='DESELECT')
+                    obj.select = True
+                    bpy.context.scene.objects.active = obj
+                    for ob in getChildren(obj):
+                        ob.select = True
+                    name = bpy.path.clean_name(obj.name)
+                    fn = os.path.join(basedir, name)
+                    bpy.ops.export_scene.fbx(filepath= fn + ".fbx", check_existing=True, axis_forward='-Z', axis_up='Y', filter_glob="*.fbx", version='BIN7400', ui_tab='MAIN', use_selection=True, global_scale=1.0, apply_unit_scale=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}, use_mesh_modifiers=True, mesh_smooth_type='EDGE', use_mesh_edges=False, use_tspace=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, use_anim=True, use_anim_action_all=True, use_default_take=True, use_anim_optimize=True, anim_optimize_precision=6.0, path_mode='RELATIVE', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True)
+                else:
+                    print('The "' + obj.name + '" empty object has not the correct settings to export an FBX - LOD enabled file. I will skip it.')
+                    obj.select = False
+                    print('>>> Object number '+str(ob_counter)+' processed in '+str(time.time() - start_time)+' seconds')
+                    ob_counter += 1
+                    
+        end_time = time.time() - start_time
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(ob_counter)+' objects processed in '+str(end_time)+' seconds')
 
         return {'FINISHED'}
 
