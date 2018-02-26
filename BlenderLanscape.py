@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.3),
+    "version": (1,3.4),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -105,6 +105,8 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("create.personalgroups", icon="GROUP", text='Create per-object groups')
         row = layout.row()
         self.layout.operator("remove.alluvexcept1", icon="GROUP", text='Only UV0 will survive')
+        row = layout.row()
+        self.layout.operator("remove.fromallgroups", icon="LIBRARY_DATA_BROKEN", text='Remove from all groups')
         row = layout.row()
 
 # DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
@@ -398,6 +400,16 @@ class OBJECT_OT_removealluvexcept1(bpy.types.Operator):
             if ob.data.uv_textures[1]:
                 uv_textures = ob.data.uv_textures
                 uv_textures.remove(uv_textures[1])
+        return {'FINISHED'}
+
+class OBJECT_OT_removefromallgroups(bpy.types.Operator):
+    bl_idname = "remove.fromallgroups"
+    bl_label = "Remove the object(s) from all the Groups"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        for ob in bpy.context.selected_objects:
+            bpy.ops.group.objects_remove_all()
         return {'FINISHED'}
 
 
@@ -1899,6 +1911,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_material)
     bpy.utils.register_class(OBJECT_OT_removecc)
     bpy.utils.register_class(OBJECT_OT_bakecyclesdiffuse)
+    bpy.utils.register_class(OBJECT_OT_removefromallgroups)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 #
