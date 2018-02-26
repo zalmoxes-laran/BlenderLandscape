@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.0),
+    "version": (1,3.1),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -127,12 +127,16 @@ class ToolsPanel9(bpy.types.Panel):
         scene = context.scene
         row = layout.row()
 
-        row.label(text="Step by step procedure (selected objects):")
+        row.label(text="Step by step procedure")
+        row = layout.row()
+        row.label(text="for selected object(s):")
 
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create correction nodes')
         self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
         row = layout.row()
-        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
+        self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
+        row = layout.row()
+#        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
         self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
         self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
         row = layout.row()
@@ -1784,6 +1788,31 @@ class OBJECT_OT_applycc(bpy.types.Operator):
 #-------------------------------------------------------------
 
 
+class OBJECT_OT_bakecyclesdiffuse(bpy.types.Operator):
+    """Color correction to new texture set"""
+    bl_idname = "bake.cyclesdiffuse"
+    bl_label = "Transfer new color correction to a new texture set"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        
+        bpy.context.scene.render.engine = 'CYCLES'
+        tot_time = 0
+        for ob in bpy.context.selected_objects:
+            start_time = time.time()
+            print('start baking "'+ob.name+'"')
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_clear=True, save_mode='INTERNAL')
+            tot_time += (start_time - time.time())
+            print("--- %s seconds ---" % (start_time - time.time()))
+        print("--- JOB complete in %s seconds ---" % tot_time)
+
+        return {'FINISHED'}
+
+####-----------------------------------------------------------
+
 class OBJECT_OT_removecc(bpy.types.Operator):
     """Remove color correction nodes"""
     bl_idname = "remove.cc"
@@ -1853,6 +1882,7 @@ def register():
     bpy.utils.register_class(ImportMultipleObjs)
     bpy.utils.register_class(OBJECT_OT_material)
     bpy.utils.register_class(OBJECT_OT_removecc)
+    bpy.utils.register_class(OBJECT_OT_bakecyclesdiffuse)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 #
@@ -1898,6 +1928,7 @@ def unregister():
     bpy.utils.unregister_class(OBJECT_OT_createpersonalgroups)
     bpy.utils.unregister_class(OBJECT_OT_removealluvexcept1)
     bpy.utils.unregister_class(OBJECT_OT_fbxexp)
+    bpy.utils.unregister_class(OBJECT_OT_bakecyclesdiffuse)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
