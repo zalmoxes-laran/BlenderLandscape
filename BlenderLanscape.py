@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.2),
+    "version": (1,3.3),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -767,7 +767,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
         print('>>>>>> '+str(ob_tot)+' objects will be processed')
 
         for obj in bpy.context.selected_objects:
-
+            start_time_ob = time.time()
             print('>>> LOD 1 >>>')
             print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
             bpy.ops.object.select_all(action='DESELECT')
@@ -864,7 +864,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False))
-            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time)+' seconds')
+            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time_ob)+' seconds')
             ob_counter += 1
 
         bpy.context.scene.layers[11] = True
@@ -902,7 +902,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
         for obj in bpy.context.selected_objects:
             print('>>> LOD 2 >>>')
             print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
-
+            start_time_ob = time.time()
 
             bpy.ops.object.select_all(action='DESELECT')
             obj.select = True
@@ -1000,7 +1000,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             bpy.ops.export_scene.obj(filepath=fn + ".obj", use_selection=True, axis_forward='Y', axis_up='Z', path_mode='RELATIVE')
 
             bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False))
-            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time)+' seconds')
+            print('>>> "'+obj.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object baked in '+str(time.time() - start_time_ob)+' seconds')
             ob_counter += 1
 
         bpy.context.scene.layers[10] = True
@@ -1061,7 +1061,7 @@ class OBJECT_OT_ExportGroupsLOD(bpy.types.Operator):
                     obj.select = False
                     print('>>> Object number '+str(ob_counter)+' processed in '+str(time.time() - start_time)+' seconds')
                     ob_counter += 1
-                    
+
         end_time = time.time() - start_time
         print('<<<<<<< Process done >>>>>>')
         print('>>>'+str(ob_counter)+' objects processed in '+str(end_time)+' seconds')
