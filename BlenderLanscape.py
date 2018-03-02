@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.4),
+    "version": (1,3.5),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -52,32 +52,36 @@ class ToolsPanel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
         row = layout.row()
-        row.label(text="Active object is: " + obj.name)
-        row = layout.row()
-        row.label(text="Override")
-        row = layout.row()
-        row.prop(obj, "name")
-        row = layout.row()
-#        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates of selected')
-#        row = layout.row()
-        self.layout.operator("export.coordname", icon="WORLD_DATA", text='position-name of selected')
-        row = layout.row()
-        self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
-        row = layout.row()
-        row.label(text="Resulting file: " + obj.name + ".txt")
-        row = layout.row()
-        self.layout.operator("export.object", icon="OBJECT_DATA", text='Export selected in one file')
-        row = layout.row()
-        row.label(text="Resulting file: " + obj.name + ".obj")
-        row = layout.row()
-        self.layout.operator("obj.exportbatch", icon="OBJECT_DATA", text='Export selected in several obj files')
-        row = layout.row()
-        self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx for UE4')
-        row = layout.row()
-        self.layout.operator("fbx.exp", icon="OBJECT_DATA", text='Export selected in fbx for UE4')
-        row = layout.row()
-        self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
-        row = layout.row()
+        if obj is not None:
+            row.label(text="Active object is: " + obj.name)
+            row = layout.row()
+            row.label(text="Override")
+            row = layout.row()
+            row.prop(obj, "name")
+            row = layout.row()
+    #        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates of selected')
+    #        row = layout.row()
+            self.layout.operator("export.coordname", icon="WORLD_DATA", text='position-name of selected')
+            row = layout.row()
+            self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
+            row = layout.row()
+            row.label(text="Resulting file: " + obj.name + ".txt")
+            row = layout.row()
+            self.layout.operator("export.object", icon="OBJECT_DATA", text='Export selected in one file')
+            row = layout.row()
+            row.label(text="Resulting file: " + obj.name + ".obj")
+            row = layout.row()
+            self.layout.operator("obj.exportbatch", icon="OBJECT_DATA", text='Export selected in several obj files')
+            row = layout.row()
+            self.layout.operator("fbx.exportbatch", icon="OBJECT_DATA", text='Export selected in several fbx for UE4')
+            row = layout.row()
+            self.layout.operator("fbx.exp", icon="OBJECT_DATA", text='Export selected in fbx for UE4')
+            row = layout.row()
+            self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
+            row = layout.row()
+        else:
+            row.label(text="Select object(s) to see tools here.")
+            row = layout.row()
         self.layout.operator("export.camdata", icon="OBJECT_DATA", text='Export cameras')
         row = layout.row()
         self.layout.operator("export.coordnamelens", icon="WORLD_DATA", text='Name-position-lens (selected cams)')
