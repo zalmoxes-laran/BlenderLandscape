@@ -34,7 +34,7 @@ def areamesh(obj):
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     area = sum(f.calc_area() for f in bm.faces)
-    print(area)
+#    print(area)
     bm.free()    
     return area
 
@@ -71,14 +71,14 @@ def clean_name(name):
     return cname
 
 def getnextobjname(name):
-    print("prendo in carico l'oggetto: "+name)
+#    print("prendo in carico l'oggetto: "+name)
     #lst = ['this','is','just','a','test']
 #    if fnmatch.filter(name, '.0*'):
     if name.endswith(".001") or name.endswith(".002") or name.endswith(".003") or name.endswith(".004") or name.endswith(".005"):
         current_nonumber = name[:-3]
-        print("ho ridotto il nome a :"+current_nonumber)
+#        print("ho ridotto il nome a :"+current_nonumber)
         current_n_integer = int(name[-3:])
-        print("aggiungo un numero")
+#        print("aggiungo un numero")
         current_n_integer +=1
         print(current_n_integer)
         if current_n_integer > 9:
@@ -92,7 +92,7 @@ def getnextobjname(name):
 
 def newimage2selpoly(ob, nametex):
 #    objectname = ob.name
-    print('I will use a tex name like this:'+nametex)
+    print("I'm creating texture: T_"+nametex+".png")
     me = ob.data
     tempimage = bpy.data.images.new(name=nametex, width=4096, height=4096, alpha=False)
     tempimage.filepath_raw = "//T_"+nametex+".png"
@@ -1967,11 +1967,13 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-
+        totmodels=len(context.selected_objects)
         padding = 0.05
         #ob = bpy.context.object
-
+        print("Found "+str(totmodels)+" models.")
+        currentmod = 1
         for ob in context.selected_objects:
+            print("I'm starting to process: "+ob.name+" model ("+str(currentmod)+"/"+str(totmodels)+")")
             bpy.ops.object.select_all(action='DESELECT')
             ob.select = True
             bpy.context.scene.objects.active = ob
@@ -1989,13 +1991,13 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             current_material = 1
             for mat in range(materialnumber-1):
                 bpy.ops.object.editmode_toggle()
-                print("Procedo a selezionare l'isola: "+str(mat))
+                print("Selecting polygons for mat: "+str(mat+1)+"/"+str(materialnumber))
                 bpy.ops.mesh.select_all(action='DESELECT')
                 me.update()
                 poly = len(me.polygons)
                 bm = bmesh.from_edit_mesh(me)
                 for i in range(5):
-                    print(i)
+                    #print(i+1)
                     r = choice([(0,poly)])
                     random_index=(randint(*r))
                     if hasattr(bm.faces, "ensure_lookup_table"):
@@ -2009,7 +2011,7 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
                     poly_sel = len([p for p in ob.data.polygons if p.select])
                 bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=padding)
                 bpy.ops.uv.pack_islands(margin=padding)
-                print("Creating new textures and materials")
+                print("Creating new textures (remember to save them later..)")
                 bpy.ops.object.editmode_toggle()
                 current_tex_name = (cleaned_obname+'_t'+str(current_material))
                 newimage2selpoly(ob, current_tex_name)
@@ -2025,7 +2027,6 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             bpy.ops.object.editmode_toggle()
             current_tex_name = (cleaned_obname+'_t'+str(current_material))
             newimage2selpoly(ob, current_tex_name)
-
             bpy.ops.object.select_all(action='DESELECT')
             ob.select = True
             bpy.context.scene.objects.active = ob
@@ -2043,6 +2044,7 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             bpy.ops.mesh.remove_doubles()
             bpy.ops.object.editmode_toggle()
             #bpy.ops.view3d.texface_to_material()
+            currentmod += 1
 
         return {'FINISHED'}
 
