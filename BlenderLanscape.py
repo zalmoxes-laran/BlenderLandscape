@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.5),
+    "version": (1,3.6),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -25,7 +25,83 @@ from bpy.props import (BoolProperty,
                        CollectionProperty
                        )
 
+import bmesh
+from random import randint, choice
+
 # Panel creation in the toolshelf, category B2osg
+
+def areamesh(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    area = sum(f.calc_area() for f in bm.faces)
+    print(area)
+    bm.free()    
+    return area
+
+def desiredmatnumber(ob):
+    area = areamesh(ob)
+    if area > 21:
+        if area <103:
+            desmatnumber = 6  
+            if area < 86:
+                desmatnumber = 5
+                if area < 68:
+                    desmatnumber = 4
+                    if area < 52:
+                        desmatnumber = 3
+                        if area < 37:
+                            desmatnumber = 2
+        else:
+            desmatnumber = 6
+            print("Be carefull ! the mesh is "+str(area)+" square meters is too big, consider to reduce it under 100. I will use six 4096 texture to describe it.")
+                         
+    else:
+        desmatnumber = 1
+        
+    return desmatnumber
+        
+
+#### start of funcions for multi-material baking #####
+
+def clean_name(name):
+    if name.endswith(".001") or name.endswith(".002") or name.endswith(".003") or name.endswith(".004") or name.endswith(".005")or name.endswith(".006")or name.endswith(".007")or name.endswith(".008")or name.endswith(".009"):
+        cname = name[:-4]
+    else:
+        cname = name   
+    return cname
+
+def getnextobjname(name):
+    print("prendo in carico l'oggetto: "+name)
+    #lst = ['this','is','just','a','test']
+#    if fnmatch.filter(name, '.0*'):
+    if name.endswith(".001") or name.endswith(".002") or name.endswith(".003") or name.endswith(".004") or name.endswith(".005"):
+        current_nonumber = name[:-3]
+        print("ho ridotto il nome a :"+current_nonumber)
+        current_n_integer = int(name[-3:])
+        print("aggiungo un numero")
+        current_n_integer +=1
+        print(current_n_integer)
+        if current_n_integer > 9:
+            nextname = current_nonumber+'0'+str(current_n_integer)
+        else:
+            nextname = current_nonumber+'00'+str(current_n_integer)
+    else:
+        nextname = name+'.001'    
+    print(nextname)
+    return nextname
+
+def newimage2selpoly(ob, nametex):
+#    objectname = ob.name
+    print('I will use a tex name like this:'+nametex)
+    me = ob.data
+    tempimage = bpy.data.images.new(name=nametex, width=4096, height=4096, alpha=False)
+    tempimage.filepath_raw = "//T_"+nametex+".png"
+    tempimage.file_format = 'PNG'
+    for uv_face in me.uv_textures.active.data:
+        uv_face.image = tempimage
+    return
+
+#### end of funcions for multi-material baking #####
 
 class ToolsPanel4(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -112,6 +188,9 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("remove.fromallgroups", icon="LIBRARY_DATA_BROKEN", text='Remove from all groups')
         row = layout.row()
+        self.layout.operator("multimaterial.layout", icon="IMGDISPLAY", text='Multimaterial layout')
+        row = layout.row()
+
 
 # DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
 #        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
@@ -1881,6 +1960,91 @@ class OBJECT_OT_removecc(bpy.types.Operator):
 
 #_______________________________________________________________________________________________________________
 
+class OBJECT_OT_multimateriallayout(bpy.types.Operator):
+    """Create multimaterial layout on selected mesh"""
+    bl_idname = "multimaterial.layout"
+    bl_label = "Create a multimaterial layout for selected meshe(s)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        padding = 0.05
+        #ob = bpy.context.object
+
+        for ob in context.selected_objects:
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            currentobjname = ob.name    
+            objectname = ob.name
+            me = ob.data
+            tot_poly = len(me.polygons)
+            materialnumber = desiredmatnumber(ob) #final number of whished materials
+            materialsoriginal=len(ob.material_slots)
+            cleaned_obname = clean_name(objectname)
+            print("Removing the old "+str(materialsoriginal)+" materials..")
+
+            for i in range(0,materialsoriginal):
+                bpy.ops.object.material_slot_remove()
+            current_material = 1
+            for mat in range(materialnumber-1):
+                bpy.ops.object.editmode_toggle()
+                print("Procedo a selezionare l'isola: "+str(mat))
+                bpy.ops.mesh.select_all(action='DESELECT')
+                me.update()
+                poly = len(me.polygons)
+                bm = bmesh.from_edit_mesh(me)
+                for i in range(5):
+                    print(i)
+                    r = choice([(0,poly)])
+                    random_index=(randint(*r))
+                    if hasattr(bm.faces, "ensure_lookup_table"):
+                        bm.faces.ensure_lookup_table()
+                    bm.faces[random_index].select = True
+                    bmesh.update_edit_mesh(me, True)
+                poly_sel = 5 
+                while poly_sel <= (tot_poly/materialnumber):
+                    bpy.ops.mesh.select_more(use_face_step=True)
+                    ob.update_from_editmode()
+                    poly_sel = len([p for p in ob.data.polygons if p.select])
+                bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=padding)
+                bpy.ops.uv.pack_islands(margin=padding)
+                print("Creating new textures and materials")
+                bpy.ops.object.editmode_toggle()
+                current_tex_name = (cleaned_obname+'_t'+str(current_material))
+                newimage2selpoly(ob, current_tex_name)
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.separate(type='SELECTED')
+                bpy.ops.object.editmode_toggle()
+                current_material += 1
+
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.uv.smart_project(island_margin=padding)
+            bpy.ops.uv.pack_islands(margin=padding)
+            bpy.ops.object.editmode_toggle()
+            current_tex_name = (cleaned_obname+'_t'+str(current_material))
+            newimage2selpoly(ob, current_tex_name)
+
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            currentobjname = ob.name
+
+            for mat in range(materialnumber-1):
+                
+                bpy.data.objects[getnextobjname(currentobjname)].select = True
+                nextname = getnextobjname(currentobjname)
+                currentobjname = nextname
+
+            bpy.ops.object.join()
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.remove_doubles()
+            bpy.ops.object.editmode_toggle()
+            #bpy.ops.view3d.texface_to_material()
+
+        return {'FINISHED'}
 
 
 
@@ -1916,6 +2080,7 @@ def register():
     bpy.utils.register_class(OBJECT_OT_removecc)
     bpy.utils.register_class(OBJECT_OT_bakecyclesdiffuse)
     bpy.utils.register_class(OBJECT_OT_removefromallgroups)
+    bpy.utils.register_class(OBJECT_OT_multimateriallayout)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 #
@@ -1962,6 +2127,7 @@ def unregister():
     bpy.utils.unregister_class(OBJECT_OT_removealluvexcept1)
     bpy.utils.unregister_class(OBJECT_OT_fbxexp)
     bpy.utils.unregister_class(OBJECT_OT_bakecyclesdiffuse)
+    bpy.utils.unregister_class(OBJECT_OT_multimateriallayout)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.colcor_bricon
     bpy.utils.unregister_module(__name__)
