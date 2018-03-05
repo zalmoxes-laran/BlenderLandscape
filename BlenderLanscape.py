@@ -35,14 +35,14 @@ def areamesh(obj):
     bm.from_mesh(obj.data)
     area = sum(f.calc_area() for f in bm.faces)
 #    print(area)
-    bm.free()    
+    bm.free()
     return area
 
 def desiredmatnumber(ob):
     area = areamesh(ob)
     if area > 21:
         if area <103:
-            desmatnumber = 6  
+            desmatnumber = 6
             if area < 86:
                 desmatnumber = 5
                 if area < 68:
@@ -54,12 +54,12 @@ def desiredmatnumber(ob):
         else:
             desmatnumber = 6
             print("Be carefull ! the mesh is "+str(area)+" square meters is too big, consider to reduce it under 100. I will use six 4096 texture to describe it.")
-                         
+
     else:
         desmatnumber = 1
-        
+
     return desmatnumber
-        
+
 
 #### start of funcions for multi-material baking #####
 
@@ -67,7 +67,7 @@ def clean_name(name):
     if name.endswith(".001") or name.endswith(".002") or name.endswith(".003") or name.endswith(".004") or name.endswith(".005")or name.endswith(".006")or name.endswith(".007")or name.endswith(".008")or name.endswith(".009"):
         cname = name[:-4]
     else:
-        cname = name   
+        cname = name
     return cname
 
 def getnextobjname(name):
@@ -86,7 +86,7 @@ def getnextobjname(name):
         else:
             nextname = current_nonumber+'00'+str(current_n_integer)
     else:
-        nextname = name+'.001'    
+        nextname = name+'.001'
     print(nextname)
     return nextname
 
@@ -1973,11 +1973,15 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
         print("Found "+str(totmodels)+" models.")
         currentmod = 1
         for ob in context.selected_objects:
+            print("")
+            print("***********************")
             print("I'm starting to process: "+ob.name+" model ("+str(currentmod)+"/"+str(totmodels)+")")
+            print("***********************")
+            print("")
             bpy.ops.object.select_all(action='DESELECT')
             ob.select = True
             bpy.context.scene.objects.active = ob
-            currentobjname = ob.name    
+            currentobjname = ob.name
             objectname = ob.name
             me = ob.data
             tot_poly = len(me.polygons)
@@ -2004,7 +2008,7 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
                         bm.faces.ensure_lookup_table()
                     bm.faces[random_index].select = True
                     bmesh.update_edit_mesh(me, True)
-                poly_sel = 5 
+                poly_sel = 5
                 while poly_sel <= (tot_poly/materialnumber):
                     bpy.ops.mesh.select_more(use_face_step=True)
                     ob.update_from_editmode()
@@ -2033,7 +2037,7 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             currentobjname = ob.name
 
             for mat in range(materialnumber-1):
-                
+
                 bpy.data.objects[getnextobjname(currentobjname)].select = True
                 nextname = getnextobjname(currentobjname)
                 currentobjname = nextname
