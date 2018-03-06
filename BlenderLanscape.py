@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.6),
+    "version": (1,3.7),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -1967,12 +1967,14 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        start_time = time.time()
         totmodels=len(context.selected_objects)
         padding = 0.05
         #ob = bpy.context.object
         print("Found "+str(totmodels)+" models.")
         currentmod = 1
         for ob in context.selected_objects:
+            start_time_ob = time.time()
             print("")
             print("***********************")
             print("I'm starting to process: "+ob.name+" model ("+str(currentmod)+"/"+str(totmodels)+")")
@@ -2048,11 +2050,14 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             bpy.ops.mesh.remove_doubles()
             bpy.ops.object.editmode_toggle()
             #bpy.ops.view3d.texface_to_material()
+            print('>>> "'+obj.name+'" ('+str(currentmod)+'/'+ str(totmodels) +') object baked in '+str(time.time() - start_time_ob)+' seconds')
             currentmod += 1
 
+        print(' ')
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(totmodels)+' objects processed in '+str(end_time)+' seconds')
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>')       
         return {'FINISHED'}
-
-
 
 def menu_func_import(self, context):
     self.layout.operator(ImportMultipleObjs.bl_idname, text="Wavefont Batch (.obj)")
