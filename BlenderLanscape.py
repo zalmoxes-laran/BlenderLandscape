@@ -1,7 +1,7 @@
 bl_info = {
     "name": "BlenderLandscape",
     "author": "E. Demetrescu",
-    "version": (1,3.7),
+    "version": (1,3.8),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "Blender tools for Landscape reconstruction",
@@ -80,14 +80,14 @@ def getnextobjname(name):
         current_n_integer = int(name[-3:])
 #        print("aggiungo un numero")
         current_n_integer +=1
-        print(current_n_integer)
+#        print(current_n_integer)
         if current_n_integer > 9:
             nextname = current_nonumber+'0'+str(current_n_integer)
         else:
             nextname = current_nonumber+'00'+str(current_n_integer)
     else:
         nextname = name+'.001'
-    print(nextname)
+#    print(nextname)
     return nextname
 
 def newimage2selpoly(ob, nametex):
@@ -2050,9 +2050,9 @@ class OBJECT_OT_multimateriallayout(bpy.types.Operator):
             bpy.ops.mesh.remove_doubles()
             bpy.ops.object.editmode_toggle()
             #bpy.ops.view3d.texface_to_material()
-            print('>>> "'+obj.name+'" ('+str(currentmod)+'/'+ str(totmodels) +') object baked in '+str(time.time() - start_time_ob)+' seconds')
+            print('>>> "'+ob.name+'" ('+str(currentmod)+'/'+ str(totmodels) +') object baked in '+str(time.time() - start_time_ob)+' seconds')
             currentmod += 1
-
+        end_time = time.time() - start_time
         print(' ')
         print('<<<<<<< Process done >>>>>>')
         print('>>>'+str(totmodels)+' objects processed in '+str(end_time)+' seconds')
