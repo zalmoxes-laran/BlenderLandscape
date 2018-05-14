@@ -1,7 +1,6 @@
 import bpy
 import os
 
-
 def assignmatslots(ob, matlist):
     #given an object and a list of material names
     #removes all material slots form the object

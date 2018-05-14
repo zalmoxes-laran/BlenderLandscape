@@ -108,7 +108,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
         else:
             print('Found previously created LOD1 folder. I will use it')
         if not basedir:
-            raise Exception("Il file Blender non √® stato salvato, per favore, prima salvalo")
+            raise Exception("Save the blend file")
 
         ob_counter = 1
         ob_tot = len(bpy.context.selected_objects)
@@ -166,7 +166,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             obj.modifiers["Decimate"].vertex_group = "Group"
             obj.modifiers["Decimate"].invert_vertex_group = True
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            # ora la mesh √® semplificata
+            # ora la mesh Ë semplificata
             #------------------------------------------------------------------
 
 
@@ -242,7 +242,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
         else:
             print('Found previously created LOD1 folder. I will use it')
         if not basedir:
-            raise Exception("Il file Blender non √® stato salvato, per favore, prima salvalo")
+            raise Exception("Save the blend file")
         ob_counter = 1
         ob_tot = len(bpy.context.selected_objects)
         print('<<<<<<<<<<<<<< CREATION OF LOD 2 >>>>>>>>>>>>>>')
@@ -273,7 +273,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             for i in range(0,len(bpy.data.objects[lod2name].material_slots)):
                 bpy.ops.object.material_slot_remove()
 
-# se abbiamo gi√† un atlas √® inutile rifarlo
+# se abbiamo gi‡ un atlas Ë inutile rifarlo
             if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
                 print('Found Atlas UV mapping layer. I will use it.')
                 uv_textures = obj.data.uv_textures
@@ -302,7 +302,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             obj.modifiers["Decimate"].vertex_group = "Group"
             obj.modifiers["Decimate"].invert_vertex_group = True
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            # ora la mesh √® semplificata
+            # ora la mesh Ë semplificata
             #------------------------------------------------------------------
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod2name]

@@ -16,24 +16,28 @@ class ToolsPanel9(bpy.types.Panel):
         obj = context.object
         scene = context.scene
         row = layout.row()
-
-        row.label(text="Step by step procedure")
-        row = layout.row()
-        row.label(text="for selected object(s):")
-        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
-        self.layout.operator("ccnode.material", icon="ASSET_MANAGER", text='Create correction node')
-        self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
-        row = layout.row()
-        self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
-        row = layout.row()
-#        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
-        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
-        self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
-        self.layout.operator("removeccnode.material", icon="CANCEL", text='remove cc node')   
-        row = layout.row()     
-        row.label(text="Switch engine")
-        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
-        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
+        if obj.type not in ['MESH'] or obj == None:
+#        if bpy.context.selected_objects == None or bpy.context.scene.objects.active == None:
+            row = layout.row()
+            row.label(text="Select a mesh to start")
+        else:    
+            row.label(text="Step by step procedure")
+            row = layout.row()
+            row.label(text="for selected object(s):")
+            self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
+            self.layout.operator("ccnode.material", icon="ASSET_MANAGER", text='Create correction node')
+            self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
+            row = layout.row()
+            self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
+            row = layout.row()
+    #        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
+            self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
+            self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
+            self.layout.operator("removeccnode.material", icon="CANCEL", text='remove cc node')   
+            row = layout.row()     
+            row.label(text="Switch engine")
+            self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
+            self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
 
 class OBJECT_OT_removeccnode(bpy.types.Operator):
     """Remove cc node for selected objects"""
@@ -168,8 +172,6 @@ class OBJECT_OT_activatematerial(bpy.types.Operator):
         return {'FINISHED'}
 #-------------------------------------------------------------
 
-def substring_after(s, delim):
-    return s.partition(delim)[2]
 
 class OBJECT_OT_applycc(bpy.types.Operator):
     """Apply color correction to new texs"""
@@ -184,61 +186,8 @@ class OBJECT_OT_applycc(bpy.types.Operator):
         for obj in bpy.context.selected_objects:
             for matslot in obj.material_slots:
                 mat = matslot.material
-                o_image = mat.texture_slots[0].texture.image
-                x_image = mat.texture_slots[0].texture.image.size[0]
-                y_image = mat.texture_slots[0].texture.image.size[1]
-                o_imagepath = mat.texture_slots[0].texture.image.filepath
-                o_imagepath_abs = bpy.path.abspath(o_imagepath)
-                o_imagedir, o_filename = os.path.split(o_imagepath_abs)
-                o_filename_no_ext = os.path.splitext(o_filename)[0]
-#				o_imagedir_rel = bpy.path.relpath(o_imagedir)
-                # new image
-                nodes = mat.node_tree.nodes
-                node_tree = bpy.data.materials[mat.name].node_tree
-                if o_filename_no_ext.startswith("cc_"):
-                    print(substring_after(o_filename, "cc_"))
-                    t_image_name = "cc_2_"+o_filename_no_ext
-                else:
-                    t_image_name = "cc_"+o_filename_no_ext
-                    print(substring_after(o_filename, "cc_"))
-                t_image = bpy.data.images.new(name=t_image_name, width=x_image, height=y_image, alpha=False)
-                # set path to new image
-                fn = os.path.join(o_imagedir, t_image_name)
-                t_image.filepath_raw = fn+".png"
-                t_image.file_format = 'PNG'
+                create_new_tex_set(mat,"cc")
 
-                tteximg = nodes.new('ShaderNodeTexImage')
-                tteximg.location = (-1100, -400)
-                tteximg.image = t_image
-
-                for currnode in nodes:
-                    currnode.select = False
-
-                # node_tree.nodes.select_all(action='DESELECT')
-                tteximg.select = True
-                node_tree.nodes.active = tteximg
-                mat.texture_slots[0].texture.image = t_image
-
-        #active_object_name = bpy.context.scene.objects.active.name
-
-#            bpy.context.scene.cycles.samples = 1
-#            bpy.context.scene.cycles.max_bounces = 7
-#            bpy.context.scene.cycles.bake_type = 'DIFFUSE'
-#            #    bpy.context.scene.use_pass_color = True
-#            #    bpy.context.scene.use_pass_indirect = False
-#            #    bpy.context.scene.use_pass_direct = False
-#            #    bpy.context.scene.use_selected_to_active = False
-
-#            bpy.ops.object.bake(type='DIFFUSE', use_clear=True, margin=16)
-#            bpy.ops.image.save_dirty()
-
-#
-#            remove.cc()
-#            for matslot in obj.material_slots:
-#                mat = matslot.material
-#                t_image = mat.texture_slots[0].texture.image
-#                t_image.save()
-#
         return {'FINISHED'}
 
 
