@@ -1,0 +1,33 @@
+import bpy
+import os
+
+class ToolsPanel_TM(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "TOOLS"
+    bl_context = "objectmode"
+    bl_category = "BL"
+    bl_label = "Texture merger (cycles)"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+        scene = context.scene
+        row = layout.row()
+
+#        row.label(text="Step by step procedure")
+#        row = layout.row()
+#        row.label(text="for selected object(s):")
+
+        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create correction nodes')
+#        self.layout.operator("apply.cc", icon="FILE_TICK", text='Create new texture set')
+#        row = layout.row()
+#        self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
+        row = layout.row()
+#        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
+        self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
+        self.layout.operator("remove.cc", icon="CANCEL", text='Use new textures (yoo-hoo!)')
+#        row = layout.row()
+#        row.label(text="Switch engine")
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
+        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')

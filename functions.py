@@ -3,6 +3,92 @@ import time
 import bmesh
 from random import randint, choice
 
+
+# for cycles material
+
+def create_correction_nodegroup(name):
+
+    # create a group
+#    active_object_name = bpy.context.scene.objects.active.name
+    test_group = bpy.data.node_groups.new(name, 'ShaderNodeTree')
+#    test_group.label = label
+
+    # create group inputs
+    group_inputs = test_group.nodes.new('NodeGroupInput')
+    group_inputs.location = (-750,0)
+    test_group.inputs.new('NodeSocketColor','tex')
+
+    # create group outputs
+    group_outputs = test_group.nodes.new('NodeGroupOutput')
+    group_outputs.location = (300,0)
+    test_group.outputs.new('NodeSocketColor','cortex')
+
+    # create three math nodes in a group
+    bricon = test_group.nodes.new('ShaderNodeBrightContrast')
+    bricon.location = (-220, -100)
+    bricon.label = 'bricon'
+
+    sathue = test_group.nodes.new('ShaderNodeHueSaturation')
+    sathue.location = (0, -100)
+    sathue.label = 'sathue'
+
+    RGBcurve = test_group.nodes.new('ShaderNodeRGBCurve')
+    RGBcurve.location = (-500, -100)
+    RGBcurve.label = 'RGBcurve'
+
+    # link nodes together
+    test_group.links.new(sathue.inputs[4], bricon.outputs[0])
+    test_group.links.new(bricon.inputs[0], RGBcurve.outputs[0])
+
+    # link inputs
+    test_group.links.new(group_inputs.outputs['tex'], RGBcurve.inputs[1])
+
+    #link output
+    test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
+
+def find_cc_node(mat):
+    mat_nodes = mat.node_tree.nodes
+    for node in mat_nodes:
+        if node.name == "colcornode":
+            cc_node = node
+            pass
+        else:
+            cc_node = None
+    return cc_node
+
+def create_texture_set():#(ob,context):
+    
+    for obj in bpy.context.selected_objects:
+        active_object_name = bpy.context.scene.objects.active.name
+        create_correction_nodegroup(active_object_name)
+
+        for matslot in obj.material_slots:
+            mat = matslot.material
+            image = mat.texture_slots[0].texture.image
+            mat.use_nodes = True
+            mat.node_tree.nodes.clear()
+            links = mat.node_tree.links
+            nodes = mat.node_tree.nodes
+            output = nodes.new('ShaderNodeOutputMaterial')
+            output.location = (0, 0)
+            mainNode = nodes.new('ShaderNodeBsdfDiffuse')
+            mainNode.location = (-400, -50)
+            teximg = nodes.new('ShaderNodeTexImage')
+            teximg.location = (-1100, -50)
+            teximg.image = image
+            colcor = nodes.new(type="ShaderNodeGroup")
+            colcor.node_tree = (bpy.data.node_groups[active_object_name])
+            colcor.location = (-800, -50)
+            links.new(teximg.outputs[0], colcor.inputs[0])
+            links.new(colcor.outputs[0], mainNode.inputs[0])
+            links.new(mainNode.outputs[0], output.inputs[0])
+            colcor.name = "colcornode"
+
+def remove_cc_node(mat):
+    cc_node = find_cc_node(mat)
+    if cc_node is not None:
+        mat.node_tree.nodes.remove(cc_node)
+
 # for quick utils____________________________________________
 def make_group(ob,context):
     nomeoggetto = str(ob.name)
