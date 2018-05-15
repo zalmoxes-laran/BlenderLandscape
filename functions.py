@@ -4,13 +4,27 @@ import time
 import bmesh
 from random import randint, choice
 
+def remove_ori_image(mat):
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    orimagenode = node_retriever(mat, "original")
+    newimagenode = node_retriever(mat, "cc_image")
+    nodes.remove(orimagenode)
+    if newimagenode is not None:
+        newimagenode.name = "original"
+        newimagenode.location = (-1100, -50)
+
+def set_texset(mat, type):
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    imagenode = node_retriever(mat, type)
+    diffusenode = node_retriever(mat, "diffuse")
+    links.new(imagenode.outputs[0], diffusenode.inputs[0])
 
 def substring_after(s, delim):
     return s.partition(delim)[2]
 
-
 def create_new_tex_set(mat, type):
-    
     #retrieve image specs and position from material
     o_image = mat.texture_slots[0].texture.image
     x_image = mat.texture_slots[0].texture.image.size[0]
@@ -22,14 +36,14 @@ def create_new_tex_set(mat, type):
 
     nodes = mat.node_tree.nodes
     node_tree = bpy.data.materials[mat.name].node_tree
-    if type == "cc":
+    if type == "cc_image":
         if o_filename_no_ext.startswith("cc_"):
             print(substring_after(o_filename, "cc_"))
             t_image_name = "cc_2_"+o_filename_no_ext
         else:
             t_image_name = "cc_"+o_filename_no_ext
             print(substring_after(o_filename, "cc_"))
-    if type == "source_paint":
+    if type == "source_paint_node":
         t_image_name = "sp_"+o_filename_no_ext
     
     t_image = bpy.data.images.new(name=t_image_name, width=x_image, height=y_image, alpha=False)
@@ -51,51 +65,59 @@ def create_new_tex_set(mat, type):
     node_tree.nodes.active = tteximg
     mat.texture_slots[0].texture.image = t_image
 
-def node_retriever(mat):
+#def find_cc_node(mat):
+#    mat_nodes = mat.node_tree.nodes
+#    for node in mat_nodes:
+#        if node.name == "colcornode":
+#            cc_node = node
+#            pass
+#        else:
+#            cc_node = None
+#    return cc_node
 
+
+# provide to thsi function a material and a node type and it will send you back the name of the node. With the option "all" you will get a dictionary of the nodes
+def node_retriever(mat, type):
     mat_nodes = mat.node_tree.nodes
-    for node in mat_nodes:
-        if node.name == "colcornode":
-            cc_node = node
-            pass
-        else:
-            cc_node = None
-    for node in mat_nodes:
-        if node.name == "original":
-            original_node = node
-            pass
-        else:
-            original_node = None
-    for node in mat_nodes:
-        if node.name == "diffuse":
-            diffuse_node = node
-            pass
-        else:
-            diffuse_node = None
-    for node in mat_nodes:
-        if node.name == "cc_image":
-            cc_image_node = node
-            pass
-        else:
-            cc_image_node = None
-    for node in mat_nodes:
-        if node.name == "source_paint_node":
-            source_paint_node = node
-            pass
-        else:
-            source_paint_node = None                     
-    return original_node, cc_node, diffuse_node, cc_image_node, source_paint_node
+    list_all_node_type = {}
+    cc_node = "cc_node"
+    cc_image = "cc_image"
+    original = "original"
+    source_paint_node = "source_paint_node"
+    diffuse = "diffuse"
+    list_all_node_type[cc_node] = None
+    list_all_node_type[cc_image] = None
+    list_all_node_type[original] = None
+    list_all_node_type[source_paint_node] = None
+    list_all_node_type[diffuse] = None
+    node = None 
 
-
+    if type == "all":
+        for node_type in list_all_node_type:
+            for node in mat_nodes:
+                if node.name == node_type:
+                    list_all_node_type[node_type] = node
+        #print(list_all_node_type)
+        return dict2list(list_all_node_type)
+    else:
+        for node in mat_nodes:
+            if node.name == type:
+                #print('Il nodo tipo trovato è :'+ node.name)
+                list_all_node_type[type] = node
+                return node
+                pass
+        print("non ho trovato nulla")
+        node = False
+        return node 
+               
 def add_source_paint_slot(active_ob):
-    
     for matslot in active_ob.material_slots:
         mat = matslot.material
 #   force node use (to be removed in future versiones)
         mat.use_nodes = True
         for mat in active_ob.mat:
             nodes = mat.node_tree.nodes
-            original_node, cc_node, diffuse_node, cc_image_node, source_paint_node = node_retriever(mat)
+            cc_image, cc_node, original_node, diffuse_node, source_paint_node = node_retriever(mat, "all")
             if source_paint_node != None:
                 nodes.remove(source_paint_node)
             teximg = nodes.new('ShaderNodeTexImage')
@@ -104,6 +126,14 @@ def add_source_paint_slot(active_ob):
             teximg.name = "source_paint_node"
 
 # for cycles material
+
+def dict2list(dict):
+    list=[]
+    for i,j in dict.items():
+        list.append(j)
+#    print (list)
+    return list
+
 
 def create_correction_nodegroup(name):
 
@@ -145,22 +175,11 @@ def create_correction_nodegroup(name):
     #link output
     test_group.links.new(sathue.outputs[0], group_outputs.inputs['cortex'])
 
-def find_cc_node(mat):
-    mat_nodes = mat.node_tree.nodes
-    for node in mat_nodes:
-        if node.name == "colcornode":
-            cc_node = node
-            pass
-        else:
-            cc_node = None
-    return cc_node
-
-def create_texture_set():#(ob,context):
+def bi2cycles():
     
     for obj in bpy.context.selected_objects:
         active_object_name = bpy.context.scene.objects.active.name
-        create_correction_nodegroup(active_object_name)
-
+            
         for matslot in obj.material_slots:
             mat = matslot.material
             image = mat.texture_slots[0].texture.image
@@ -172,22 +191,48 @@ def create_texture_set():#(ob,context):
             output.location = (0, 0)
             mainNode = nodes.new('ShaderNodeBsdfDiffuse')
             mainNode.location = (-400, -50)
+            mainNode.name = "diffuse"
             teximg = nodes.new('ShaderNodeTexImage')
             teximg.location = (-1100, -50)
             teximg.image = image
             teximg.name = "original"
+#            colcor = nodes.new(type="ShaderNodeGroup")
+#            colcor.node_tree = (bpy.data.node_groups[active_object_name])
+#            colcor.location = (-800, -50)
+            links.new(teximg.outputs[0], mainNode.inputs[0])
+#            links.new(colcor.outputs[0], )
+            links.new(mainNode.outputs[0], output.inputs[0])
+#            colcor.name = "colcornode"
+
+def create_cc_node():#(ob,context):
+    active_object_name = bpy.context.scene.objects.active.name
+    create_correction_nodegroup(active_object_name)
+    
+    for obj in bpy.context.selected_objects:
+        for matslot in obj.material_slots:
+            mat = matslot.material
+#            cc_image_node, cc_node, original_node, diffuse_node, source_paint_node = node_retriever(mat, "all")
+            links = mat.node_tree.links
+            nodes = mat.node_tree.nodes
+            mainNode = node_retriever(mat, "diffuse")
+            teximg = node_retriever(mat, "original")
             colcor = nodes.new(type="ShaderNodeGroup")
             colcor.node_tree = (bpy.data.node_groups[active_object_name])
             colcor.location = (-800, -50)
+            colcor.name = "cc_node"
             links.new(teximg.outputs[0], colcor.inputs[0])
             links.new(colcor.outputs[0], mainNode.inputs[0])
-            links.new(mainNode.outputs[0], output.inputs[0])
-            colcor.name = "colcornode"
 
 def remove_cc_node(mat):
-    cc_node = find_cc_node(mat)
+    cc_node = node_retriever(mat, "cc_node")
     if cc_node is not None:
+#        links = mat.node_tree.links
+#        previous_node = cc_node.inputs[0].links[0].from_node
+#        following_node = cc_node.outputs[0].links[0].to_node
+#        links.new(previous_node.outputs[0], following_node.inputs[0])
         mat.node_tree.nodes.remove(cc_node)
+    else:
+        print("There is not a color correction node in this material")
 
 # for quick utils____________________________________________
 def make_group(ob,context):
