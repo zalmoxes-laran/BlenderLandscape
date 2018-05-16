@@ -128,7 +128,7 @@ def setupclonepaint():
     bpy.ops.paint.brush_select(paint_mode='TEXTURE_PAINT', texture_paint_tool='CLONE')
     bpy.context.scene.tool_settings.image_paint.mode = 'MATERIAL'
     bpy.context.scene.tool_settings.image_paint.use_clone_layer = True
-    bpy.context.scene.tool_settings.image_paint.seam_blead = 16
+    bpy.context.scene.tool_settings.image_paint.seam_bleed = 16
     obj = bpy.context.scene.objects.active
     
     for matslot in obj.material_slots:
