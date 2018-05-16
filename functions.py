@@ -16,6 +16,18 @@ class OBJECT_OT_savepaintcam(bpy.types.Operator):
 
 ##########################################################################################
 
+def cycles2bi():
+    for ob in bpy.context.selected_objects:
+        bpy.ops.object.select_all(action='DESELECT')
+        ob.select = True
+        bpy.context.scene.objects.active = ob
+        for matslot in ob.material_slots:
+            mat = matslot.material
+            node_original = node_retriever(mat,"original")
+#            print(node_original.image.name)
+#            print(mat.texture_slots[0].texture.image.name)
+            mat.texture_slots[0].texture.image = node_original.image
+            
 def select_a_mesh(layout):
     row = layout.row()
     row.label(text="Select a mesh to start")
@@ -174,7 +186,7 @@ def node_retriever(mat, type):
     else:
         for node in mat_nodes:
             if node.name == type:
-                #print('Il nodo tipo trovato Ã¨ :'+ node.name)
+                #print('Il nodo tipo trovato è :'+ node.name)
                 list_all_node_type[type] = node
                 return node
                 pass
@@ -371,5 +383,3 @@ def desiredmatnumber(ob):
         desmatnumber = 1
 
     return desmatnumber
-
-# for 

@@ -109,6 +109,7 @@ class OBJECT_OT_deactivatematerial(bpy.types.Operator):
             for matslot in obj.material_slots:
                 mat = matslot.material
                 mat.use_nodes = False
+        cycles2bi()
 
         return {'FINISHED'}
     
