@@ -30,9 +30,15 @@ class OBJECT_OT_texmerger(bpy.types.Operator):
     def execute(self, context):
         selected_ob = bpy.context.selected_objects
         active_ob = bpy.context.scene.objects.active
-        add_source_paint_slot(active_ob)
-        
-        
+        for matslot in active_ob.material_slots:
+            mat = matslot.material
+            mat.use_nodes = True
+            for mat in active_ob.mat:
+                source_paint_node = node_retriever(mat, "source_paint_node")
+                if source_paint_node != None:
+                    nodes.remove(source_paint_node)
+                create_new_tex_set(mat, type)
+            
 #        aggiungere source paint slots
 #        abiliater painting
 #        set-up paint

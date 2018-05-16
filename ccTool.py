@@ -158,6 +158,34 @@ class OBJECT_OT_createnewset(bpy.types.Operator):
 
 #-------------------------------------------------------------
 
+def bake_tex_set(type):
+    scene = context.scene
+    bpy.context.scene.render.engine = 'CYCLES'
+    tot_time = 0
+    ob_counter = 1
+    scene.cycles.sample = 1
+    scene.cycles.max_bounces = 1
+    start_time = time.time()
+    if type == "source":
+        if len(bpy.context.selected_objects) > 1:
+            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=True, use_clear=True, save_mode='INTERNAL')
+        else:
+            raise Exception("Select two ")
+        tot_time += (time.time() - start_time)
+    if type == "cc":
+        tot_selected_ob = len(bpy.context.selected_objects)
+        for ob in bpy.context.selected_objects:
+            print('start baking "'+ob.name+'" (object '+str(ob_counter)+'/'+str(tot_selected_ob)+')')
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=False, use_clear=True, save_mode='INTERNAL')
+            tot_time += (time.time() - start_time)
+            print("--- %s seconds ---" % (time.time() - start_time))
+            ob_counter += 1
+    print("--- JOB complete in %s seconds ---" % tot_time)
+    
+
 class OBJECT_OT_bakecyclesdiffuse(bpy.types.Operator):
     """Color correction to new texture set"""
     bl_idname = "bake.cyclesdiffuse"
@@ -165,25 +193,8 @@ class OBJECT_OT_bakecyclesdiffuse(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        scene = context.scene
-        bpy.context.scene.render.engine = 'CYCLES'
-        tot_time = 0
-        ob_counter = 1
-        scene.cycles.sample = 1
-        scene.cycles.max_bounces = 1        
-        tot_selected_ob = len(bpy.context.selected_objects)
-        for ob in bpy.context.selected_objects:
-            start_time = time.time()
-            print('start baking "'+ob.name+'" (object '+str(ob_counter)+'/'+str(tot_selected_ob)+')')
-            bpy.ops.object.select_all(action='DESELECT')
-            ob.select = True
-            bpy.context.scene.objects.active = ob
-            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_clear=True, save_mode='INTERNAL')
-            tot_time += (time.time() - start_time)
-            print("--- %s seconds ---" % (time.time() - start_time))
-            ob_counter += 1
-        print("--- JOB complete in %s seconds ---" % tot_time)
-
+        bake_tex_set("cc")
+        
         return {'FINISHED'}
 
 ####-----------------------------------------------------------

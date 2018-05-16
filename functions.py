@@ -65,17 +65,6 @@ def create_new_tex_set(mat, type):
     node_tree.nodes.active = tteximg
     mat.texture_slots[0].texture.image = t_image
 
-#def find_cc_node(mat):
-#    mat_nodes = mat.node_tree.nodes
-#    for node in mat_nodes:
-#        if node.name == "colcornode":
-#            cc_node = node
-#            pass
-#        else:
-#            cc_node = None
-#    return cc_node
-
-
 # provide to thsi function a material and a node type and it will send you back the name of the node. With the option "all" you will get a dictionary of the nodes
 def node_retriever(mat, type):
     mat_nodes = mat.node_tree.nodes
@@ -110,21 +99,6 @@ def node_retriever(mat, type):
         node = False
         return node 
                
-def add_source_paint_slot(active_ob):
-    for matslot in active_ob.material_slots:
-        mat = matslot.material
-#   force node use (to be removed in future versiones)
-        mat.use_nodes = True
-        for mat in active_ob.mat:
-            nodes = mat.node_tree.nodes
-            cc_image, cc_node, original_node, diffuse_node, source_paint_node = node_retriever(mat, "all")
-            if source_paint_node != None:
-                nodes.remove(source_paint_node)
-            teximg = nodes.new('ShaderNodeTexImage')
-            teximg.location = (-1100, -50)
-            teximg.image = image
-            teximg.name = "source_paint_node"
-
 # for cycles material
 
 def dict2list(dict):
@@ -133,7 +107,6 @@ def dict2list(dict):
         list.append(j)
 #    print (list)
     return list
-
 
 def create_correction_nodegroup(name):
 
