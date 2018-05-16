@@ -126,22 +126,20 @@ class OBJECT_OT_paintsetup(bpy.types.Operator):
 def setupclonepaint():
     bpy.ops.object.mode_set(mode = 'TEXTURE_PAINT')
     bpy.ops.paint.brush_select(paint_mode='TEXTURE_PAINT', texture_paint_tool='CLONE')
+    bpy.context.scene.tool_settings.image_paint.mode = 'MATERIAL'
     bpy.context.scene.tool_settings.image_paint.use_clone_layer = True
-
-    obj = bpy.context.scene.active_object
+    bpy.context.scene.tool_settings.image_paint.seam_blead = 16
+    obj = bpy.context.scene.objects.active
+    
     for matslot in obj.material_slots:
         mat = matslot.material
+        original_image = node_retriever(mat, "original")
         clone_image = node_retriever(mat, "source_paint_node")
-        clone_image.name
         for idx, img in enumerate(mat.texture_paint_images):
-            if img.name == clone_image.name:
+            if img.name == original_image.image.name:
+                mat.paint_active_slot = idx
+                print ("I have just set the " + img.name + " image, as a paint image, that corresponds to the index: "+ str(idx))
+            if img.name == clone_image.image.name:
                 mat.paint_clone_slot = idx
-                print ("I have just set the " + img.name + " image, that corresponds to the index: "+ str(idx))
-
-#    for idx, img in enumerate(mat.texture_paint_images):
-#        print (idx, img)
-#        if idx == mat.paint_clone_slot:
-#            print ("Index:", idx)
-#            print ("Name:", img.name)
-
+                print ("I have just set the " + img.name + " image, as a paint image, that corresponds to the index: "+ str(idx))
 
