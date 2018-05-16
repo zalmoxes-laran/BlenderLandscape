@@ -479,12 +479,4 @@ class OBJECT_OT_applypaintcam(bpy.types.Operator):
         bpy.ops.paint.texture_paint_toggle()
         return {'FINISHED'}
 
-class OBJECT_OT_savepaintcam(bpy.types.Operator):
-    bl_idname = "savepaint.cam"
-    bl_label = "Save paint"
-    bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
-#        bpy.ops.paint.texture_paint_toggle()
-        bpy.ops.image.save_dirty()
-        return {'FINISHED'}

@@ -4,6 +4,88 @@ import time
 import bmesh
 from random import randint, choice
 
+
+class OBJECT_OT_savepaintcam(bpy.types.Operator):
+    bl_idname = "savepaint.cam"
+    bl_label = "Save paint"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        bpy.ops.image.save_dirty()
+        return {'FINISHED'}
+
+##########################################################################################
+
+def select_a_mesh(layout):
+    row = layout.row()
+    row.label(text="Select a mesh to start")
+
+def select_a_node(mat, type):
+    nodes = mat.node_tree.nodes
+    for node in nodes:
+        if node.name == type:
+            node.select = True
+            nodes.active = node
+            is_node = True
+            pass
+        else:
+            is_node = False
+    return is_node
+
+# potenzialmente una migliore scrittura del codice:
+# nodes = material_slot.material.node_tree.nodes
+# texture_node = nodes.get('Image Texture')
+# if texture_node is None:
+
+def bake_tex_set(type):
+    scene = bpy.context.scene
+    scene.render.engine = 'CYCLES'
+    tot_time = 0
+    ob_counter = 1
+    scene.cycles.samples = 1
+    scene.cycles.max_bounces = 1
+    scene.cycles.bake_type = 'DIFFUSE'
+    scene.render.bake.use_pass_color = True
+    scene.render.bake.use_pass_direct = False
+    scene.render.bake.use_pass_indirect = False
+    scene.render.bake.use_selected_to_active = False
+    scene.render.bake.use_cage = True
+    scene.render.bake.cage_extrusion = 0.1
+    scene.render.bake.use_clear = True
+    start_time = time.time()
+    if type == "source":
+        if len(bpy.context.selected_objects) > 1:
+            ob = scene.objects.active
+            print('checking presence of a destination texture set..')
+            for matslot in ob.material_slots:
+                mat = matslot.material
+                select_a_node(mat,"source_paint_node")
+            print('start baking..')
+            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=True, use_clear=True, save_mode='INTERNAL')
+        else:
+            raise Exception("Select two meshes in order to transfer a clone layer")
+            return
+        tot_time += (time.time() - start_time)
+    if type == "cc":
+        tot_selected_ob = len(bpy.context.selected_objects)
+        for ob in bpy.context.selected_objects:
+            print('start baking "'+ob.name+'" (object '+str(ob_counter)+'/'+str(tot_selected_ob)+')')
+            bpy.ops.object.select_all(action='DESELECT')
+            ob.select = True
+            bpy.context.scene.objects.active = ob
+            for matslot in ob.material_slots:
+                mat = matslot.material
+                select_a_node(mat,"cc_image")
+#                is_node = select_a_node(mat,"cc_image")
+#                if is_node == False:
+#                    print("The material " + mat.name +" lacks a cc_image node. I'm creating it..")
+#                    create_new_tex_set(mat, "cc_image")
+            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=False, use_clear=True, save_mode='INTERNAL')
+            tot_time += (time.time() - start_time)
+            print("--- %s seconds ---" % (time.time() - start_time))
+            ob_counter += 1
+    print("--- JOB complete in %s seconds ---" % tot_time)
+
 def remove_ori_image(mat):
     nodes = mat.node_tree.nodes
     links = mat.node_tree.links
@@ -47,6 +129,7 @@ def create_new_tex_set(mat, type):
         t_image_name = "sp_"+o_filename_no_ext
     
     t_image = bpy.data.images.new(name=t_image_name, width=x_image, height=y_image, alpha=False)
+    
     # set path to new image
     fn = os.path.join(o_imagedir, t_image_name)
     t_image.filepath_raw = fn+".png"
@@ -91,7 +174,7 @@ def node_retriever(mat, type):
     else:
         for node in mat_nodes:
             if node.name == type:
-                #print('Il nodo tipo trovato Ã¨ :'+ node.name)
+                #print('Il nodo tipo trovato è :'+ node.name)
                 list_all_node_type[type] = node
                 return node
                 pass
@@ -196,16 +279,16 @@ def create_cc_node():#(ob,context):
             links.new(teximg.outputs[0], colcor.inputs[0])
             links.new(colcor.outputs[0], mainNode.inputs[0])
 
-def remove_cc_node(mat):
-    cc_node = node_retriever(mat, "cc_node")
-    if cc_node is not None:
+def remove_node(mat, node_to_remove):
+    node = node_retriever(mat, node_to_remove)
+    if node is not None:
 #        links = mat.node_tree.links
 #        previous_node = cc_node.inputs[0].links[0].from_node
 #        following_node = cc_node.outputs[0].links[0].to_node
 #        links.new(previous_node.outputs[0], following_node.inputs[0])
-        mat.node_tree.nodes.remove(cc_node)
-    else:
-        print("There is not a color correction node in this material")
+        mat.node_tree.nodes.remove(node)
+#    else:
+#        print("There is not a color correction node in this material")
 
 # for quick utils____________________________________________
 def make_group(ob,context):

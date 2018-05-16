@@ -4,11 +4,6 @@ import time
 from .functions import *
 
 
-def select_a_mesh(layout):
-    row = layout.row()
-    row.label(text="Select a mesh to start")
-
-
 class ToolsPanel9(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -35,7 +30,6 @@ class ToolsPanel9(bpy.types.Panel):
                 row = layout.row()
                 self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
                 row = layout.row()
-        #        row.label(text="NOW Bake Diffuse, color only", icon='TPAINT_HLT')
                 self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
                 self.layout.operator("applynewtexset.material", icon="AUTOMERGE_ON", text='Use new tex set')
                 self.layout.operator("applyoritexset.material", icon="RECOVER_LAST", text='Use original tex set')
@@ -50,7 +44,6 @@ class ToolsPanel9(bpy.types.Panel):
             select_a_mesh(layout)
 
 
-        
 class OBJECT_OT_removeccnode(bpy.types.Operator):
     """Remove cc node for selected objects"""
     bl_idname = "removeccnode.material"
@@ -61,7 +54,7 @@ class OBJECT_OT_removeccnode(bpy.types.Operator):
         for obj in bpy.context.selected_objects:
             for matslot in obj.material_slots:
                 mat = matslot.material
-                remove_cc_node(mat)
+                remove_node(mat, "cc_node")
         return {'FINISHED'}
     
 class OBJECT_OT_removeorimage(bpy.types.Operator):
@@ -140,51 +133,21 @@ class OBJECT_OT_activatematerial(bpy.types.Operator):
 #-------------------------------------------------------------
 
 class OBJECT_OT_createnewset(bpy.types.Operator):
-    """Apply color correction to new texs"""
+    """Create new texture set for corrected mats"""
     bl_idname = "create.newset"
     bl_label = "Create new texture set for corrected mats (cc_ + previous tex name)"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-
         bpy.context.scene.render.engine = 'CYCLES'
-
         for obj in bpy.context.selected_objects:
             for matslot in obj.material_slots:
                 mat = matslot.material
                 create_new_tex_set(mat,"cc_image")
-
         return {'FINISHED'}
 
 #-------------------------------------------------------------
 
-def bake_tex_set(type):
-    scene = context.scene
-    bpy.context.scene.render.engine = 'CYCLES'
-    tot_time = 0
-    ob_counter = 1
-    scene.cycles.sample = 1
-    scene.cycles.max_bounces = 1
-    start_time = time.time()
-    if type == "source":
-        if len(bpy.context.selected_objects) > 1:
-            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=True, use_clear=True, save_mode='INTERNAL')
-        else:
-            raise Exception("Select two ")
-        tot_time += (time.time() - start_time)
-    if type == "cc":
-        tot_selected_ob = len(bpy.context.selected_objects)
-        for ob in bpy.context.selected_objects:
-            print('start baking "'+ob.name+'" (object '+str(ob_counter)+'/'+str(tot_selected_ob)+')')
-            bpy.ops.object.select_all(action='DESELECT')
-            ob.select = True
-            bpy.context.scene.objects.active = ob
-            bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, use_selected_to_active=False, use_clear=True, save_mode='INTERNAL')
-            tot_time += (time.time() - start_time)
-            print("--- %s seconds ---" % (time.time() - start_time))
-            ob_counter += 1
-    print("--- JOB complete in %s seconds ---" % tot_time)
-    
 
 class OBJECT_OT_bakecyclesdiffuse(bpy.types.Operator):
     """Color correction to new texture set"""
@@ -200,6 +163,23 @@ class OBJECT_OT_bakecyclesdiffuse(bpy.types.Operator):
 ####-----------------------------------------------------------
 
 
+class OBJECT_OT_applyoritexset(bpy.types.Operator):
+    """Use original textures in mats"""
+    bl_idname = "applyoritexset.material"
+    bl_label = "Use original textures in mats"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'CYCLES'
+
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                set_texset(mat, "original")
+                
+        return {'FINISHED'}
+    
 class OBJECT_OT_applynewtexset(bpy.types.Operator):
     """Use new textures in mats"""
     bl_idname = "applynewtexset.material"
@@ -214,22 +194,5 @@ class OBJECT_OT_applynewtexset(bpy.types.Operator):
             for matslot in obj.material_slots:
                 mat = matslot.material
                 set_texset(mat, "cc_image")
-                
-        return {'FINISHED'}
-
-class OBJECT_OT_applynewtexset(bpy.types.Operator):
-    """Use original textures in mats"""
-    bl_idname = "applyoritexset.material"
-    bl_label = "Use original textures in mats"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-
-        bpy.context.scene.render.engine = 'CYCLES'
-
-        for obj in bpy.context.selected_objects:
-            for matslot in obj.material_slots:
-                mat = matslot.material
-                set_texset(mat, "original")
                 
         return {'FINISHED'}
