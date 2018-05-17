@@ -186,7 +186,7 @@ def node_retriever(mat, type):
     else:
         for node in mat_nodes:
             if node.name == type:
-                #print('Il nodo tipo trovato è :'+ node.name)
+                #print('Il nodo tipo trovato Ã¨ :'+ node.name)
                 list_all_node_type[type] = node
                 return node
                 pass

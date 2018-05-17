@@ -2,7 +2,7 @@ import bpy
 import time
 import bmesh
 from random import randint, choice
-from functions import *
+from .functions import *
 
 class ToolsPanel3(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
