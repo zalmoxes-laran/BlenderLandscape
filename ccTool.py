@@ -17,31 +17,31 @@ class ToolsPanel9(bpy.types.Panel):
         obj = context.object
         scene = context.scene
         row = layout.row()
-        if scene.objects.active:
-            if obj.type not in ['MESH']:
-                select_a_mesh(layout)
-            else:    
-                row.label(text="Step by step procedure")
-                row = layout.row()
-                row.label(text="for selected object(s):")
-                self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
-                self.layout.operator("create.ccnode", icon="ASSET_MANAGER", text='Create correction node')
-                self.layout.operator("create.newset", icon="FILE_TICK", text='Create new texture set')
-                row = layout.row()
-                self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
-                row = layout.row()
-                self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
-                self.layout.operator("applynewtexset.material", icon="AUTOMERGE_ON", text='Use new tex set')
-                self.layout.operator("applyoritexset.material", icon="RECOVER_LAST", text='Use original tex set')
-                
-                self.layout.operator("removeccnode.material", icon="CANCEL", text='remove cc node')
-                self.layout.operator("removeorimage.material", icon="CANCEL", text='remove ori image')
-                row = layout.row()     
-                row.label(text="Switch engine")
-                self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
-                self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
+        if bpy.context.scene.render.engine != 'CYCLES':
+            row.label(text="Please, activate cycles engine !")
         else:
-            select_a_mesh(layout)
+            if scene.objects.active:
+                if obj.type not in ['MESH']:
+                    select_a_mesh(layout)
+                else:    
+                    row.label(text="Step by step procedure")
+                    row = layout.row()
+                    row.label(text="for selected object(s):")
+                    self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
+                    self.layout.operator("create.ccnode", icon="ASSET_MANAGER", text='Create correction node')
+                    self.layout.operator("create.newset", icon="FILE_TICK", text='Create new texture set')
+                    row = layout.row()
+                    self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
+                    row = layout.row()
+                    self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
+                    self.layout.operator("applynewtexset.material", icon="AUTOMERGE_ON", text='Use new tex set')
+                    self.layout.operator("applyoritexset.material", icon="RECOVER_LAST", text='Use original tex set')
+                    
+                    self.layout.operator("removeccnode.material", icon="CANCEL", text='remove cc node')
+                    self.layout.operator("removeorimage.material", icon="CANCEL", text='remove ori image')
+                    row = layout.row() 
+            else:
+                select_a_mesh(layout)
 
 
 class OBJECT_OT_removeccnode(bpy.types.Operator):
@@ -94,43 +94,6 @@ class OBJECT_OT_createccnode(bpy.types.Operator):
 
         return {'FINISHED'}
 
-#________________________________________________________
-
-class OBJECT_OT_deactivatematerial(bpy.types.Operator):
-    """De-activate node  materials for selected object"""
-    bl_idname = "deactivatenode.material"
-    bl_label = "De-activate cycles node materials for selected object and switch to BI"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-
-        bpy.context.scene.render.engine = 'BLENDER_RENDER'
-        for obj in bpy.context.selected_objects:
-            for matslot in obj.material_slots:
-                mat = matslot.material
-                mat.use_nodes = False
-        cycles2bi()
-
-        return {'FINISHED'}
-    
-#-------------------------------------------------------------
-
-class OBJECT_OT_activatematerial(bpy.types.Operator):
-    """Activate node materials for selected object"""
-    bl_idname = "activatenode.material"
-    bl_label = "Activate cycles node materials for selected object and switch to cycles"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-
-        bpy.context.scene.render.engine = 'CYCLES'
-        for obj in bpy.context.selected_objects:
-            for matslot in obj.material_slots:
-                mat = matslot.material
-                mat.use_nodes = True
-
-        return {'FINISHED'}
-    
 #-------------------------------------------------------------
 
 class OBJECT_OT_createnewset(bpy.types.Operator):

@@ -1,4 +1,6 @@
 import bpy
+import os
+import time
 
 def selectLOD(listobjects, lodnum, basename):
     name2search = basename + '_LOD' + str(lodnum)
@@ -157,6 +159,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             bpy.ops.object.editmode_toggle()
             print('Decimating the original mesh to obtain the LOD1 mesh...')
             bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.mesh.select_mode(type="VERT")
             bpy.ops.mesh.select_non_manifold()
             bpy.ops.object.vertex_group_add()
             bpy.ops.object.vertex_group_assign()
@@ -166,7 +169,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             obj.modifiers["Decimate"].vertex_group = "Group"
             obj.modifiers["Decimate"].invert_vertex_group = True
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            # ora la mesh √® semplificata
+            # ora la mesh Ë semplificata
             #------------------------------------------------------------------
 
 
@@ -273,7 +276,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             for i in range(0,len(bpy.data.objects[lod2name].material_slots)):
                 bpy.ops.object.material_slot_remove()
 
-# se abbiamo gi√† un atlas √® inutile rifarlo
+# se abbiamo gi‡ un atlas Ë inutile rifarlo
             if obj.data.uv_textures[1] and obj.data.uv_textures[1].name =='Atlas':
                 print('Found Atlas UV mapping layer. I will use it.')
                 uv_textures = obj.data.uv_textures
@@ -302,7 +305,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
             obj.modifiers["Decimate"].vertex_group = "Group"
             obj.modifiers["Decimate"].invert_vertex_group = True
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            # ora la mesh √® semplificata
+            # ora la mesh Ë semplificata
             #------------------------------------------------------------------
             bpy.ops.object.select_all(action='DESELECT')
             oggetto = bpy.data.objects[lod2name]

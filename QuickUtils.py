@@ -2,6 +2,7 @@ import bpy
 import time
 import bmesh
 from random import randint, choice
+from functions import *
 
 class ToolsPanel3(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -28,13 +29,64 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("multimaterial.layout", icon="IMGDISPLAY", text='Multimaterial layout')
         row = layout.row()
+        row.label(text="Switch engine")
+        self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
+        self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
+
+        self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
 
 
-# DA TROVARE IL MODO DI FARLO FUNZIONARE FUORI DALL'OUTLINER
-#        self.layout.operator("purge.resources", icon="LIBRARY_DATA_BROKEN", text='Purge unused resources')
-#        box = layout.box()
-        row = layout.row()
-#        box.
+class OBJECT_OT_cycles2bi(bpy.types.Operator):
+    """Convert cycles to bi"""
+    bl_idname = "cycles2bi.material"
+    bl_label = "Convert cycles to bi"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'BLENDER_RENDER'
+        cycles2bi()
+
+        return {'FINISHED'}
+
+
+
+#________________________________________________________
+
+class OBJECT_OT_deactivatematerial(bpy.types.Operator):
+    """De-activate node  materials for selected object"""
+    bl_idname = "deactivatenode.material"
+    bl_label = "De-activate cycles node materials for selected object and switch to BI"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'BLENDER_RENDER'
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                mat.use_nodes = False
+
+        return {'FINISHED'}
+    
+#-------------------------------------------------------------
+
+class OBJECT_OT_activatematerial(bpy.types.Operator):
+    """Activate node materials for selected object"""
+    bl_idname = "activatenode.material"
+    bl_label = "Activate cycles node materials for selected object and switch to cycles"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'CYCLES'
+        for obj in bpy.context.selected_objects:
+            for matslot in obj.material_slots:
+                mat = matslot.material
+                mat.use_nodes = True
+
+        return {'FINISHED'}
+
 
 class OBJECT_OT_CenterMass(bpy.types.Operator):
     bl_idname = "center.mass"
