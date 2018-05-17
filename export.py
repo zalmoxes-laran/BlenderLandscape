@@ -41,6 +41,9 @@ class ToolsPanel(bpy.types.Panel):
             row = layout.row()
             self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Export selected in several osgt files')
             row = layout.row()
+            if is_windows():
+                row = layout.row()
+                row.label(text="We are under Windows..")
         else:
             row.label(text="Select object(s) to see tools here.")
             row = layout.row()
