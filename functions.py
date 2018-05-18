@@ -2,6 +2,7 @@ import bpy
 import os
 import time
 import bmesh
+import platform
 from random import randint, choice
 
 
@@ -26,6 +27,13 @@ class OBJECT_OT_createcyclesmat(bpy.types.Operator):
         return {'FINISHED'}
 
 ##########################################################################################
+
+def is_windows():
+    if platform.system == 'Windows':
+        is_win =True
+    else:
+        is_win =False
+    return is_win
 
 def cycles2bi():
     for ob in bpy.context.selected_objects:
