@@ -32,7 +32,7 @@ class ToolsPanel3(bpy.types.Panel):
         row.label(text="Switch engine")
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
-
+        self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
 
 

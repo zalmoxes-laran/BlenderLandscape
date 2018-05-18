@@ -14,6 +14,17 @@ class OBJECT_OT_savepaintcam(bpy.types.Operator):
         bpy.ops.image.save_dirty()
         return {'FINISHED'}
 
+class OBJECT_OT_createcyclesmat(bpy.types.Operator):
+    """Create cycles materials for selected objects"""
+    bl_idname = "bi2cycles.material"
+    bl_label = "Create cycles materials for selected object"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.context.scene.render.engine = 'CYCLES'
+        bi2cycles()
+        return {'FINISHED'}
+
 ##########################################################################################
 
 def cycles2bi():
@@ -186,7 +197,7 @@ def node_retriever(mat, type):
     else:
         for node in mat_nodes:
             if node.name == type:
-                #print('Il nodo tipo trovato Ã¨ :'+ node.name)
+                #print('Il nodo tipo trovato è :'+ node.name)
                 list_all_node_type[type] = node
                 return node
                 pass

@@ -26,6 +26,16 @@ class ToolsPanel1400(bpy.types.Panel):
             self.layout.operator("applysptexset.material", icon="AUTOMERGE_ON", text='Preview sp tex set')
             self.layout.operator("applyoritexset.material", icon="RECOVER_LAST", text='Use original tex set')
             self.layout.operator("paint.setup", icon="VPAINT_HLT", text='Paint from source')
+            if context.object.mode == 'TEXTURE_PAINT':
+                row = layout.row()
+                row.prop(scene.tool_settings.image_paint, "seam_bleed")
+                row = layout.row()
+                row.prop(scene.tool_settings.image_paint, "use_occlude")
+                row.prop(scene.tool_settings.image_paint, "use_backface_culling")
+                row.prop(scene.tool_settings.image_paint, "use_normal_falloff")
+                
+                row = layout.row()
+                self.layout.operator("exit.setup", icon="OBJECT_DATAMODE", text='Exit paint mode')            
             row = layout.row()
             self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save new textures')
             self.layout.operator("remove.sp", icon="LIBRARY_DATA_BROKEN", text='Remove image source')
@@ -106,6 +116,20 @@ class OBJECT_OT_paintsetup(bpy.types.Operator):
                 
         return {'FINISHED'}
 
+class OBJECT_OT_exitsetup(bpy.types.Operator):
+    """Exit paint from source"""
+    bl_idname = "exit.setup"
+    bl_label = "Exit paint from source"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        bpy.context.scene.render.engine = 'CYCLES'
+        bpy.context.scene.tool_settings.image_paint.use_clone_layer = False
+        bpy.ops.object.mode_set ( mode = 'OBJECT' ) 
+                
+        return {'FINISHED'}
+
 class OBJECT_OT_paintsetup(bpy.types.Operator):
     """Remove paint source"""
     bl_idname = "remove.sp"
@@ -128,7 +152,7 @@ def setupclonepaint():
     bpy.ops.paint.brush_select(paint_mode='TEXTURE_PAINT', texture_paint_tool='CLONE')
     bpy.context.scene.tool_settings.image_paint.mode = 'MATERIAL'
     bpy.context.scene.tool_settings.image_paint.use_clone_layer = True
-    bpy.context.scene.tool_settings.image_paint.seam_bleed = 16
+#    bpy.context.scene.tool_settings.image_paint.seam_bleed = 16
     obj = bpy.context.scene.objects.active
     
     for matslot in obj.material_slots:

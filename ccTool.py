@@ -70,17 +70,7 @@ class OBJECT_OT_removeorimage(bpy.types.Operator):
                 remove_ori_image(mat)
         return {'FINISHED'}
 
-class OBJECT_OT_createcyclesmat(bpy.types.Operator):
-    """Create cycles materials for selected objects"""
-    bl_idname = "bi2cycles.material"
-    bl_label = "Create cycles materials for selected object"
-    bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        bpy.context.scene.render.engine = 'CYCLES'
-        bi2cycles()
-        return {'FINISHED'}
-    
 class OBJECT_OT_createccnode(bpy.types.Operator):
     """Create a color correction node for selected objects"""
     bl_idname = "create.ccnode"
