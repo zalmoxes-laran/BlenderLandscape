@@ -150,8 +150,11 @@ class ToolsPanel5(bpy.types.Panel):
         self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
         self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
         self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
+        self.layout.operator("nikond3200.scene", icon="RENDER_REGION", text='NIKON D3200 scene')
+
         row = layout.row()
         row.label(text="Set selected cams as:", icon='RENDER_STILL')
+        self.layout.operator("nikond320018mm.camera", icon="RENDER_REGION", text='Nikon d3200 18mm')
         self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
         self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
         self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
@@ -243,6 +246,37 @@ class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
         bpy.context.scene.game_settings.material_mode = 'GLSL'
         bpy.context.scene.game_settings.use_glsl_lights = False
         return {'FINISHED'}
+    
+class OBJECT_OT_nikond3200scene(bpy.types.Operator):
+    bl_idname = "nikond3200.scene"
+    bl_label = "Nikon d3200 scene"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        bpy.context.scene.render.resolution_x = 4512
+        bpy.context.scene.render.resolution_y = 3000
+        bpy.context.scene.render.resolution_percentage = 100
+        bpy.context.scene.tool_settings.image_paint.screen_grab_size[0] = 4512
+        bpy.context.scene.tool_settings.image_paint.screen_grab_size[1] = 3000
+        bpy.context.scene.game_settings.material_mode = 'GLSL'
+        bpy.context.scene.game_settings.use_glsl_lights = False
+        return {'FINISHED'}
+
+class OBJECT_OT_nikond320018mm(bpy.types.Operator):
+    bl_idname = "nikond320018mm.camera"
+    bl_label = "Set as nikond3200 18mm"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select = True
+            obj.data.lens = 18
+            obj.data.sensor_fit = 'HORIZONTAL'
+            obj.data.sensor_width = 23.2
+            obj.data.sensor_height = 15.4
+        return {'FINISHED'}
 
 class OBJECT_OT_Canon6D35(bpy.types.Operator):
     bl_idname = "canon6d35mm.camera"
@@ -323,7 +357,19 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
             cam.data.show_limits = False
         return {'FINISHED'}
 
-#_______________________________________________________________________________________________________________
+#_________________________________________________
+
+def correctcameraname(cameraname):
+        extensions = ['.jpg','.JPG']
+        for extension in extensions:
+            if cameraname.endswith(extension):
+                return cameraname
+                pass
+            else:
+                cameranamecor = cameraname + ".JPG"
+                print(cameranamecor)
+                return cameranamecor
+#______________________________________________________________
 
 class CreateCameraImagePlane(bpy.types.Operator):
     """Create image plane for camera"""
@@ -358,6 +404,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
 
     # get selected camera (might traverse children of selected object until a camera is found?)
     # for now just pick the active object
+        
 
     def createImagePlaneForCamera(self, camera):
         imageplane = None
@@ -367,7 +414,8 @@ class CreateCameraImagePlane(bpy.types.Operator):
             #create imageplane
             bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
             imageplane = bpy.context.active_object
-            imageplane.name = ("objplane_"+camera.name)
+            cameraname = correctcameraname(camera.name)
+            imageplane.name = ("objplane_"+cameraname)
             bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
             bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.select_all(action='TOGGLE')
@@ -405,7 +453,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
             if not undistortedpath:
                 raise Exception("Hey Buddy, you have to set the undistorted images path !")
 
-            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(undistortedpath+camera.name)
+            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(undistortedpath+cameraname)
 
             bpy.ops.view3d.tex_to_material()
 
