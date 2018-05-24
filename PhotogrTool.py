@@ -142,53 +142,84 @@ class ToolsPanel5(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
         obj = context.object
-
         obj_selected = scene.objects.active
-        row = layout.row()
-        row.label(text="Set up scene", icon='RADIO')
-        row = layout.row()
-        self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
-        self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
-        self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
-        self.layout.operator("nikond3200.scene", icon="RENDER_REGION", text='NIKON D3200 scene')
-
-        row = layout.row()
-        row.label(text="Set selected cams as:", icon='RENDER_STILL')
-        self.layout.operator("nikond320018mm.camera", icon="RENDER_REGION", text='Nikon d3200 18mm')
-        self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
-        self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
-        self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
-        row = layout.row()
-        row.label(text="Visual mode for selected cams:", icon='NODE_SEL')
-        self.layout.operator("better.cameras", icon="NODE_SEL", text='Better Cams')
-        self.layout.operator("nobetter.cameras", icon="NODE_SEL", text='Disable Better Cams')
-        row = layout.row()
-        row = layout.row()
-        row.label(text="Painting Toolbox", icon='TPAINT_HLT')
-        row = layout.row()
-        row.label(text="Folder with undistorted images:")
-        row = layout.row()
-        row.prop(context.scene, 'BL_undistorted_path', toggle = True)
-        row = layout.row()
-
-        if bpy.context.scene.camera is not None:
-            cam_ob = scene.camera
-            cam_cam = scene.camera.data
-            row.label(text="Active Cam: " + cam_ob.name)
-            self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')
+        cam_ob = scene.camera
+        cam_cam = scene.camera.data
+        
+        if scene.render.engine != 'BLENDER_RENDER':
             row = layout.row()
-            row = layout.row()
-            row.prop(cam_cam, "lens")
-            row = layout.row()
-            row.label(text="Active object: " + obj.name)
-            self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
-            self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
-            self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
-            row = layout.row()
+            row.label(text="Please, activate Blender Render engine !")
         else:
-            row.label(text="!!! Import some cams to start !!!")
+            row = layout.row()
+            row.label(text="Set up scene", icon='RADIO')
+            row = layout.row()
+            if scene.objects.active:
+                if obj.type in ['MESH']:
+#                    select_a_mesh(layout)
+#                else:
+                    self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
+                    self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
+                    self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
+                    self.layout.operator("nikond3200.scene", icon="RENDER_REGION", text='NIKON D3200 scene')
+                elif obj.type in ['CAMERA']:
+                    row = layout.row()
+                    row.label(text="Set selected cams as:", icon='RENDER_STILL')
+                    self.layout.operator("nikond320018mm.camera", icon="RENDER_REGION", text='Nikon d3200 18mm')
+                    self.layout.operator("canon6d35mm.camera", icon="RENDER_REGION", text='Canon6D 35mm')
+                    self.layout.operator("canon6d24mm.camera", icon="RENDER_REGION", text='Canon6D 24mm')
+                    self.layout.operator("canon6d14mm.camera", icon="RENDER_REGION", text='Canon6D 14mm')
+                    row = layout.row()
+                    row.label(text="Visual mode for selected cams:", icon='NODE_SEL')
+                    self.layout.operator("better.cameras", icon="NODE_SEL", text='Better Cams')
+                    self.layout.operator("nobetter.cameras", icon="NODE_SEL", text='Disable Better Cams')
+                    row = layout.row()
+                    row = layout.row()
+                else:
+                    row = layout.row()
+                    row.label(text="Please select a mesh or a cam", icon='OUTLINER_DATA_CAMERA')
+ 
+            row = layout.row()
+            row.label(text="Painting Toolbox", icon='TPAINT_HLT')
+            row = layout.row()
+            row.label(text="Folder with undistorted images:")
+            row = layout.row()
+            row.prop(context.scene, 'BL_undistorted_path', toggle = True)
+            row = layout.row()
+
+            if cam_ob is not None:
+                row.label(text="Active Cam: " + cam_ob.name)
+                self.layout.operator("object.createcameraimageplane", icon="IMAGE_COL", text='Photo to camera')
+                row = layout.row()
+                row = layout.row()
+                row.prop(cam_cam, "lens")
+                row = layout.row()
+                is_cam_ob_plane = check_children_plane(cam_ob)
+#                row.label(text=str(is_cam_ob_plane))
+                if is_cam_ob_plane:
+                    if obj.type in ['MESH']:
+                        row.label(text="Active object: " + obj.name)
+                        self.layout.operator("paint.cam", icon="IMAGE_COL", text='Paint active from cam')
+                else:
+                    row = layout.row()
+                    row.label(text="Please, set a photo to camera", icon='TPAINT_HLT')
+                
+                self.layout.operator("applypaint.cam", icon="IMAGE_COL", text='Apply paint')
+                self.layout.operator("savepaint.cam", icon="IMAGE_COL", text='Save modified texs')
+                row = layout.row()
+            else:
+                row.label(text="!!! Import some cams to start !!!")
 
 #        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
+
+def check_children_plane(cam_ob):
+    check = False
+    for obj in cam_ob.children:
+        if obj.name.startswith("objplane_"):
+            check = True
+            pass
+        else:
+            check = False
+    return check
 
 class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
     bl_idname = "correct.material"
