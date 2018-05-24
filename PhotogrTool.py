@@ -506,8 +506,8 @@ class OBJECT_OT_paintcam(bpy.types.Operator):
             bpy.context.space_data.show_only_render = True
             bpy.ops.image.project_edit()
             obj_camera = bpy.context.scene.camera
-
-            undistortedphoto = undistortedpath+obj_camera.name
+    
+            undistortedphoto = undistortedpath+correctcameraname(obj_camera.name)
             cleanpath = bpy.path.abspath(undistortedphoto)
             bpy.ops.image.external_edit(filepath=cleanpath)
 
