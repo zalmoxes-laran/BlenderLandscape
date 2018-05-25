@@ -1,6 +1,8 @@
 import bpy
 import os
 import time
+from .functions import *
+from mathutils import Vector
 
 def selectLOD(listobjects, lodnum, basename):
     name2search = basename + '_LOD' + str(lodnum)
@@ -71,8 +73,9 @@ class OBJECT_OT_LOD0(bpy.types.Operator):
             baseobj = obj.name
             if not baseobj.endswith('LOD0'):
                 obj.name = baseobj + '_LOD0'
-            if obj.data.uv_textures[0].name =='MultiTex' and obj.data.uv_textures[1].name =='Atlas':
-                pass
+            if len(obj.data.uv_layers) > 1:
+                if obj.data.uv_textures[0].name =='MultiTex' and obj.data.uv_textures[1].name =='Atlas':
+                    pass
             else:
                 mesh = obj.data
                 mesh.uv_textures.active_index = 0
@@ -101,6 +104,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
+        context = bpy.context
         start_time = time.time()
         basedir = os.path.dirname(bpy.data.filepath)
         subfolder = 'LOD1'
@@ -154,23 +158,13 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
                 bpy.ops.uv.pack_islands(margin=0.001)
                 bpy.ops.object.editmode_toggle()
 
+            decimate_mesh(context,obj,0.5,'LOD1')
 
-            # procedura di semplificazione mesh
-            bpy.ops.object.editmode_toggle()
-            print('Decimating the original mesh to obtain the LOD1 mesh...')
-            bpy.ops.mesh.select_all(action='DESELECT')
-            bpy.ops.mesh.select_mode(type="VERT")
-            bpy.ops.mesh.select_non_manifold()
-            bpy.ops.object.vertex_group_add()
-            bpy.ops.object.vertex_group_assign()
-            bpy.ops.object.editmode_toggle()
-            bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
-            obj.modifiers["Decimate"].ratio = 0.5
-            obj.modifiers["Decimate"].vertex_group = "Group"
-            obj.modifiers["Decimate"].invert_vertex_group = True
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
-            # ora mesh semplificata
-            #------------------------------------------------------------------
+
+    # procedura di semplificazione mesh
+    
+    # ora mesh semplificata
+    #------------------------------------------------------------------
 
 
             bpy.ops.object.select_all(action='DESELECT')

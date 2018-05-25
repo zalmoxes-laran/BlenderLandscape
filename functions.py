@@ -28,6 +28,48 @@ class OBJECT_OT_createcyclesmat(bpy.types.Operator):
 
 ##########################################################################################
 
+def decimate_mesh(context,obj,ratio,lod):
+    selected_obs = context.selected_objects
+    bpy.ops.object.select_all(action='DESELECT')
+    D = bpy.data
+    obj.select = True
+    context.scene.objects.active = obj
+    bpy.ops.object.editmode_toggle()
+    print('Decimating the original mesh to obtain the '+lod+' mesh...')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.mesh.select_mode(type="VERT")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_add()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.object.editmode_toggle()
+#    bpy.data.objects[lod1name].modifiers.new("Decimate", type='DECIMATE')
+    D.objects[obj.name].modifiers.new("Decimate", type='DECIMATE')
+    D.objects[obj.name].modifiers["Decimate"].ratio = ratio
+    D.objects[obj.name].modifiers["Decimate"].vertex_group = "Group"
+    D.objects[obj.name].modifiers["Decimate"].invert_vertex_group = True
+    bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
+#    print("applied modifier")
+
+def setupclonepaint():
+    bpy.ops.object.mode_set(mode = 'TEXTURE_PAINT')
+    bpy.ops.paint.brush_select(paint_mode='TEXTURE_PAINT', texture_paint_tool='CLONE')
+    bpy.context.scene.tool_settings.image_paint.mode = 'MATERIAL'
+    bpy.context.scene.tool_settings.image_paint.use_clone_layer = True
+#    bpy.context.scene.tool_settings.image_paint.seam_bleed = 16
+    obj = bpy.context.scene.objects.active
+    
+    for matslot in obj.material_slots:
+        mat = matslot.material
+        original_image = node_retriever(mat, "original")
+        clone_image = node_retriever(mat, "source_paint_node")
+        for idx, img in enumerate(mat.texture_paint_images):
+            if img.name == original_image.image.name:
+                mat.paint_active_slot = idx
+                print ("I have just set the " + img.name + " image, as a paint image, that corresponds to the index: "+ str(idx))
+            if img.name == clone_image.image.name:
+                mat.paint_clone_slot = idx
+                print ("I have just set the " + img.name + " image, as a paint image, that corresponds to the index: "+ str(idx))
+
 def is_windows():
     if platform.system == 'Windows':
         is_win =True

@@ -29,12 +29,37 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("multimaterial.layout", icon="IMGDISPLAY", text='Multimaterial layout')
         row = layout.row()
+        self.layout.operator("lod0poly.reducer", icon="IMGDISPLAY", text='LOD0 mesh decimator')
+        row = layout.row()
         row.label(text="Switch engine")
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
 
+
+class OBJECT_OT_LOD0polyreducer(bpy.types.Operator):
+    """Reduce the polygon number to a correct LOD0 set up"""
+    bl_idname = "lod0poly.reducer"
+    bl_label = "Reduce the polygon number to a correct LOD0 set up"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        context = bpy.context
+
+        selected_objs = context.selected_objects
+
+        for obj in selected_objs:
+            me = obj.data
+            tot_poly = len(me.polygons)
+            tot_area = areamesh(obj)
+            final_poly = tot_area*1000
+            if final_poly < tot_poly:
+                ratio = final_poly/tot_poly
+                print("ratio is "+ str(ratio))
+                decimate_mesh(context,obj,ratio,'LOD0')
+
+        return {'FINISHED'}
 
 class OBJECT_OT_cycles2bi(bpy.types.Operator):
     """Convert cycles to bi"""
