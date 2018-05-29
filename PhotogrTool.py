@@ -1,112 +1,15 @@
 import bpy
 import os
-
-def assignmatslots(ob, matlist):
-    #given an object and a list of material names
-    #removes all material slots form the object
-    #adds new ones for each material in matlist
-    #adds the materials to the slots as well.
-
-    scn = bpy.context.scene
-    ob_active = bpy.context.active_object
-    scn.objects.active = ob
-
-    for s in ob.material_slots:
-        bpy.ops.object.material_slot_remove()
-
-    # re-add them and assign material
-    i = 0
-    for m in matlist:
-        mat = bpy.data.materials[m]
-        ob.data.materials.append(mat)
-        bpy.context.object.active_material.use_transparency = True
-        bpy.context.object.active_material.alpha = 0.5
-        i += 1
-
-    # restore active object:
-    scn.objects.active = ob_active
+from .functions import *
 
 
-def check_texture(img, mat):
-    #finds a texture from an image
-    #makes a texture if needed
-    #adds it to the material if it isn't there already
+#class CAMERA_PH_presets(Menu):
+#    bl_label = "cameras presets"
+#    preset_subdir = "ph_camera"
+#    preset_operator = "script.execute_preset"
+#    COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_GAME'}
+#    draw = Menu.draw_preset
 
-    tex = bpy.data.textures.get(img.name)
-
-    if tex is None:
-        tex = bpy.data.textures.new(name=img.name, type='IMAGE')
-
-    tex.image = img
-
-    #see if the material already uses this tex
-    #add it if needed
-    found = False
-    for m in mat.texture_slots:
-        if m and m.texture == tex:
-            found = True
-            break
-    if not found and mat:
-        mtex = mat.texture_slots.add()
-        mtex.texture = tex
-        mtex.texture_coords = 'UV'
-        mtex.use_map_color_diffuse = True
-
-def tex_to_mat():
-    # editmode check here!
-    editmode = False
-    ob = bpy.context.object
-    if ob.mode == 'EDIT':
-        editmode = True
-        bpy.ops.object.mode_set()
-
-    for ob in bpy.context.selected_editable_objects:
-
-        faceindex = []
-        unique_images = []
-
-        # get the texface images and store indices
-        if (ob.data.uv_textures):
-            for f in ob.data.uv_textures.active.data:
-                if f.image:
-                    img = f.image
-                    #build list of unique images
-                    if img not in unique_images:
-                        unique_images.append(img)
-                    faceindex.append(unique_images.index(img))
-
-                else:
-                    img = None
-                    faceindex.append(None)
-
-        # check materials for images exist; create if needed
-        matlist = []
-        for i in unique_images:
-            if i:
-                try:
-                    m = bpy.data.materials[i.name]
-                except:
-                    m = bpy.data.materials.new(name=i.name)
-                    continue
-
-                finally:
-                    matlist.append(m.name)
-                    # add textures if needed
-                    check_texture(i, m)
-
-        # set up the object material slots
-        assignmatslots(ob, matlist)
-
-        #set texface indices to material slot indices..
-        me = ob.data
-
-        i = 0
-        for f in faceindex:
-            if f is not None:
-                me.polygons[i].material_index = f
-            i += 1
-    if editmode:
-        bpy.ops.object.mode_set(mode='EDIT')
 
 
 
@@ -209,17 +112,6 @@ class ToolsPanel5(bpy.types.Panel):
             else:
                 row.label(text="!!! Import some cams to start !!!")
 
-#        self.layout.operator("cam.visibility", icon="RENDER_REGION", text='Cam visibility')
-
-def check_children_plane(cam_ob):
-    check = False
-    for obj in cam_ob.children:
-        if obj.name.startswith("objplane_"):
-            check = True
-            pass
-        else:
-            check = False
-    return check
 
 class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
     bl_idname = "correct.material"
@@ -388,18 +280,6 @@ class OBJECT_OT_NoBetterCameras(bpy.types.Operator):
             cam.data.show_limits = False
         return {'FINISHED'}
 
-#_________________________________________________
-
-def correctcameraname(cameraname):
-        extensions = ['.jpg','.JPG']
-        for extension in extensions:
-            if cameraname.endswith(extension):
-                return cameraname
-                pass
-            else:
-                cameranamecor = cameraname + ".JPG"
-                print(cameranamecor)
-                return cameranamecor
 #______________________________________________________________
 
 class CreateCameraImagePlane(bpy.types.Operator):

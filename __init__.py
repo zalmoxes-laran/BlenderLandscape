@@ -54,11 +54,30 @@ from bpy.props import (BoolProperty,
 
 import traceback
 
+
+#def register():
+#    bpy.utils.register_class(InterfaceVars)
+#    bpy.types.WindowManager.interface_vars = bpy.props.PointerProperty(type=InterfaceVars)
+
+
+class InterfaceVars(bpy.types.PropertyGroup):
+    cc_nodes = bpy.props.EnumProperty(
+        items=[
+            ('RGB', 'RGB', 'RGB Curve', '', 0),
+            ('BC', 'BC', 'Bright/Contrast', '', 1),
+            ('HS', 'HS', 'Hue/Saturation', '', 2),
+        ],
+        default='RGB'
+    )
+
 def register():
     try: bpy.utils.register_module(__name__)
     except: traceback.print_exc()
 
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
+
+#    bpy.utils.register_class(InterfaceVars)
+    bpy.types.WindowManager.interface_vars = bpy.props.PointerProperty(type=InterfaceVars)
 
     bpy.types.Scene.BL_undistorted_path = StringProperty(
       name = "Undistorted Path",

@@ -3,6 +3,9 @@ import os
 import time
 from .functions import *
 
+import nodeitems_utils
+from bpy.types import Header, Menu, Panel
+
 
 class ToolsPanel9(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -29,6 +32,42 @@ class ToolsPanel9(bpy.types.Panel):
                     row.label(text="for selected object(s):")
                     self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
                     self.layout.operator("create.ccnode", icon="ASSET_MANAGER", text='Create correction node')
+                    
+                    activeobj = scene.objects.active
+                    if get_nodegroupname_from_obj(obj) is not None:
+#                    layout = self.layout
+                        row = self.layout.row()
+                        row.prop(context.window_manager.interface_vars, 'cc_nodes', expand=True)
+                        nodegroupname = get_nodegroupname_from_obj(obj)
+                        node_to_visualize = context.window_manager.interface_vars.cc_nodes
+                        if node_to_visualize == 'RGB':
+                            node = get_cc_node_in_obj_mat(nodegroupname, "RGB")
+                        if node_to_visualize == 'BC':
+                            node = get_cc_node_in_obj_mat(nodegroupname, "BC")
+                        if node_to_visualize == 'HS':
+                            node = get_cc_node_in_obj_mat(nodegroupname, "HS")               
+                        row = layout.row()
+                        row.label(text="Active cc node: "+node_to_visualize)# + nodegroupname)
+                        row = layout.row()
+                        row.label(text=nodegroupname)
+                        # set "node" context pointer for the panel layout
+                        layout.context_pointer_set("node", node)
+
+                        if hasattr(node, "draw_buttons_ext"):
+                            node.draw_buttons_ext(context, layout)
+                        elif hasattr(node, "draw_buttons"):
+                            node.draw_buttons(context, layout)
+
+                        # XXX this could be filtered further to exclude socket types which don't have meaningful input values (e.g. cycles shader)
+#                        value_inputs = [socket for socket in node.inputs if socket.enabled and not socket.is_linked]
+#                        if value_inputs:
+#                            layout.separator()
+#                            layout.label("Inputs:")
+#                            for socket in value_inputs:
+#                                row = layout.row()
+#                                socket.draw(context, row, node, iface_(socket.name, socket.bl_rna.translation_context))                    
+#                    
+                    
                     self.layout.operator("create.newset", icon="FILE_TICK", text='Create new texture set')
                     row = layout.row()
                     self.layout.operator("bake.cyclesdiffuse", icon="TPAINT_HLT", text='Bake CC to texture set')
@@ -43,6 +82,28 @@ class ToolsPanel9(bpy.types.Panel):
             else:
                 select_a_mesh(layout)
 
+#    @classmethod
+#    def poll(cls, context):
+#        return context.active_node is not None
+
+#    def draw(self, context):
+
+def get_nodegroupname_from_obj(obj):
+    if obj.material_slots[0].material.node_tree.nodes['cc_node']:
+        nodegroupname = obj.material_slots[0].material.node_tree.nodes['cc_node'].node_tree.name
+    else:
+        nodegroupname = None
+    return nodegroupname
+
+def get_cc_node_in_obj_mat(nodegroupname,type):
+    if type == 'RGB':
+        type_name = 'RGB Curves'
+    if type == 'BC':
+        type_name = 'Bright/Contrast'
+    if type == 'HS':
+        type_name = 'Hue Saturation Value'
+    node = bpy.data.node_groups[nodegroupname].nodes[type_name]
+    return node
 
 class OBJECT_OT_removeccnode(bpy.types.Operator):
     """Remove cc node for selected objects"""
