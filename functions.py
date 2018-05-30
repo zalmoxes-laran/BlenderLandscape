@@ -29,6 +29,33 @@ class OBJECT_OT_createcyclesmat(bpy.types.Operator):
 ##########################################################################################
 
 
+
+def get_nodegroupname_from_obj(obj):
+#    if 'cc_node' in [node.node_tree.name for node in obj.material_slots[0].material.node_tree.nodes]:
+    if obj.material_slots[0].material.node_tree.nodes['cc_node']:
+        nodegroupname = obj.material_slots[0].material.node_tree.nodes['cc_node'].node_tree.name
+    else:
+        nodegroupname = None
+    return nodegroupname
+
+
+
+#if 'Material Output' in [node.name for node in bpy.data.materials['your_material_name'].node_tree.nodes]:
+#    print('Yes!')
+
+
+
+def get_cc_node_in_obj_mat(nodegroupname,type):
+    if type == 'RGB':
+        type_name = 'RGB Curves'
+    if type == 'BC':
+        type_name = 'Bright/Contrast'
+    if type == 'HS':
+        type_name = 'Hue Saturation Value'
+    node = bpy.data.node_groups[nodegroupname].nodes[type_name]
+    return node
+
+
 def set_up_lens(obj,sens_width,sens_lenght,lens):
     obj.select = True
     obj.data.lens = lens

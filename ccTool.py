@@ -82,28 +82,6 @@ class ToolsPanel9(bpy.types.Panel):
             else:
                 select_a_mesh(layout)
 
-#    @classmethod
-#    def poll(cls, context):
-#        return context.active_node is not None
-
-#    def draw(self, context):
-
-def get_nodegroupname_from_obj(obj):
-    if obj.material_slots[0].material.node_tree.nodes['cc_node']:
-        nodegroupname = obj.material_slots[0].material.node_tree.nodes['cc_node'].node_tree.name
-    else:
-        nodegroupname = None
-    return nodegroupname
-
-def get_cc_node_in_obj_mat(nodegroupname,type):
-    if type == 'RGB':
-        type_name = 'RGB Curves'
-    if type == 'BC':
-        type_name = 'Bright/Contrast'
-    if type == 'HS':
-        type_name = 'Hue Saturation Value'
-    node = bpy.data.node_groups[nodegroupname].nodes[type_name]
-    return node
 
 class OBJECT_OT_removeccnode(bpy.types.Operator):
     """Remove cc node for selected objects"""
