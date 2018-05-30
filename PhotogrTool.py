@@ -144,16 +144,8 @@ class OBJECT_OT_IsometricScene(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-#        bpy.context.scene.compression = 90
-        bpy.context.scene.render.resolution_x = 3000
-        bpy.context.scene.render.resolution_y = 3000
-        bpy.context.scene.render.resolution_percentage = 100
-        bpy.context.scene.game_settings.material_mode = 'GLSL'
-        bpy.context.scene.game_settings.use_glsl_lights = False
-        bpy.context.scene.world.light_settings.use_ambient_occlusion = True
-        bpy.context.scene.render.alpha_mode = 'TRANSPARENT'
+        set_up_scene(3000,3000,True)
         return {'FINISHED'}
-
 
 class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
     bl_idname = "canon6d.scene"
@@ -161,13 +153,7 @@ class OBJECT_OT_Canon6Dscene(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        bpy.context.scene.render.resolution_x = 5472
-        bpy.context.scene.render.resolution_y = 3648
-        bpy.context.scene.render.resolution_percentage = 100
-        bpy.context.scene.tool_settings.image_paint.screen_grab_size[0] = 5472
-        bpy.context.scene.tool_settings.image_paint.screen_grab_size[1] = 3648
-        bpy.context.scene.game_settings.material_mode = 'GLSL'
-        bpy.context.scene.game_settings.use_glsl_lights = False
+        set_up_scene(5472,3648,False)
         return {'FINISHED'}
     
 class OBJECT_OT_nikond3200scene(bpy.types.Operator):
@@ -176,13 +162,7 @@ class OBJECT_OT_nikond3200scene(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        bpy.context.scene.render.resolution_x = 4512
-        bpy.context.scene.render.resolution_y = 3000
-        bpy.context.scene.render.resolution_percentage = 100
-        bpy.context.scene.tool_settings.image_paint.screen_grab_size[0] = 4512
-        bpy.context.scene.tool_settings.image_paint.screen_grab_size[1] = 3000
-        bpy.context.scene.game_settings.material_mode = 'GLSL'
-        bpy.context.scene.game_settings.use_glsl_lights = False
+        set_up_scene(4512,3000,False)
         return {'FINISHED'}
 
 class OBJECT_OT_nikond320018mm(bpy.types.Operator):
@@ -194,11 +174,7 @@ class OBJECT_OT_nikond320018mm(bpy.types.Operator):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
-            obj.select = True
-            obj.data.lens = 18
-            obj.data.sensor_fit = 'HORIZONTAL'
-            obj.data.sensor_width = 23.2
-            obj.data.sensor_height = 15.4
+            set_up_lens(obj,23.2,15.4,18)
         return {'FINISHED'}
 
 class OBJECT_OT_Canon6D35(bpy.types.Operator):
@@ -210,11 +186,7 @@ class OBJECT_OT_Canon6D35(bpy.types.Operator):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
-            obj.select = True
-            obj.data.lens = 35
-            obj.data.sensor_fit = 'HORIZONTAL'
-            obj.data.sensor_width = 35.8
-            obj.data.sensor_height = 23.9
+            set_up_lens(obj,35.8,23.9,35)
         return {'FINISHED'}
 
 class OBJECT_OT_Canon6D24(bpy.types.Operator):
@@ -226,11 +198,7 @@ class OBJECT_OT_Canon6D24(bpy.types.Operator):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
-            obj.select = True
-            obj.data.lens = 24
-            obj.data.sensor_fit = 'HORIZONTAL'
-            obj.data.sensor_width = 35.8
-            obj.data.sensor_height = 23.9
+            set_up_lens(obj,35.8,23.9,24)
         return {'FINISHED'}
 
 class OBJECT_OT_Canon6D14(bpy.types.Operator):
@@ -242,11 +210,7 @@ class OBJECT_OT_Canon6D14(bpy.types.Operator):
         selection = bpy.context.selected_objects
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
-            obj.select = True
-            obj.data.lens = 14.46
-            obj.data.sensor_fit = 'HORIZONTAL'
-            obj.data.sensor_width = 35.8
-            obj.data.sensor_height = 23.9
+            set_up_lens(obj,35.8,23.9,14.46)
         return {'FINISHED'}
 
 class OBJECT_OT_BetterCameras(bpy.types.Operator):

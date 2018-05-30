@@ -29,6 +29,24 @@ class OBJECT_OT_createcyclesmat(bpy.types.Operator):
 ##########################################################################################
 
 
+def set_up_lens(obj,sens_width,sens_lenght,lens):
+    obj.select = True
+    obj.data.lens = lens
+    obj.data.sensor_fit = 'HORIZONTAL'
+    obj.data.sensor_width = sens_width
+    obj.data.sensor_height = sens_lenght
+    
+def set_up_scene(x,y,ao):
+    bpy.context.scene.render.resolution_x = x
+    bpy.context.scene.render.resolution_y = y
+    bpy.context.scene.render.resolution_percentage = 100
+    bpy.context.scene.game_settings.material_mode = 'GLSL'
+    bpy.context.scene.game_settings.use_glsl_lights = False
+    bpy.context.scene.world.light_settings.use_ambient_occlusion = ao
+    bpy.context.scene.render.alpha_mode = 'TRANSPARENT'
+    bpy.context.scene.tool_settings.image_paint.screen_grab_size[0] = x
+    bpy.context.scene.tool_settings.image_paint.screen_grab_size[1] = y
+
 def assignmatslots(ob, matlist):
     #given an object and a list of material names
     #removes all material slots form the object
