@@ -21,6 +21,8 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
+        self.layout.operator("light.off", icon="LAMP_DATA", text='Deactivate lights')
+        row = layout.row()
         self.layout.operator("create.personalgroups", icon="GROUP", text='Create per-object groups')
         row = layout.row()
         self.layout.operator("remove.alluvexcept1", icon="GROUP", text='Only UV0 will survive')
@@ -37,6 +39,17 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
 
+
+class OBJECT_OT_lightoff(bpy.types.Operator):
+    """Turn off light sensibility"""
+    bl_idname = "light.off"
+    bl_label = "Turn off light sensibility"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.context.scene.game_settings.material_mode = 'GLSL'
+        bpy.context.scene.game_settings.use_glsl_lights = False
+        return {'FINISHED'}
 
 class OBJECT_OT_LOD0polyreducer(bpy.types.Operator):
     """Reduce the polygon number to a correct LOD0 set up"""
