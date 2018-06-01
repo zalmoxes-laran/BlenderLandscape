@@ -127,7 +127,14 @@ class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
 #                bpy.ops.object.material_slot_remove()
                 obj.active_material_index = i
                 ma = obj.active_material
+                ma.diffuse_intensity = 1
                 ma.specular_intensity = 0
+                ma.specular_color[0] = 1
+                ma.specular_color[1] = 1         
+                ma.specular_color[2] = 1  
+                ma.diffuse_color[0] = 1
+                ma.diffuse_color[1] = 1         
+                ma.diffuse_color[2] = 1       
                 ma.alpha = 1.0
                 ma.use_transparency = False
                 ma.transparency_method = 'Z_TRANSPARENCY'
