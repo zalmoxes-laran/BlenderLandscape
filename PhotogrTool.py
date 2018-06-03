@@ -323,7 +323,7 @@ class CreateCameraImagePlane(bpy.types.Operator):
             imageplane.material_slots[0].material = bpy.data.materials[mat_index]
             material =  imageplane.material_slots[0].material
             # if not returned by new use imgeplane.material_slots[0].material
-            material.name = 'mat_imageplane_'+camera.name
+            material.name = 'mat_imageplane_'+cameraname
 
             material.use_nodes = False
 

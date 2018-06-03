@@ -200,15 +200,15 @@ def check_children_plane(cam_ob):
     return check
 
 def correctcameraname(cameraname):
-        extensions = ['.jpg','.JPG']
-        for extension in extensions:
-            if cameraname.endswith(extension):
-                return cameraname
-                pass
-            else:
-                cameranamecor = cameraname + ".JPG"
+#        extensions = ['.jpg','.JPG']
+#        for extension in extensions:
+    if cameraname.endswith('.JPG'):
+        return cameraname
+        pass
+    else:
+        cameranamecor = cameraname + ".JPG"
 #                print(cameranamecor)
-                return cameranamecor
+        return cameranamecor
 
 def decimate_mesh(context,obj,ratio,lod):
     selected_obs = context.selected_objects
@@ -429,7 +429,7 @@ def node_retriever(mat, type):
     else:
         for node in mat_nodes:
             if node.name == type:
-                #print('Il nodo tipo trovato Ã¨ :'+ node.name)
+                #print('Il nodo tipo trovato è :'+ node.name)
                 list_all_node_type[type] = node
                 return node
                 pass
