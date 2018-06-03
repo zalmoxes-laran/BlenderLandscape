@@ -3,6 +3,8 @@ import time
 import bmesh
 from random import randint, choice
 from .functions import *
+from .qualitycheck import *
+
 
 class ToolsPanel3(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -33,11 +35,27 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("lod0poly.reducer", icon="IMGDISPLAY", text='LOD0 mesh decimator')
         row = layout.row()
+        
+        self.layout.operator("quality.check", icon="META_DATA", text='Quality check')
+        row = layout.row()
+        
         row.label(text="Switch engine")
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
+
+
+class OBJECT_OT_qualitycheck(bpy.types.Operator):
+    """Turn off light sensibility"""
+    bl_idname = "quality.check"
+    bl_label = "Report on quality of 3d models"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+		get_texel_density(self,context)
+        return {'FINISHED'}
+
 
 
 class OBJECT_OT_lightoff(bpy.types.Operator):
