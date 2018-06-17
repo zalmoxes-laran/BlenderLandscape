@@ -53,7 +53,7 @@ class OBJECT_OT_qualitycheck(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-		get_texel_density(self,context)
+        get_texel_density(self, context)
         return {'FINISHED'}
 
 

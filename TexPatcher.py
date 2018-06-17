@@ -128,7 +128,7 @@ class OBJECT_OT_exitsetup(bpy.types.Operator):
                 
         return {'FINISHED'}
 
-class OBJECT_OT_paintsetup(bpy.types.Operator):
+class OBJECT_OT_removepaintsetup(bpy.types.Operator):
     """Remove paint source"""
     bl_idname = "remove.sp"
     bl_label = "Remove paint source"
