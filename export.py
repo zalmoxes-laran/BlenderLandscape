@@ -270,7 +270,7 @@ class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
             obj.select = False
         return {'FINISHED'}
 #_______________________________________________________________________________________________________________
-class OBJECT_OT_fbxexportbatch(bpy.types.Operator):
+class OBJECT_OT_osgtexportbatch(bpy.types.Operator):
     bl_idname = "osgt.exportbatch"
     bl_label = "osgt export batch"
     bl_options = {"REGISTER", "UNDO"}
