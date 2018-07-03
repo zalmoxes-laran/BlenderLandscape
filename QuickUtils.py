@@ -38,7 +38,10 @@ class ToolsPanel3(bpy.types.Panel):
         
         self.layout.operator("quality.check", icon="META_DATA", text='Quality check')
         row = layout.row()
-        
+
+        self.layout.operator("tiff2png.relink", icon="META_DATA", text='Relink images from tiff to png')
+        row = layout.row()
+
         row.label(text="Switch engine")
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
@@ -56,6 +59,27 @@ class OBJECT_OT_qualitycheck(bpy.types.Operator):
         get_texel_density(self, context)
         return {'FINISHED'}
 
+
+class OBJECT_OT_tiff2pngrelink(bpy.types.Operator):
+    """relink tiff images to png"""
+    bl_idname = "tiff2png.relink"
+    bl_label = "Relink tiff images to png"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        images = bpy.data.images
+
+        def changetiff(img):
+            if img.filepath.endswith("tif"):
+                img.filepath = img.filepath.replace(".tif", ".png")
+                img.reload()
+            if img.name.endswith("tif"):
+                img.name = img.name.replace(".tif", ".png")
+            
+        for img in images:
+            changetiff(img)
+            
+        return {'FINISHED'}
 
 
 class OBJECT_OT_lightoff(bpy.types.Operator):
