@@ -42,17 +42,61 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("tiff2png.relink", icon="META_DATA", text='Relink images from tiff to png')
         row = layout.row()
 
+        self.layout.operator("obname.ffn", icon="META_DATA", text='Ren active from namefile')
+        row = layout.row()
+        self.layout.operator("rename.ge", icon="META_DATA", text='Ren 4 GE')
+        row = layout.row()
         row.label(text="Switch engine")
         self.layout.operator("activatenode.material", icon="PMARKER_SEL", text='Activate cycles nodes')
         self.layout.operator("deactivatenode.material", icon="PMARKER", text='De-activate cycles nodes')
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
+        
+
+
+class OBJECT_OT_renameGEobject(bpy.types.Operator):
+    """Rename data tree of selected objects using the object name"""
+    bl_idname = "rename.ge"
+    bl_label = "Rename data tree of selected objects using the object name (usefull for GE export)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        context = bpy.context
+        scene = context.scene
+
+        for ob in context.selected_objects:
+            ob.data.name = "ME_"+ob.name
+            if ob.material_slots:
+                for m_slot in ob.material_slots:
+                    if m_slot.material:
+                        if m_slot.material.users == 1:
+                            m_slot.material.name = "M_"+ob.name
+                        else:
+                            m_slot.material.name = name
+                        if m_slot.material.texture_slots:
+                            if(len(m_slot.material.texture_slots) > 0):
+                                m_tex = m_slot.material.texture_slots[0]
+                                m_tex.texture.name = "T_"+ob.name
+                                m_tex.texture.image.name = "img_"+ob.name
+        return {'FINISHED'}
+    
+class OBJECT_OT_objectnamefromfilename(bpy.types.Operator):
+    """Set active object name from file name"""
+    bl_idname = "obname.ffn"
+    bl_label = "Set active object name from file name"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        objname = bpy.path.basename(bpy.context.blend_data.filepath)
+        sel = bpy.context.active_object
+        sel.name = objname.split(".")[0]
+        return {'FINISHED'}
 
 
 class OBJECT_OT_qualitycheck(bpy.types.Operator):
-    """Turn off light sensibility"""
+    """Quality check"""
     bl_idname = "quality.check"
-    bl_label = "Report on quality of 3d models"
+    bl_label = "Report on quality of 3d models (install the UVtools addon)"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
