@@ -22,7 +22,20 @@ class ToolsPanel4(bpy.types.Panel):
         obj = context.object
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
+        row = layout.row()
+        self.layout.operator("import_points.txt", icon="WORLD_DATA", text='Import txt points')
 #        row = layout.row()
+
+class OBJECT_OT_IMPORTPOINTS(bpy.types.Operator):
+    """Import points as empty objects from a txt file"""
+    bl_idname = "import_points.txt"
+    bl_label = "ImportPoints"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        bpy.ops.import_test.some_data('INVOKE_DEFAULT')
+        return {'FINISHED'}
+
 
 class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
     """This appears in the tooltip of the operator and in the generated docs"""
