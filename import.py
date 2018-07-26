@@ -20,6 +20,14 @@ class ToolsPanel4(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         obj = context.object
+        row = layout.row()        
+        row.label(text="Shift values:")
+        row = layout.row()
+        row.prop(context.scene, 'BL_x_shift', toggle = True)
+        row = layout.row()  
+        row.prop(context.scene, 'BL_y_shift', toggle = True)
+        row = layout.row()  
+        row.prop(context.scene, 'BL_z_shift', toggle = True)     
         row = layout.row()
         self.layout.operator("import_scene.multiple_objs", icon="WORLD_DATA", text='Import multiple objs')
         row = layout.row()

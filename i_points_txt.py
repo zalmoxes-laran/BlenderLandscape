@@ -16,9 +16,9 @@ def read_point_data(context, filepath, shift, name_col, x_col, y_col, z_col, sep
         z_coor = float(p0[int(z_col)])
          
         if shift == True:
-            shift_x = 667000.0
-            shift_y = 4811000.0
-            shift_z = 0.0
+            shift_x = context.scene.BL_x_shift
+            shift_y = context.scene.BL_y_shift
+            shift_z = context.scene.BL_z_shift
             x_coor = x_coor-shift_x
             y_coor = y_coor-shift_y
             z_coor = z_coor-shift_z  
@@ -30,10 +30,6 @@ def read_point_data(context, filepath, shift, name_col, x_col, y_col, z_col, sep
         o.location.y = y_coor
         o.location.z = z_coor
         o.show_name = True
-
-
-    # would normally load the data here
-#    print(data)
 
     return {'FINISHED'}
 

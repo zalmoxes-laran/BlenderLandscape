@@ -85,6 +85,24 @@ def register():
       description = "Define the root path of the undistorted images",
       subtype = 'DIR_PATH'
       )
+      
+    bpy.types.Scene.BL_x_shift = FloatProperty(
+      name = "X shift",
+      default = 0.0,
+      description = "Define the shift on the x axis",
+      )
+
+    bpy.types.Scene.BL_y_shift = FloatProperty(
+      name = "Y shift",
+      default = 0.0,
+      description = "Define the shift on the y axis",
+      )
+
+    bpy.types.Scene.BL_z_shift = FloatProperty(
+      name = "Z shift",
+      default = 0.0,
+      description = "Define the shift on the z axis",
+      )
 
 def unregister():
     try: bpy.utils.unregister_module(__name__)
