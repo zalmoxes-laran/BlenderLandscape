@@ -27,9 +27,9 @@ def write_some_data(context, filepath, shift):
             shift_x = context.scene.BL_x_shift
             shift_y = context.scene.BL_y_shift
             shift_z = context.scene.BL_z_shift
-            x_coor = x_coor-shift_x
-            y_coor = y_coor-shift_y
-            z_coor = z_coor-shift_z  
+            x_coor = x_coor+shift_x
+            y_coor = y_coor+shift_y
+            z_coor = z_coor+shift_z  
 
         # Generate UV sphere at x = lon and y = lat (and z = 0 )
     
