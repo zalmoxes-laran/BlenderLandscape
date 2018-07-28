@@ -23,10 +23,10 @@ class ToolsPanel(bpy.types.Panel):
             row = layout.row()
     #        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates')
     #        row = layout.row()
-            self.layout.operator("export.coordname", icon="WORLD_DATA", text='position-name')
-            row = layout.row()
-            self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
-            row = layout.row()
+            self.layout.operator("export.coordname", icon="WORLD_DATA", text='Name-position')
+#            row = layout.row()
+#            self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
+#            row = layout.row()
             row.label(text="Resulting file: " + obj.name + ".txt")
             row = layout.row()
             self.layout.operator("export.object", icon="OBJECT_DATA", text='Exp. one obj')
@@ -62,75 +62,61 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
 
     def execute(self, context):
 
-        basedir = os.path.dirname(bpy.data.filepath)
-
-        if not basedir:
-            raise Exception("Save the blend file")
+        bpy.ops.export_test.some_data('INVOKE_DEFAULT')
             
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-        fn = os.path.join(basedir, activename)
-        file = open(fn + ".txt", 'w')
-
-        # write selected objects coordinate
-        for obj in selection:
-            obj.select = True
-            file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
-        file.close()
         return {'FINISHED'}
 
-class OBJECT_OT_ExportButtonName(bpy.types.Operator):
-    bl_idname = "export.coordname"
-    bl_label = "Export coord name"
-    bl_options = {"REGISTER", "UNDO"}
+#class OBJECT_OT_ExportButtonName(bpy.types.Operator):
+#    bl_idname = "export.coordname"
+#    bl_label = "Export coord name"
+#    bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
+#    def execute(self, context):
 
-        basedir = os.path.dirname(bpy.data.filepath)
+#        basedir = os.path.dirname(bpy.data.filepath)
 
-        if not basedir:
-            raise Exception("Save the blend file")
+#        if not basedir:
+#            raise Exception("Save the blend file")
 
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-        fn = os.path.join(basedir, activename)
-        file = open(fn + ".txt", 'w')
+#        selection = bpy.context.selected_objects
+#        bpy.ops.object.select_all(action='DESELECT')
+#        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+#        fn = os.path.join(basedir, activename)
+#        file = open(fn + ".txt", 'w')
 
-        # write selected objects coordinate
-        for obj in selection:
-            obj.select = True
-            file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
-        file.close()
-        return {'FINISHED'}
+#        # write selected objects coordinate
+#        for obj in selection:
+#            obj.select = True
+#            file.write("%s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2]))
+#        file.close()
+#        return {'FINISHED'}
 
-class OBJECT_OT_ExportabsButtonName(bpy.types.Operator):
-    bl_idname = "export.abscoordname"
-    bl_label = "Export abs coord name"
-    bl_options = {"REGISTER", "UNDO"}
+#class OBJECT_OT_ExportabsButtonName(bpy.types.Operator):
+#    bl_idname = "export.abscoordname"
+#    bl_label = "Export abs coord name"
+#    bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
+#    def execute(self, context):
 
-        basedir = os.path.dirname(bpy.data.filepath)
+#        basedir = os.path.dirname(bpy.data.filepath)
 
-        if not basedir:
-            raise Exception("Save the blend file")
+#        if not basedir:
+#            raise Exception("Save the blend file")
 
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-        fn = os.path.join(basedir, activename)
-        file = open(fn + ".txt", 'w')
+#        selection = bpy.context.selected_objects
+#        bpy.ops.object.select_all(action='DESELECT')
+#        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+#        fn = os.path.join(basedir, activename)
+#        file = open(fn + ".txt", 'w')
 
-        # write selected objects coordinate
-        for obj in selection:
-            obj.select = True
-            x_abs = obj.location[0] + bpy.data.window_managers['WinMan'].crsx
-            y_abs = obj.location[1] + bpy.data.window_managers['WinMan'].crsy
-            file.write("%s %s %s %s\n" % (obj.name, x_abs, y_abs, obj.location[2]))
-        file.close()
-        return {'FINISHED'}
+#        # write selected objects coordinate
+#        for obj in selection:
+#            obj.select = True
+#            x_abs = obj.location[0] + bpy.data.window_managers['WinMan'].crsx
+#            y_abs = obj.location[1] + bpy.data.window_managers['WinMan'].crsy
+#            file.write("%s %s %s %s\n" % (obj.name, x_abs, y_abs, obj.location[2]))
+#        file.close()
+#        return {'FINISHED'}
 
 class OBJECT_OT_ExportButton(bpy.types.Operator):
     bl_idname = "export.coordnamelens"
