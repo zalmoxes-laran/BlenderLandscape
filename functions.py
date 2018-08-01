@@ -28,7 +28,9 @@ class OBJECT_OT_createcyclesmat(bpy.types.Operator):
 
 ##########################################################################################
 
-
+def grad(rad):
+    grad = rad*57.2957795
+    return grad
 
 def get_nodegroupname_from_obj(obj):
 #    if 'cc_node' in [node.node_tree.name for node in obj.material_slots[0].material.node_tree.nodes]:

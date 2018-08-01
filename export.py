@@ -1,6 +1,6 @@
 import bpy
 import os
-
+from .functions import *
 
 class ToolsPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -15,19 +15,13 @@ class ToolsPanel(bpy.types.Panel):
         obj = context.object
         row = layout.row()
         if obj is not None:
+            self.layout.operator("export.coordname", icon="WORLD_DATA", text='Coordinates')
+            row = layout.row()
             row.label(text="Active object is: " + obj.name)
             row = layout.row()
             row.label(text="Override")
             row = layout.row()
             row.prop(obj, "name")
-            row = layout.row()
-    #        self.layout.operator("export.coord", icon="WORLD_DATA", text='Coordinates')
-    #        row = layout.row()
-            self.layout.operator("export.coordname", icon="WORLD_DATA", text='Name-position')
-#            row = layout.row()
-#            self.layout.operator("export.abscoordname", icon="WORLD_DATA", text='georef position-name')
-#            row = layout.row()
-            row.label(text="Resulting file: " + obj.name + ".txt")
             row = layout.row()
             self.layout.operator("export.object", icon="OBJECT_DATA", text='Exp. one obj')
             row = layout.row()
@@ -47,12 +41,7 @@ class ToolsPanel(bpy.types.Panel):
         else:
             row.label(text="Select object(s) to see tools here.")
             row = layout.row()
-        self.layout.operator("export.camdata", icon="OBJECT_DATA", text='Export cameras')
-        row = layout.row()
-        self.layout.operator("export.coordnamelens", icon="WORLD_DATA", text='Name-position-lens (selected cams)')
-        row = layout.row()
-        row.label(text="Resulting file: cams.csv")
-        row = layout.row()
+
         
         
 class OBJECT_OT_ExportButtonName(bpy.types.Operator):
@@ -118,55 +107,6 @@ class OBJECT_OT_ExportButtonName(bpy.types.Operator):
 #        file.close()
 #        return {'FINISHED'}
 
-class OBJECT_OT_ExportButton(bpy.types.Operator):
-    bl_idname = "export.coordnamelens"
-    bl_label = "Export coord name lens"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-
-        basedir = os.path.dirname(bpy.data.filepath)
-
-        if not basedir:
-            raise Exception("Save the blend file")
-
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-#        fn = os.path.join(basedir, activename)
-        fn = os.path.join(basedir, 'cams')
-        file = open(fn + ".csv", 'w')
-
-        # write selected objects coordinate
-        for obj in selection:
-            obj.select = True
-            file.write("%s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.data.lens))
-            file.close()
-        return {'FINISHED'}
-
-class OBJECT_OT_ExportCamButton(bpy.types.Operator):
-    bl_idname = "export.camdata"
-    bl_label = "Export cam data"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-
-        basedir = os.path.dirname(bpy.data.filepath)
-
-        if not basedir:
-            raise Exception("Save the blend file")
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-        fn = os.path.join(basedir, activename)
-        file = open(fn + ".txt", 'w')
-
-        # write selected objects coordinate
-        for obj in selection:
-            obj.select = True
-            file.write("%s %s %s %s %s %s %s %s\n" % (obj.name, obj.location[0], obj.location[1], obj.location[2], obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2], obj.data.lens))
-        file.close()
-        return {'FINISHED'}
     
 class OBJECT_OT_ExportObjButton(bpy.types.Operator):
     bl_idname = "export.object"

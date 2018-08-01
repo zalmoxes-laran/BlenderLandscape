@@ -14,7 +14,7 @@ class ToolsPanel4(bpy.types.Panel):
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
     bl_category = "BL"
-    bl_label = "Importer"
+    bl_label = "Importers"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):

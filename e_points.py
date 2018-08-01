@@ -1,8 +1,8 @@
 import bpy
+import math
 
-
-def write_some_data(context, filepath, shift):
-    print("running write_some_data...")
+def write_some_data(context, filepath, shift, rot, cam):
+    print("running write some data...")
     
     
     selection = bpy.context.selected_objects
@@ -22,18 +22,30 @@ def write_some_data(context, filepath, shift):
         x_coor = obj.location[0]
         y_coor = obj.location[1]
         z_coor = obj.location[2]
-            
+        
+        if rot == True or cam == True:
+            rotation_grad_x = math.degrees(obj.rotation_euler[0])
+            rotation_grad_y = math.degrees(obj.rotation_euler[1])
+            rotation_grad_z = math.degrees(obj.rotation_euler[2])
+
         if shift == True:
             shift_x = context.scene.BL_x_shift
             shift_y = context.scene.BL_y_shift
             shift_z = context.scene.BL_z_shift
             x_coor = x_coor+shift_x
             y_coor = y_coor+shift_y
-            z_coor = z_coor+shift_z  
+            z_coor = z_coor+shift_z
 
         # Generate UV sphere at x = lon and y = lat (and z = 0 )
-    
-        f.write("%s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor))
+
+        if rot == True:    
+            f.write("%s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
+        if cam == True:
+            if obj.type == 'CAMERA':
+                f.write("%s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, obj.data.lens))        
+        if rot == False and cam == False:
+            f.write("%s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor))
+        
     f.close()    
     
 
@@ -67,15 +79,27 @@ class ExportSomeData(Operator, ExportHelper):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
 
+
+    rot = BoolProperty(
+            name="Add coordinates of rotation",
+            description="This tool includes name, position and rotation",
+            default=False,
+            )
+
+    cam = BoolProperty(
+            name="Export only cams",
+            description="This tool includes name, position, rotation and focal lenght",
+            default=False,
+            )
+
     shift = BoolProperty(
-            name="Shift coordinates",
+            name="World shift coordinates",
             description="Shift coordinates using the General Shift Value (GSV)",
             default=False,
             )
 
-
     def execute(self, context):
-        return write_some_data(context, self.filepath, self.shift)
+        return write_some_data(context, self.filepath, self.shift, self.rot, self.cam)
 
 
 # Only needed if you want to add into a dynamic menu
