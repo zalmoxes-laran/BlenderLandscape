@@ -19,12 +19,12 @@ Created by EMANUEL DEMETRESCU
 '''
 
 bl_info = {
-    "name": "BlenderLandscape",
+    "name": "3D Survey Collection",
     "author": "E. Demetrescu",
     "version": (1,3.9),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
-    "description": "Blender tools for Landscape reconstruction",
+    "description": "A collection of tools for 3D Survey activities",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
