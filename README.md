@@ -1,2 +1,6 @@
 # 3D Survey Collection (ex BlenderLandscape)
-Addons to extend Blender functionalities in the virtual reconstruction of present and ancient Landscapes
+Blender Add-on: collection of tools to improve the 3D survey work-flow.
+
+Tools:
+
+
