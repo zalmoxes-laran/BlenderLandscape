@@ -21,7 +21,7 @@ class ToolsPanel100(bpy.types.Panel):
     bl_region_type = "TOOLS"
 #    bl_context = "objectmode"
     bl_category = "3DSC"
-    bl_label = "Spherical Photogrammetry tool"
+    bl_label = "Spherical Photogrammetry tool (alpha)"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
