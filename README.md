@@ -1,8 +1,10 @@
-# 3D Survey Collection
+# 3D Survey Collection (ex Blender Landscape)
 
-Hello there! I’m **3D Survey Collection** (Blender Add-on), an open source collection of tools to improve the work-flow of a 3D survey (terrestrial or UAV photogrammetry).
+Hello there! I’m **3D Survey Collection** (Blender Add-on), an open source collection of tools to improve the work-flow of a 3D survey (terrestrial or UAV photogrammetry). 
 
-Let me introduce myself.
+I am under constant development at the CNR-ITABC (Italian National Council for Research, Institute for Technologies Appplied to Cultural Heritage).
+
+Let me introduce the tools.
 
 
 ## Markdown and I
@@ -11,7 +13,7 @@ Let me introduce myself.
 
 **MacDown** is created as a simple-to-use editor for Markdown documents. I render your Markdown contents real-time into HTML, and display them in a preview panel.
 
-![MacDown Screenshot](http://d.pr/i/10UGP+)
+![Importers screenshot](https://github.com/zalmoxes-laran/BlenderLandscape/README_images/Importers_139.png)
 
 I support all the original Markdown syntaxes. But I can do so much more! Various popular but non-standard syntaxes can be turned on/off from the [**Markdown** preference pane](#markdown-pane).
 
