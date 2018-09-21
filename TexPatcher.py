@@ -6,7 +6,7 @@ class ToolsPanel1400(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
 #    bl_context = "objectmode"
-    bl_category = "BL"
+    bl_category = "3DSC"
     bl_label = "Texture patcher (Cycles)"
     bl_options = {'DEFAULT_CLOSED'}
 
