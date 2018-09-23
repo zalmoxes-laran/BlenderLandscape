@@ -1,4 +1,4 @@
-# 3D Survey Collection (ex Blender Landscape)
+# 3D Survey Collection (3DSC), ex Blender Landscape
 
 Hello there! I’m **3D Survey Collection** (Blender Add-on), an open source collection of tools to improve the work-flow of a 3D survey (terrestrial or UAV photogrammetry). 
 
@@ -20,7 +20,7 @@ The **Importers** panel allows to
 * import multiple objs at once (with correct orientation), for instance a bunch of models made in Photoscan, Meshroom or Zephir 3D.
 * import points as empty objects from a txt file, for instance a topographic survey made with a total station or DGPS. Optionally I can shift the values of the world coordinates (they are usually to big to be correctly managed by a computer graphic software like Blender and it is a good practice to shift them)
 
-![Importers screenshot](https://raw.githubusercontent.com/zalmoxes-laran/BlenderLandscape/master/README_images/Importers_139.png)
+![Importers screenshot](https://raw.githubusercontent.com/zalmoxes-laran/BlenderLandscape/master/README_images/Importers_139.png) {:width="256px"}
 
 ## <a name="exporters-pane"></a>Exporters
 
@@ -61,9 +61,14 @@ The **Color correction** panel allows to
 
 ### How to cite this tool
 
-You can link this github repo [Macdown Website](https://github.com/zalmoxes-laran/BlenderLandscape "Title") or cite
+You can link this github repo [3DSC Website](https://github.com/zalmoxes-laran/BlenderLandscape "Title") or cite
 
-	bibtex
+	@misc{demetrescu_3d_2018,
+	title = {3D {Survey} {Collection}},
+	url = {https://github.com/zalmoxes-laran/BlenderLandscape},
+	author = {Demetrescu, Emanuel},
+	year = {2018}
+	}
 
 ### Contact
 If something goes wrong with me or if you have comments or suggestions, please report a feedback to <emanuel.demetrescu@gmail.com> 
