@@ -9,8 +9,9 @@ Let me introduce the tools with a short list.
 * [**Importers** panel](#importers-pane)
 * [**Exporters** panel](#exporters-pane)
 * [**Quick utils** panel](#quick_utils-pane)
-* [**Exporters** panel](#exporters-pane)
-* [**Exporters** panel](#exporters-pane)
+* [**Photogrammetry** panel](#photogrammetry_tool-pane)
+* [**Color Correction** panel](#color_correction_tool-pane)
+* [**LOD Generator** panel](#LOD_generator-pane)
 
 ## <a name="importers-pane"></a>Importers
 
@@ -20,7 +21,6 @@ The **Importers** panel allows to
 * import points as empty objects from a txt file, for instance a topographic survey made with a total station or DGPS. Optionally I can shift the values of the world coordinates (they are usually to big to be correctly managed by a computer graphic software like Blender and it is a good practice to shift them)
 
 ![Importers screenshot](https://raw.githubusercontent.com/zalmoxes-laran/BlenderLandscape/master/README_images/Importers_139.png)
-
 
 ## <a name="exporters-pane"></a>Exporters
 
