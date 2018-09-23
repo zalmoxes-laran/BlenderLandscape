@@ -20,7 +20,7 @@ The **Importers** panel allows to
 * import multiple objs at once (with correct orientation), for instance a bunch of models made in Photoscan, Meshroom or Zephir 3D.
 * import points as empty objects from a txt file, for instance a topographic survey made with a total station or DGPS. Optionally I can shift the values of the world coordinates (they are usually to big to be correctly managed by a computer graphic software like Blender and it is a good practice to shift them)
 
-![Importers screenshot](https://raw.githubusercontent.com/zalmoxes-laran/BlenderLandscape/master/README_images/Importers_139.png) {:width="256px"}
+![Importers screenshot](https://raw.githubusercontent.com/zalmoxes-laran/BlenderLandscape/master/README_images/Importers_139.png){:width="256px"}
 
 ## <a name="exporters-pane"></a>Exporters
 
