@@ -64,7 +64,7 @@ class OBJECT_OT_LOD0(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-
+        selected_objs = bpy.context.selected_objects
         for obj in bpy.context.selected_objects:
             bpy.ops.object.select_all(action='DESELECT')
             obj.select = True
@@ -122,6 +122,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
         print('>>>>>> '+str(ob_tot)+' objects will be processed')
 
         for obj in bpy.context.selected_objects:
+            obj.data.uv_textures["MultiTex"].active_render = True
             start_time_ob = time.time()
             print('>>> LOD 1 >>>')
             print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
@@ -246,6 +247,7 @@ class OBJECT_OT_LOD2(bpy.types.Operator):
         print('>>>>>> '+str(ob_tot)+' objects will be processed')
 
         for obj in bpy.context.selected_objects:
+            obj.data.uv_textures["MultiTex"].active_render = True
             print('>>> LOD 2 >>>')
             print('>>>>>> processing the object ""'+ obj.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
             start_time_ob = time.time()

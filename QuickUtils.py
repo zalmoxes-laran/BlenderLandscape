@@ -67,17 +67,21 @@ class OBJECT_OT_renameGEobject(bpy.types.Operator):
         for ob in context.selected_objects:
             ob.data.name = "ME_"+ob.name
             if ob.material_slots:
+                mslot_index = 0
+                tslot_index = 0
                 for m_slot in ob.material_slots:
                     if m_slot.material:
+                        mslot_index += 1
                         if m_slot.material.users == 1:
-                            m_slot.material.name = "M_"+ob.name
+                            m_slot.material.name = "M_"+str(mslot_index)+"_"+ob.name
                         else:
-                            m_slot.material.name = name
+                            m_slot.material.name = "M_"+str(mslot_index)+"_"+ob.name
                         if m_slot.material.texture_slots:
                             if(len(m_slot.material.texture_slots) > 0):
+                                tslot_index += 1
                                 m_tex = m_slot.material.texture_slots[0]
-                                m_tex.texture.name = "T_"+ob.name
-                                m_tex.texture.image.name = "img_"+ob.name
+                                m_tex.texture.name = "T_"+str(tslot_index)+"_"+ob.name
+                                m_tex.texture.image.name = "img_"+str(mslot_index)+"_"+ob.name
         return {'FINISHED'}
     
 class OBJECT_OT_objectnamefromfilename(bpy.types.Operator):
