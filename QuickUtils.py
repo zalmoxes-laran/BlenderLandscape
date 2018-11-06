@@ -39,6 +39,11 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("quality.check", icon="META_DATA", text='Quality check')
         row = layout.row()
 
+        self.layout.operator("project.segmentation", icon="SCULPTMODE_HLT", text='Project segmentat')
+        row = layout.row()
+        self.layout.operator("project.segmentationinv", icon="SCULPTMODE_HLT", text='Inverse Project segment')
+        row = layout.row()
+
         self.layout.operator("tiff2png.relink", icon="META_DATA", text='Relink images from tiff to png')
         row = layout.row()
 
@@ -53,6 +58,61 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
         
 
+class OBJECT_OT_projectsegmentation(bpy.types.Operator):
+    """Project segmentation"""
+    bl_idname = "project.segmentation"
+    bl_label = "Project segmentation"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        context = bpy.context
+        data = bpy.data
+        ob_cutting = context.scene.objects.active
+        #ob_cutting = data.objects.get("secante")
+        ob_to_cut = context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for ob in ob_to_cut:
+            if ob == ob_cutting:
+                pass
+            else:
+                ob_cutting.select = True
+                context.scene.objects.active = ob
+                ob.select = True
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.knife_project(cut_through=True)
+                bpy.ops.mesh.separate(type='SELECTED')
+                bpy.ops.object.editmode_toggle()
+        return {'FINISHED'}
+
+class OBJECT_OT_projectsegmentationinversed(bpy.types.Operator):
+    """Project segmentation inverse"""
+    bl_idname = "project.segmentationinv"
+    bl_label = "Project segmentation inverse"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        context = bpy.context
+        data = bpy.data
+        ob_to_cut = context.scene.objects.active
+        #ob_cutting = data.objects.get("secante")
+        ob_cutting = context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        
+        for ob in ob_cutting:
+            if ob == ob_to_cut:
+                pass
+            else:
+                ob.select = True
+                context.scene.objects.active = ob_to_cut
+                ob_to_cut.select = True
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.knife_project(cut_through=True)
+                try:
+                    bpy.ops.mesh.separate(type='SELECTED')
+                except:
+                    pass
+                bpy.ops.object.editmode_toggle()
+        return {'FINISHED'}
 
 class OBJECT_OT_renameGEobject(bpy.types.Operator):
     """Rename data tree of selected objects using the object name"""
