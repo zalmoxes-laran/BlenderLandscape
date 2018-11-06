@@ -80,7 +80,10 @@ class OBJECT_OT_projectsegmentation(bpy.types.Operator):
                 ob.select = True
                 bpy.ops.object.editmode_toggle()
                 bpy.ops.mesh.knife_project(cut_through=True)
-                bpy.ops.mesh.separate(type='SELECTED')
+                try:
+                    bpy.ops.mesh.separate(type='SELECTED')
+                except:
+                    pass
                 bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
 
