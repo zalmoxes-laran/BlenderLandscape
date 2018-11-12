@@ -39,9 +39,9 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("quality.check", icon="META_DATA", text='Quality check')
         row = layout.row()
 
-        self.layout.operator("project.segmentation", icon="SCULPTMODE_HLT", text='Project segmentat')
+        self.layout.operator("project.segmentation", icon="SCULPTMODE_HLT", text='Mono-cutter')
         row = layout.row()
-        self.layout.operator("project.segmentationinv", icon="SCULPTMODE_HLT", text='Inverse Project segment')
+        self.layout.operator("project.segmentationinv", icon="SCULPTMODE_HLT", text='Multi-cutter')
         row = layout.row()
 
         self.layout.operator("tiff2png.relink", icon="META_DATA", text='Relink images from tiff to png')
@@ -66,15 +66,22 @@ class OBJECT_OT_projectsegmentation(bpy.types.Operator):
 
     def execute(self, context):
         context = bpy.context
+        start_time = time.time()
+        ob_counter = 1
+        
         data = bpy.data
         ob_cutting = context.scene.objects.active
         #ob_cutting = data.objects.get("secante")
         ob_to_cut = context.selected_objects
+        ob_tot = (len(ob_to_cut)-1)
         bpy.ops.object.select_all(action='DESELECT')
         for ob in ob_to_cut:
             if ob == ob_cutting:
                 pass
             else:
+                start_time_ob = time.time()
+                print('>>> CUTTING >>>')
+                print('>>>>>> the object is going to be cutted: ""'+ ob.name+'"" ('+str(ob_counter)+'/'+str(ob_tot)+')')
                 ob_cutting.select = True
                 context.scene.objects.active = ob
                 ob.select = True
@@ -85,6 +92,12 @@ class OBJECT_OT_projectsegmentation(bpy.types.Operator):
                 except:
                     pass
                 bpy.ops.object.editmode_toggle()
+                print('>>> "'+ob.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object cutted in '+str(time.time() - start_time_ob)+' seconds')
+                ob_counter += 1
+                bpy.ops.object.select_all(action='DESELECT')
+        end_time = time.time() - start_time
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
 
 class OBJECT_OT_projectsegmentationinversed(bpy.types.Operator):
@@ -95,16 +108,22 @@ class OBJECT_OT_projectsegmentationinversed(bpy.types.Operator):
 
     def execute(self, context):
         context = bpy.context
+        start_time = time.time()
+        ob_counter = 1
         data = bpy.data
         ob_to_cut = context.scene.objects.active
         #ob_cutting = data.objects.get("secante")
         ob_cutting = context.selected_objects
+        ob_tot = (len(ob_cutting)-1)
         bpy.ops.object.select_all(action='DESELECT')
         
         for ob in ob_cutting:
             if ob == ob_to_cut:
                 pass
             else:
+                start_time_ob = time.time()
+                print('>>> CUTTING >>>')
+                print('>>>>>> the object "'+ ob.name +'" ('+str(ob_counter)+'/'+str(ob_tot)+') is cutting the object'+ ob_to_cut.name)
                 ob.select = True
                 context.scene.objects.active = ob_to_cut
                 ob_to_cut.select = True
@@ -115,6 +134,12 @@ class OBJECT_OT_projectsegmentationinversed(bpy.types.Operator):
                 except:
                     pass
                 bpy.ops.object.editmode_toggle()
+                print('>>> "'+ob.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object used to cut in '+str(time.time() - start_time_ob)+' seconds')
+                ob_counter += 1
+                bpy.ops.object.select_all(action='DESELECT')
+        end_time = time.time() - start_time
+        print('<<<<<<< Process done >>>>>>')
+        print('>>>'+str(ob_tot)+' objects processed in '+str(end_time)+' seconds')
         return {'FINISHED'}
 
 class OBJECT_OT_renameGEobject(bpy.types.Operator):
