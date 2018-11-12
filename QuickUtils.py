@@ -91,6 +91,7 @@ class OBJECT_OT_projectsegmentation(bpy.types.Operator):
                     bpy.ops.mesh.separate(type='SELECTED')
                 except:
                     pass
+                bpy.ops.mesh.select_all(action='DESELECT')
                 bpy.ops.object.editmode_toggle()
                 print('>>> "'+ob.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object cutted in '+str(time.time() - start_time_ob)+' seconds')
                 ob_counter += 1
@@ -133,6 +134,7 @@ class OBJECT_OT_projectsegmentationinversed(bpy.types.Operator):
                     bpy.ops.mesh.separate(type='SELECTED')
                 except:
                     pass
+                bpy.ops.mesh.select_all(action='DESELECT')
                 bpy.ops.object.editmode_toggle()
                 print('>>> "'+ob.name+'" ('+str(ob_counter)+'/'+ str(ob_tot) +') object used to cut in '+str(time.time() - start_time_ob)+' seconds')
                 ob_counter += 1
