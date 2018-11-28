@@ -21,6 +21,8 @@ class ToolsPanel3(bpy.types.Panel):
         row = layout.row()
         self.layout.operator("center.mass", icon="DOT", text='Center of Mass')
         row = layout.row()
+        self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
+        row = layout.row()
         self.layout.operator("local.texture", icon="TEXTURE", text='Local texture mode ON')
         row = layout.row()
         self.layout.operator("light.off", icon="LAMP_DATA", text='Deactivate lights')
@@ -57,6 +59,37 @@ class ToolsPanel3(bpy.types.Panel):
         self.layout.operator("bi2cycles.material", icon="SMOOTH", text='Create cycles nodes')
         self.layout.operator("cycles2bi.material", icon="PMARKER", text='Cycles to BI')
         
+
+class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
+    bl_idname = "correct.material"
+    bl_label = "Correct photogr. mats"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select = True
+            for i in range(0,len(obj.material_slots)):
+#                bpy.ops.object.material_slot_remove()
+                obj.active_material_index = i
+                ma = obj.active_material
+                ma.diffuse_intensity = 1
+                ma.specular_intensity = 0
+                ma.specular_color[0] = 1
+                ma.specular_color[1] = 1         
+                ma.specular_color[2] = 1  
+                ma.diffuse_color[0] = 1
+                ma.diffuse_color[1] = 1         
+                ma.diffuse_color[2] = 1       
+                ma.alpha = 1.0
+                ma.use_transparency = False
+                ma.transparency_method = 'Z_TRANSPARENCY'
+                ma.use_transparent_shadows = True
+                ma.ambient = 0.0
+                image = ma.texture_slots[0].texture.image
+                image.use_alpha = False
+        return {'FINISHED'}
 
 class OBJECT_OT_projectsegmentation(bpy.types.Operator):
     """Project segmentation"""

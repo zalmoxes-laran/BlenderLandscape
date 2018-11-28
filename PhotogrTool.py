@@ -44,26 +44,29 @@ class ToolsPanel5(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        obj = context.object
-        obj_selected = scene.objects.active
+        cam_ob = None
         cam_ob = scene.camera
-        cam_cam = scene.camera.data
-        
+
         if scene.render.engine != 'BLENDER_RENDER':
             row = layout.row()
-            row.label(text="Please, activate Blender Render engine !")
+            row.label(text="Please, activate BI engine !")
+        elif cam_ob is None:
+            row = layout.row()
+            row.label(text="Please, add a Cam to see tools here")
+            
         else:
+            obj = context.object
+            obj_selected = scene.objects.active
+            cam_cam = scene.camera.data
             row = layout.row()
             row.label(text="Set up scene", icon='RADIO')
             row = layout.row()
+            self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
+            self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
+            self.layout.operator("nikond3200.scene", icon="RENDER_REGION", text='NIKON D3200 scene')
             if scene.objects.active:
                 if obj.type in ['MESH']:
-#                    select_a_mesh(layout)
-#                else:
-                    self.layout.operator("correct.material", icon="NODE", text='Correct Photoscan mats')
-                    self.layout.operator("isometric.scene", icon="RENDER_REGION", text='Isometric scene')
-                    self.layout.operator("canon6d.scene", icon="RENDER_REGION", text='CANON 6D scene')
-                    self.layout.operator("nikond3200.scene", icon="RENDER_REGION", text='NIKON D3200 scene')
+                    pass
                 elif obj.type in ['CAMERA']:
                     row = layout.row()
                     row.label(text="Set selected cams as:", icon='RENDER_STILL')
@@ -111,39 +114,6 @@ class ToolsPanel5(bpy.types.Panel):
                 row = layout.row()
             else:
                 row.label(text="!!! Import some cams to start !!!")
-
-
-class OBJECT_OT_CorrectMaterial(bpy.types.Operator):
-    bl_idname = "correct.material"
-    bl_label = "Correct photogr. mats"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        selection = bpy.context.selected_objects
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in selection:
-            obj.select = True
-            for i in range(0,len(obj.material_slots)):
-#                bpy.ops.object.material_slot_remove()
-                obj.active_material_index = i
-                ma = obj.active_material
-                ma.diffuse_intensity = 1
-                ma.specular_intensity = 0
-                ma.specular_color[0] = 1
-                ma.specular_color[1] = 1         
-                ma.specular_color[2] = 1  
-                ma.diffuse_color[0] = 1
-                ma.diffuse_color[1] = 1         
-                ma.diffuse_color[2] = 1       
-                ma.alpha = 1.0
-                ma.use_transparency = False
-                ma.transparency_method = 'Z_TRANSPARENCY'
-                ma.use_transparent_shadows = True
-                ma.ambient = 0.0
-                image = ma.texture_slots[0].texture.image
-                image.use_alpha = False
-        return {'FINISHED'}
-
 
 class OBJECT_OT_IsometricScene(bpy.types.Operator):
     bl_idname = "isometric.scene"
