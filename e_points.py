@@ -1,7 +1,7 @@
 import bpy
 import math
 
-def write_some_data(context, filepath, shift, rot, cam):
+def write_some_data(context, filepath, shift, rot, cam, nam):
     print("running write some data...")
     
     
@@ -38,13 +38,19 @@ def write_some_data(context, filepath, shift, rot, cam):
 
         # Generate UV sphere at x = lon and y = lat (and z = 0 )
 
-        if rot == True:    
-            f.write("%s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
+        if rot == True:
+            if nam == True:
+                f.write("%s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
+            else:    
+                f.write("%s %s %s %s %s %s\n" % (x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
         if cam == True:
             if obj.type == 'CAMERA':
                 f.write("%s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, obj.data.lens))        
         if rot == False and cam == False:
-            f.write("%s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor))
+            if nam == True:
+                f.write("%s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor))
+            else:
+                f.write("%s %s %s\n" % (x_coor, y_coor, z_coor))
         
     f.close()    
     
@@ -65,7 +71,7 @@ from bpy.types import Operator
 class ExportSomeData(Operator, ExportHelper):
     """This appears in the tooltip of the operator and in the generated docs"""
     bl_idname = "export_test.some_data"  # important since its how bpy.ops.import_test.some_data is constructed
-    bl_label = "Export Some Data"
+    bl_label = "Export Coordinate Data"
 
     # ExportHelper mixin class uses this
     filename_ext = ".txt"
@@ -79,6 +85,12 @@ class ExportSomeData(Operator, ExportHelper):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
 
+
+    nam = BoolProperty(
+            name="Add names of objects",
+            description="This tool includes name",
+            default=True,
+            )
 
     rot = BoolProperty(
             name="Add coordinates of rotation",
@@ -99,7 +111,7 @@ class ExportSomeData(Operator, ExportHelper):
             )
 
     def execute(self, context):
-        return write_some_data(context, self.filepath, self.shift, self.rot, self.cam)
+        return write_some_data(context, self.filepath, self.shift, self.rot, self.cam, self.nam)
 
 
 # Only needed if you want to add into a dynamic menu
