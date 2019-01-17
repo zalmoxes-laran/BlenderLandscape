@@ -46,7 +46,7 @@ class ToolsPanel2(bpy.types.Panel):
         self.layout.operator("lod1.b2osg", icon="MESH_ICOSPHERE", text='LOD 1 (creation)')
         self.layout.operator("lod2.b2osg", icon="MESH_CUBE", text='LOD 2 (creation)')
         self.layout.operator("bake.b2osg", icon="RADIO", text='just bake')
-        
+
         row = layout.row()
         if obj:
             row.label(text="Resulting files: ")
@@ -164,7 +164,7 @@ class OBJECT_OT_BAKE(bpy.types.Operator):
 
 
     # procedura di semplificazione mesh
-    
+
     # ora mesh semplificata
     #------------------------------------------------------------------
 
@@ -294,7 +294,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
 
 
     # procedura di semplificazione mesh
-    
+
     # ora mesh semplificata
     #------------------------------------------------------------------
 
@@ -304,7 +304,7 @@ class OBJECT_OT_LOD1(bpy.types.Operator):
             oggetto.select = True
             print('Creating new texture atlas for LOD1....')
 
-            tempimage = bpy.data.images.new(name=lod1name, width=2048, height=2048, alpha=False)
+            tempimage = bpy.data.images.new(name=lod1name, width=4096, height=4096, alpha=False)
             tempimage.filepath_raw = "//"+subfolder+'/'+lod1name+".jpg"
             tempimage.file_format = 'JPEG'
 
@@ -601,4 +601,3 @@ class OBJECT_OT_CreateGroupsLOD(bpy.types.Operator):
                     num += 1
                     child = selectLOD(listobjects, num, baseobj)
         return {'FINISHED'}
-
