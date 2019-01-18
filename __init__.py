@@ -1,9 +1,7 @@
 '''
-Copyright (C) 2018 EMANUEL DEMETRESCU
-emanuel.demetrescu@gmail.com
-
-Created by EMANUEL DEMETRESCU
-
+    Created by EMANUEL DEMETRESCU
+    emanuel.demetrescu@gmail.com
+    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +19,7 @@ Created by EMANUEL DEMETRESCU
 bl_info = {
     "name": "3D Survey Collection",
     "author": "E. Demetrescu",
-    "version": (1,3.9),
+    "version": (1,4.0),
     "blender": (2, 7, 9),
     "location": "Tool Shelf panel",
     "description": "A collection of tools for 3D Survey activities",

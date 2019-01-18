@@ -33,8 +33,8 @@ class ToolsPanel(bpy.types.Panel):
             row = layout.row()
             self.layout.operator("fbx.exp", icon="OBJECT_DATA", text='Exp. fbx UE4')
             row = layout.row()
-            self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Exp. several osgt files')
-            row = layout.row()
+#            self.layout.operator("osgt.exportbatch", icon="OBJECT_DATA", text='Exp. several osgt files')
+#            row = layout.row()
 #            if is_windows():
 #                row = layout.row()
 #                row.label(text="We are under Windows..")
