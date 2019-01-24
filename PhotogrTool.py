@@ -260,59 +260,62 @@ class CreateCameraImagePlane(bpy.types.Operator):
 
     def createImagePlaneForCamera(self, camera):
         imageplane = None
+
+        depth = 10
+        
+        cameraname = correctcameraname(camera.name)
+
         try:
-            depth = 10
-
-            #create imageplane
-            bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
-            imageplane = bpy.context.active_object
-            cameraname = correctcameraname(camera.name)
-            imageplane.name = ("objplane_"+cameraname)
-            bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='TOGGLE')
-            bpy.ops.transform.resize( value=(0.5,0.5,0.5))
-            bpy.ops.uv.smart_project(angle_limit=66,island_margin=0, user_area_weight=0)
-            bpy.ops.uv.select_all(action='TOGGLE')
-            bpy.ops.transform.rotate(value=1.5708, axis=(0,0,1) )
-            bpy.ops.object.editmode_toggle()
-
-            imageplane.location = (0,0,-depth)
-            imageplane.parent = camera
-
-            #calculate scale
-            #REPLACED WITH CREATING EXPRESSIONS
-            self.SetupDriversForImagePlane(imageplane)
-
-            #setup material
-            if( len( imageplane.material_slots) == 0 ):
-                bpy.ops.object.material_slot_add()
-                #imageplane.material_slots.
-            bpy.ops.material.new()
-            mat_index = len(bpy.data.materials)-1
-            imageplane.material_slots[0].material = bpy.data.materials[mat_index]
-            material =  imageplane.material_slots[0].material
-            # if not returned by new use imgeplane.material_slots[0].material
-            material.name = 'mat_imageplane_'+cameraname
-
-            material.use_nodes = False
-
-
-            activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
-
             undistortedpath = bpy.context.scene.BL_undistorted_path
+        except:
+            raise Exception("Hey Buddy, you have to set the undistorted images path !")
+            
+        try:
+            cam_texture = bpy.data.images.load(undistortedpath+cameraname)
+        except:
+            raise NameError("Cannot load image %s" % bpy.data.images.load(undistortedpath+cameraname))
+        
+        
+        #create imageplane
+        bpy.ops.mesh.primitive_plane_add()#radius = 0.5)
+        imageplane = bpy.context.active_object
+        
+        imageplane.name = ("objplane_"+cameraname)
+        bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.mesh.select_all(action='TOGGLE')
+        bpy.ops.transform.resize( value=(0.5,0.5,0.5))
+        bpy.ops.uv.smart_project(angle_limit=66,island_margin=0, user_area_weight=0)
+        bpy.ops.uv.select_all(action='TOGGLE')
+        bpy.ops.transform.rotate(value=1.5708, axis=(0,0,1) )
+        bpy.ops.object.editmode_toggle()
 
-            if not undistortedpath:
-                raise Exception("Hey Buddy, you have to set the undistorted images path !")
+        imageplane.location = (0,0,-depth)
+        imageplane.parent = camera
 
-            bpy.context.object.data.uv_textures.active.data[0].image = bpy.data.images.load(undistortedpath+cameraname)
+        #calculate scale
+        #REPLACED WITH CREATING EXPRESSIONS
+        self.SetupDriversForImagePlane(imageplane)
 
-            bpy.ops.view3d.tex_to_material()
+        #setup material
+        if( len( imageplane.material_slots) == 0 ):
+            bpy.ops.object.material_slot_add()
+            #imageplane.material_slots.
+        bpy.ops.material.new()
+        mat_index = len(bpy.data.materials)-1
+        imageplane.material_slots[0].material = bpy.data.materials[mat_index]
+        material =  imageplane.material_slots[0].material
+        # if not returned by new use imgeplane.material_slots[0].material
+        material.name = 'mat_imageplane_'+cameraname
 
-        except Exception as e:
-            imageplane.select=False
-            camera.select = True
-            raise e
+        material.use_nodes = False
+
+        activename = bpy.path.clean_name(bpy.context.scene.objects.active.name)
+
+        bpy.context.object.data.uv_textures.active.data[0].image = cam_texture
+
+        bpy.ops.view3d.tex_to_material()
+
         return {'FINISHED'}
 
     def execute(self, context):
