@@ -2,7 +2,7 @@ import bpy
 import math
 
 def write_some_data(context, filepath, shift, rot, cam, nam):
-    print("running write some data...")
+    print("running write coordinates...")
     
     
     selection = bpy.context.selected_objects
@@ -27,6 +27,11 @@ def write_some_data(context, filepath, shift, rot, cam, nam):
             rotation_grad_x = math.degrees(obj.rotation_euler[0])
             rotation_grad_y = math.degrees(obj.rotation_euler[1])
             rotation_grad_z = math.degrees(obj.rotation_euler[2])
+            
+        if rot == True:
+            scale_x = obj.scale[0]
+            scale_y = obj.scale[1]
+            scale_z = obj.scale[2]
 
         if shift == True:
             shift_x = context.scene.BL_x_shift
@@ -40,9 +45,9 @@ def write_some_data(context, filepath, shift, rot, cam, nam):
 
         if rot == True:
             if nam == True:
-                f.write("%s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
+                f.write("%s %s %s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, scale_x, scale_y, scale_z))
             else:    
-                f.write("%s %s %s %s %s %s\n" % (x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z))
+                f.write("%s %s %s %s %s %s %s %s %s\n" % (x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, scale_x, scale_y, scale_z))
         if cam == True:
             if obj.type == 'CAMERA':
                 f.write("%s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, obj.data.lens))        
@@ -93,8 +98,8 @@ class ExportSomeData(Operator, ExportHelper):
             )
 
     rot = BoolProperty(
-            name="Add coordinates of rotation",
-            description="This tool includes name, position and rotation",
+            name="Add coordinates of rotation and scale",
+            description="This tool includes name, position, rotation and scale",
             default=False,
             )
 
