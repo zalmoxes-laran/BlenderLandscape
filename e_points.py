@@ -27,6 +27,9 @@ def write_some_data(context, filepath, shift, rot, cam, nam):
             rotation_grad_x = math.degrees(obj.rotation_euler[0])
             rotation_grad_y = math.degrees(obj.rotation_euler[1])
             rotation_grad_z = math.degrees(obj.rotation_euler[2])
+            rotation_rad_x = obj.rotation_euler[0]
+            rotation_rad_y = obj.rotation_euler[1]
+            rotation_rad_z = obj.rotation_euler[2]
             
         if rot == True:
             scale_x = obj.scale[0]
@@ -47,7 +50,7 @@ def write_some_data(context, filepath, shift, rot, cam, nam):
             if nam == True:
                 f.write("%s %s %s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, scale_x, scale_y, scale_z))
             else:    
-                f.write("%s %s %s %s %s %s %s %s %s\n" % (x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, scale_x, scale_y, scale_z))
+                f.write("%s %s %s %s %s %s %s %s %s\n" % (x_coor, y_coor, z_coor, rotation_grad_x, rotation_rad_y, rotation_grad_z, scale_x, scale_y, scale_z))
         if cam == True:
             if obj.type == 'CAMERA':
                 f.write("%s %s %s %s %s %s %s %s\n" % (obj.name, x_coor, y_coor, z_coor, rotation_grad_x, rotation_grad_y, rotation_grad_z, obj.data.lens))        
