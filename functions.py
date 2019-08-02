@@ -502,7 +502,7 @@ def bi2cycles():
             nodes = mat.node_tree.nodes
             output = nodes.new('ShaderNodeOutputMaterial')
             output.location = (0, 0)
-            mainNode = nodes.new('ShaderNodeBsdfDiffuse')
+            mainNode = nodes.new('ShaderNodeBsdfPrincipled')
             mainNode.location = (-400, -50)
             mainNode.name = "diffuse"
             teximg = nodes.new('ShaderNodeTexImage')
